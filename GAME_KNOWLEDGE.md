@@ -10,7 +10,7 @@ Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
 Current source branch: `main`
 
-Current delivery: static browser game published at `https://sixth-sense-game.vercel.app/`; local development URL `http://127.0.0.1:4173/`
+Current delivery: static browser game published primarily at `https://sixth-sense-game.vercel.app/` and secondarily at `https://cyberpaapi.github.io/SixthSenseGame/`; local development URL `http://127.0.0.1:4173/`
 
 ## Maintenance contract
 
@@ -100,7 +100,7 @@ Inventory and coins persist in `localStorage`. The bottom dock shows only icons.
 - Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, result sheet timing, and win confetti.
 - All optional motion collapses under `prefers-reduced-motion`.
 - Sound uses a small Web Audio tone system and can be disabled.
-- Dark and high-contrast modes are available.
+- Dark and high-contrast modes are available. Dark mode preserves four visually distinct keyboard treatments: untested purple, Aligned green, Echoing orange, and Quiet charcoal, with the `●`, `◆`, and `×` markers retained.
 - The UI supplies visible keyboard color states, color-independent symbols, semantic buttons, ARIA labels, focus styles, first-visit help, and a skip-to-content link.
 
 ## Intentional removals and simplifications
@@ -227,9 +227,10 @@ Current verified result on 2026-08-27:
 - JavaScript syntax: passed.
 - Core rules/data: passed — 5,000 answers and 15,232 accepted guesses; all answers are guessable; `coates` and representative proper names are rejected; `raffle` and `rattle` remain answers.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — phone playthrough, all modes, repeatable lifelines, results, desktop layout, dark theme, and overflow checks.
+- Browser QA: passed — phone playthrough, all modes, repeatable lifelines, results, desktop layout, distinct dark-theme keyboard feedback, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
 - Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; core CSS, JavaScript, answer data, manifest, and hero artwork return HTTP 200.
+- GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
 - The generic board-game validator reports missing `package.json`/npm build scripts; this is expected for the intentionally dependency-free static architecture. The repository-specific Node and Playwright checks above are the canonical validation path.
 
 When behavior changes, add or update an automated assertion. Do not rely only on visual inspection for game rules or economy state.
@@ -251,7 +252,7 @@ Release workflow:
 
 Vercel project `aryanchandwani-gmailcoms-projects/sixth-sense-game` is connected to the GitHub repository and is the primary production route. Vercel deploys the dependency-free repository root and assigns the stable production alias `https://sixth-sense-game.vercel.app/`. Local `.vercel` linkage metadata is intentionally ignored rather than committed.
 
-GitHub Pages remains configured as a secondary route through `.github/workflows/pages.yml`, but its initial publication was blocked by the GitHub Actions and Pages incident active on 2026-08-26. The repository was made public because the account plan does not support Pages for private repositories. Do not advertise the Pages URL unless a future verification confirms it is live.
+GitHub Pages is active as a secondary route through `.github/workflows/pages.yml` at `https://cyberpaapi.github.io/SixthSenseGame/`. Its initial publication was delayed by the GitHub Actions and Pages incident active on 2026-08-26, but GitHub now reports the site as built and the latest completed deployment as successful. The repository remains public because the account plan does not support Pages for private repositories.
 
 ## Known limitations
 
@@ -262,6 +263,12 @@ GitHub Pages remains configured as a secondary route through `.github/workflows/
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-27 — Dark-mode keyboard feedback repair
+
+- Restricted the dark purple keyboard-row treatment to untested keys. Its earlier selector was more specific than the Aligned, Echoing, and Quiet selectors, so it visually painted over all three feedback colors in dark mode even though their state classes and symbols remained correct.
+- Added browser regression coverage that toggles dark mode after a scored guess, inspects the computed key backgrounds, and requires Aligned green, Echoing orange, Quiet charcoal, and untested purple to remain four distinct treatments while preserving the `●`, `◆`, and `×` markers.
+- Rechecked publishing state during release: GitHub Pages has recovered from the earlier service incident and is now a successful secondary deployment alongside the primary Vercel route.
 
 ### 2026-08-27 — Full vocabulary curation audit
 

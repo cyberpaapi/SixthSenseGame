@@ -154,6 +154,24 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await page.locator(`[data-key="${stateLetters.absent.toUpperCase()}"]`).evaluate(el => el.classList.contains("absent")), "absent keyboard letter should be dark");
     assert(await page.locator(`[data-key="${stateLetters.exact.toUpperCase()}"]`).evaluate(el => el.classList.contains("exact")), "exact keyboard letter should be green");
     assert(await page.locator(`[data-key="${stateLetters.present.toUpperCase()}"]`).evaluate(el => el.classList.contains("present")), "present keyboard letter should be orange");
+    await page.click('[data-modal-open="settings-modal"]');
+    await page.click('label:has(#dark-mode)');
+    await page.waitForTimeout(250);
+    const darkKeyboardStyles = await page.evaluate(({ stateLetters }) => {
+      const background = letter => getComputedStyle(document.querySelector(`[data-key="${letter.toUpperCase()}"]`)).backgroundImage;
+      const untested = [...document.querySelectorAll("#keyboard .key")].find(key => !key.classList.contains("exact") && !key.classList.contains("present") && !key.classList.contains("absent"));
+      return {
+        exact: background(stateLetters.exact),
+        present: background(stateLetters.present),
+        absent: background(stateLetters.absent),
+        untested: getComputedStyle(untested).backgroundImage,
+        markers: Object.fromEntries(Object.entries(stateLetters).map(([status, letter]) => [status, document.querySelector(`[data-key="${letter.toUpperCase()}"] .key-marker`)?.textContent]))
+      };
+    }, { stateLetters });
+    assert.equal(new Set([darkKeyboardStyles.exact, darkKeyboardStyles.present, darkKeyboardStyles.absent, darkKeyboardStyles.untested]).size, 4, "dark mode must keep exact, present, absent, and untested keys visually distinct");
+    assert.deepEqual(darkKeyboardStyles.markers, { exact: "●", present: "◆", absent: "×" }, "dark-mode keyboard feedback must retain color-independent markers");
+    await page.click('label:has(#dark-mode)');
+    await page.click("#settings-modal .modal-close");
     await page.waitForTimeout(2800);
     assert.equal(await page.locator("#toast").isHidden(), true, "valid guesses should not show a tries-left toast");
 

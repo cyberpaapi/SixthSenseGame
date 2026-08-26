@@ -634,9 +634,9 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
 .keyboard-row:nth-child(1) .key { background: linear-gradient(145deg, #d7fbff, #b8eaf4); }
 .keyboard-row:nth-child(2) .key { background: linear-gradient(145deg, #ffe8f3, #ffc7e0); }
 .keyboard-row:nth-child(3) .key { background: linear-gradient(145deg, #fff4c8, #ffe08b); }
-.is-dark .keyboard-row:nth-child(1) .key,
-.is-dark .keyboard-row:nth-child(2) .key,
-.is-dark .keyboard-row:nth-child(3) .key { background: linear-gradient(145deg, #40256d, #2d194e); }
+.is-dark .keyboard-row:nth-child(1) .key:not(.exact):not(.present):not(.absent),
+.is-dark .keyboard-row:nth-child(2) .key:not(.exact):not(.present):not(.absent),
+.is-dark .keyboard-row:nth-child(3) .key:not(.exact):not(.present):not(.absent) { background: linear-gradient(145deg, #40256d, #2d194e); }
 .key.wide { flex: 1.55 1 0; font-size: 11px; letter-spacing: .04em; }
 .key svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .key:hover { transform: translateY(-1px); }
