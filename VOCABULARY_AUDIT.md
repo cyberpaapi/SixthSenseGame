@@ -4,19 +4,19 @@ Verified: 2026-08-27
 
 ## Result
 
-Sixth Sense now recognizes **15,232 realistically acceptable six-letter guesses**. Exactly **5,000** of those words are included in the puzzle-answer pool.
+Sixth Sense recognizes **15,232 realistically acceptable six-letter guesses**. **10,187** clueable, answer-safe words are available as puzzles in three ordered tiers.
 
 | Measure | Before | After |
 | --- | ---: | ---: |
 | Accepted guesses available to the game | 32,068 | 15,232 |
-| Puzzle answers | 5,000 | 5,000 |
+| Puzzle answers | 5,000 | 10,187 |
 | Old guesses retained | — | 14,850 |
 | Unsupported guesses removed | — | 17,218 |
 | Valid guesses previously missing and added | — | 382 |
 | Old answers retained | — | 4,782 |
 | Answers replaced | — | 218 |
 
-`coates` is no longer accepted and cannot be selected as an answer. `raffle` and `rattle` remain accepted guesses and possible answers.
+The answer tiers are **Easy: 4,309**, **Medium: 1,995**, and **Extreme: 3,883**. `coates` is not accepted and cannot be selected as an answer. `raffle`, `rattle`, `brooch`, `napkin`, `pewter`, `tarmac`, and `walrus` are accepted and are Easy answers.
 
 ## What “realistically acceptable” means
 
@@ -27,10 +27,12 @@ The guess bank intentionally remains broader than the answer pool. It includes l
 A puzzle answer must satisfy every guess rule and also:
 
 1. have a usable, non-proper-name WordNet definition for the Sense clue;
-2. rank within the 5,000 most familiar eligible words using `wordfreq`;
+2. receive a deterministic familiarity tier using `wordfreq`;
 3. not occur in the answer-only safety exclusion set.
 
-The least-frequent selected answer has a `wordfreq` Zipf score of 2.44. The full validated lexicon contains 10,188 clueable, answer-safe candidates, of which the top 5,000 are used as puzzles. The audit also rejects clues containing the answer itself, broken placeholder text, or proper-name/offensive senses; 4,633 clean existing clues were preserved, 149 retained answers received repaired clues, and 218 new answers received new clues.
+Easy contains exactly the top 4,309 familiar eligible answers, with a small explicit rescue list for ordinary object and animal words whose written-corpus frequency understates everyday familiarity. Medium contains the remaining eligible words with a Zipf score of at least 2.0. Extreme contains the final answer-safe remainder. The audit rejects clues containing the answer itself, broken placeholder text, or proper-name/offensive senses.
+
+Solo non-Daily selection begins with Easy. Solved words are stored locally and excluded from fresh selections. Completing all Easy words silently adds Medium; completing Medium silently adds Extreme. Daily remains a shared deterministic Easy puzzle. Multiplayer difficulty selects exactly one tier and does not depend on a player's solo unlock state.
 
 ## Reproducibility
 

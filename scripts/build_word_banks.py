@@ -3,8 +3,10 @@
 
 The accepted-guess vocabulary is the six-letter subset of ENABLE, a
 public-domain word-game lexicon that excludes ordinary proper names. Answers
-are the 5,000 highest-frequency accepted words that have a usable WordNet
-definition, minus a small answer-only safety list.
+are every accepted word with a usable WordNet definition, minus a small
+answer-only safety list. They are assigned to three deterministic play tiers:
+4,309 familiar words, a less-common middle tier, and the remaining specialist
+or rare words.
 """
 
 from __future__ import annotations
@@ -24,9 +26,14 @@ from wordfreq import zipf_frequency
 
 ENABLE_URL = "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt"
 ENABLE_SHA256 = "3f16130220645692ed49c7134e24a18504c2ca55b3c012f7290e3e77c63b1a89"
-ANSWER_COUNT = 5_000
+PRIMARY_ANSWER_COUNT = 4_309
+MEDIUM_MIN_ZIPF = 2.0
 WORD_LENGTH = 6
 REQUIRED_ANSWERS = {"raffle", "rattle"}
+REQUIRED_PRIMARY = {
+    "alcove", "brooch", "gopher", "magpie", "napkin", "pewter",
+    "raffle", "rattle", "tarmac", "walrus",
+}
 
 # These remain valid guesses but are intentionally not selected as puzzles.
 ANSWER_ONLY_EXCLUSIONS = {
@@ -124,7 +131,7 @@ PROPER_CLUE_PATTERNS = (
     r"\ba resident of\b",
     r"\ba member of the .+? (?:peoples?|nation|tribe)\b",
     r"\bethnic slur\b",
-    r"\boffensive term\b",
+    r"\boffensive terms?\b",
     r"\bcaucasoid race\b",
 )
 
@@ -206,10 +213,14 @@ def read_old_banks(project: Path, baseline_ref: str | None) -> tuple[dict[str, s
     else:
         answer_source = (project / "answer-bank.js").read_text(encoding="utf-8")
         word_source = (project / "word-bank.js").read_text(encoding="utf-8")
-    old_answers = {
-        match.group(1): json.loads(match.group(2))
-        for match in re.finditer(r'\{"word": "([a-z]{6})", "clue": ("(?:\\.|[^"\\])*")\}', answer_source)
-    }
+    old_answers = {}
+    for raw_entry in re.findall(r'^\s*(\{.+\}),?$', answer_source, re.MULTILINE):
+        try:
+            entry = json.loads(raw_entry)
+        except json.JSONDecodeError:
+            continue
+        if re.fullmatch(r"[a-z]{6}", entry.get("word", "")) and isinstance(entry.get("clue"), str):
+            old_answers[entry["word"]] = entry["clue"]
     match = re.search(r'return "(.*)"\.split\(" "\);', word_source, re.DOTALL)
     old_raw_guesses = set(match.group(1).split()) if match else set()
     return old_answers, old_raw_guesses | set(old_answers)
@@ -229,7 +240,7 @@ def reusable_old_clue(clue: str | None, word: str) -> bool:
 
 def render_answers(entries: list[dict[str, str]]) -> str:
     lines = [
-        "/* 5,000 curated six-letter answers ranked with wordfreq and clued with WordNet 3.0. */",
+        "/* Tiered six-letter answers ranked with wordfreq and clued with WordNet 3.0. */",
         "(function (root, factory) {",
         "  const answers = factory();",
         '  if (typeof module === "object" && module.exports) module.exports = answers;',
@@ -278,17 +289,31 @@ def main() -> int:
             scored.append((zipf_frequency(word, "en"), word))
     scored.sort(key=lambda item: (-item[0], item[1]))
 
-    selected = [word for _, word in scored[:ANSWER_COUNT]]
+    primary = [word for _, word in scored[:PRIMARY_ANSWER_COUNT]]
+    for required in sorted(REQUIRED_PRIMARY):
+        if required not in clue_map:
+            raise RuntimeError(f"Required primary answer is not clueable: {required}")
+        if required not in primary:
+            primary[-1] = required
+    primary = sorted(set(primary), key=lambda word: (-zipf_frequency(word, "en"), word))
+    if len(primary) != PRIMARY_ANSWER_COUNT:
+        raise RuntimeError(f"Expected {PRIMARY_ANSWER_COUNT} unique primary answers, got {len(primary)}")
+
+    primary_set = set(primary)
+    medium = [word for frequency, word in scored if word not in primary_set and frequency >= MEDIUM_MIN_ZIPF]
+    medium_set = set(medium)
+    extreme = [word for _, word in scored if word not in primary_set and word not in medium_set]
+    selected = primary + medium + extreme
     for required in sorted(REQUIRED_ANSWERS):
         if required not in selected:
-            if required not in clue_map:
-                raise RuntimeError(f"Required answer is not clueable: {required}")
-            selected[-1] = required
-    selected = sorted(set(selected), key=lambda word: (-zipf_frequency(word, "en"), word))
-    if len(selected) != ANSWER_COUNT:
-        raise RuntimeError(f"Expected {ANSWER_COUNT} unique answers, got {len(selected)}")
+            raise RuntimeError(f"Required answer is not clueable: {required}")
 
-    entries = [{"word": word, "clue": clue_map[word]} for word in selected]
+    tier_by_word = {
+        **{word: "easy" for word in primary},
+        **{word: "medium" for word in medium},
+        **{word: "extreme" for word in extreme},
+    }
+    entries = [{"word": word, "clue": clue_map[word], "tier": tier_by_word[word]} for word in selected]
     selected_set = set(selected)
     accepted_set = set(accepted)
     if not selected_set <= accepted_set:
@@ -302,7 +327,9 @@ def main() -> int:
             "length": WORD_LENGTH,
             "guessLexicon": "ENABLE",
             "enableSha256": ENABLE_SHA256,
-            "answers": "Top 5,000 by wordfreq with a non-proper WordNet clue and answer safety exclusions",
+            "answers": "All clueable answer-safe words, tiered by wordfreq with 4,309 primary familiar words",
+            "primaryCount": PRIMARY_ANSWER_COUNT,
+            "mediumMinimumZipf": MEDIUM_MIN_ZIPF,
         },
         "before": {"accepted": len(old_accepted), "answers": len(old_answers)},
         "after": {"accepted": len(accepted_set), "answers": len(selected_set)},
@@ -317,6 +344,11 @@ def main() -> int:
             "new": len(selected_set - old_answers),
             "minimumSelectedZipf": min(zipf_frequency(word, "en") for word in selected_set),
             "clueableCandidates": len(scored),
+            "tiers": {
+                "easy": len(primary),
+                "medium": len(medium),
+                "extreme": len(extreme),
+            },
         },
         "clueReview": {
             "preservedCleanExisting": sum(

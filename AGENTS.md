@@ -15,7 +15,8 @@ Preserve these product invariants unless the user explicitly changes them:
 
 - The game uses six-letter words and seven chances.
 - The visual identity, artwork, terminology, copy, and layout remain original and must not imitate Wordle branding.
-- The answer pool contains exactly 5,000 common six-letter words with clues; accepted guesses remain substantially broader.
+- The answer pool contains every clueable answer-safe word, with exactly 4,309 primary Easy words followed by Medium and Extreme tiers; accepted guesses remain substantially broader.
+- Multiplayer must use the authoritative room API and durable database. Never replace it with localStorage, BroadcastChannel, or another same-browser simulation, and never expose answer words or database credentials to the client.
 - The game screen must not page-scroll or overflow at supported phone sizes.
 - Sense is unlocked once per puzzle and can then be reopened freely. Peek, Clear, and Skip use persistent inventory and can be purchased and used repeatedly while useful.
 - Accessibility, keyboard input, touch targets, color-independent markers, and reduced-motion behavior must be preserved.

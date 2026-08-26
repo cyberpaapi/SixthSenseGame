@@ -73,12 +73,20 @@
   const loadedAnswers = loadAnswerBank();
   const ANSWERS = (loadedAnswers.length ? loadedAnswers : CURATED_ANSWERS)
     .filter(item => item && typeof item.word === "string" && typeof item.clue === "string")
-    .map(item => ({ word: item.word.toLowerCase(), clue: item.clue }));
+    .map(item => ({ word: item.word.toLowerCase(), clue: item.clue, tier: ["easy", "medium", "extreme"].includes(item.tier) ? item.tier : "easy" }));
+
+  const TIER_ORDER = Object.freeze(["easy", "medium", "extreme"]);
+  const ANSWER_TIERS = Object.freeze(Object.fromEntries(TIER_ORDER.map(tier => [
+    tier,
+    Object.freeze(ANSWERS.filter(item => item.tier === tier))
+  ])));
 
   const MAX_GUESSES = 7;
   const WORD_LENGTH = 6;
   const STARTING_COINS = 20;
   const LIFELINE_COSTS = Object.freeze({ sense: 3, peek: 5, clear: 4, skip: 6 });
+  const ADVENTURE_TOTAL = ANSWERS.length;
+  const adventureRouteCache = new Map();
 
   function rewardForAttempts(attempts) {
     const safeAttempts = Math.min(MAX_GUESSES, Math.max(1, Number(attempts) || MAX_GUESSES));
@@ -151,13 +159,87 @@
 
   function dailyAnswer(date = new Date()) {
     const day = dayNumber(date);
-    const mixed = Math.abs((day * 73 + 41) % ANSWERS.length);
-    return ANSWERS[mixed];
+    const mixed = Math.abs((day * 73 + 41) % ANSWER_TIERS.easy.length);
+    return ANSWER_TIERS.easy[mixed];
   }
 
-  function practiceAnswer(excludeWord, random = Math.random) {
-    const choices = ANSWERS.filter(item => item.word !== excludeWord);
+  function answersForDifficulty(difficulty = "easy") {
+    return ANSWER_TIERS[TIER_ORDER.includes(difficulty) ? difficulty : "easy"];
+  }
+
+  function unlockedDifficulty(completedWords = []) {
+    const completed = completedWords instanceof Set ? completedWords : new Set(completedWords);
+    if (!ANSWER_TIERS.easy.every(item => completed.has(item.word))) return "easy";
+    if (!ANSWER_TIERS.medium.every(item => completed.has(item.word))) return "medium";
+    return "extreme";
+  }
+
+  function progressionPool(completedWords = []) {
+    const unlockedIndex = TIER_ORDER.indexOf(unlockedDifficulty(completedWords));
+    return TIER_ORDER.slice(0, unlockedIndex + 1).flatMap(tier => ANSWER_TIERS[tier]);
+  }
+
+  function practiceAnswer(excludeWord, random = Math.random, completedWords = []) {
+    const completed = completedWords instanceof Set ? completedWords : new Set(completedWords);
+    const pool = progressionPool(completed);
+    const unsolved = pool.filter(item => item.word !== excludeWord && !completed.has(item.word));
+    const choices = unsolved.length ? unsolved : pool.filter(item => item.word !== excludeWord);
     return choices[Math.floor(random() * choices.length)];
+  }
+
+  function seededRandom(seed) {
+    let state = Number(seed) >>> 0;
+    return function () {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let mixed = state;
+      mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+      mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+      return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function adventureRoute(seed = 1) {
+    const normalizedSeed = Number(seed) >>> 0 || 1;
+    if (adventureRouteCache.has(normalizedSeed)) return adventureRouteCache.get(normalizedSeed);
+    const route = TIER_ORDER.flatMap((tier, tierIndex) => {
+      const shuffled = [...ANSWER_TIERS[tier]];
+      const random = seededRandom(normalizedSeed ^ Math.imul(tierIndex + 1, 0x9E3779B1));
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+      }
+      return shuffled;
+    });
+    const frozen = Object.freeze(route);
+    adventureRouteCache.set(normalizedSeed, frozen);
+    if (adventureRouteCache.size > 4) adventureRouteCache.delete(adventureRouteCache.keys().next().value);
+    return frozen;
+  }
+
+  function adventureProgress(level = 0) {
+    const completed = Math.max(0, Math.min(ADVENTURE_TOTAL, Math.floor(Number(level) || 0)));
+    let offset = 0;
+    for (let tierIndex = 0; tierIndex < TIER_ORDER.length; tierIndex += 1) {
+      const tier = TIER_ORDER[tierIndex];
+      const tierTotal = ANSWER_TIERS[tier].length;
+      if (completed < offset + tierTotal || tierIndex === TIER_ORDER.length - 1) {
+        return Object.freeze({
+          level: completed,
+          total: ADVENTURE_TOTAL,
+          tier,
+          tierIndex,
+          tierLevel: Math.max(0, Math.min(tierTotal, completed - offset)),
+          tierTotal,
+          complete: completed >= ADVENTURE_TOTAL
+        });
+      }
+      offset += tierTotal;
+    }
+  }
+
+  function adventureAnswer(level = 0, seed = 1) {
+    const safeLevel = Math.max(0, Math.min(ADVENTURE_TOTAL - 1, Math.floor(Number(level) || 0)));
+    return adventureRoute(seed)[safeLevel];
   }
 
   function isValidWord(word) {
@@ -165,8 +247,9 @@
   }
 
   return {
-    ANSWERS, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, LIFELINE_COSTS,
+    ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, LIFELINE_COSTS, ADVENTURE_TOTAL,
     scoreGuess, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
-    rewardForAttempts
+    rewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
+    adventureRoute, adventureProgress, adventureAnswer
   };
 });

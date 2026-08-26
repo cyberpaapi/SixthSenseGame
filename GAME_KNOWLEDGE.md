@@ -28,7 +28,7 @@ For every future change:
 
 ## Product summary
 
-Sixth Sense is an original, mobile-first, single-player word deduction game. Every puzzle answer has six letters. The player has seven guesses. Feedback is presented through both color and symbols:
+Sixth Sense is an original, mobile-first word deduction game with solo and private-room multiplayer. Every puzzle answer has six letters. The player has seven guesses. Feedback is presented through both color and symbols:
 
 - Aligned: green plus `●` — correct letter in the correct position.
 - Echoing: orange plus `◆` — correct letter in a different position.
@@ -51,15 +51,18 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 
 ## Modes
 
-The home screen exposes five modes:
+The home screen exposes eight modes:
 
 | Mode | Current behavior |
 | --- | --- |
 | Daily | One deterministic UTC puzzle per day. Daily completion updates played, win rate, guess distribution, and daily streak. |
+| Adventure | A persistent 10,187-level solo journey through every answer exactly once. Each device receives a seeded randomized order inside each tier: all 4,309 Normal levels first, then 1,995 Hard, then 3,883 Extreme. Those totals and difficulty names remain off the newcomer-facing map. The dedicated map loads only the current zone and uses a generated endless ladder built directly into the scene. Every image window carries exactly eight consecutive overlaid level markers: normally three previous, the current level, and four upcoming; the opening window is levels 1–8. After a win, the selected animal visibly climbs one rung to the new current level. Losses and Skip reveal the answer but keep the player on that level. |
 | Practice | Unlimited randomly selected puzzles. A Skip starts a fresh Practice puzzle. |
 | Sprint | A Practice-style puzzle with a 90-second deadline. A zero timer ends the puzzle as a loss. |
 | Insight | Starts with the clue unlocked and one deterministic answer position revealed. |
 | Streak | Consecutive wins grow a separate mode streak; a loss or Skip resets that run. |
+| Race | A room-code match for 2–8 players. The host chooses Normal, Hard, or Extreme and a 3-word Sprint, 5-word Normal, or 10-word Marathon. Everyone receives the same ordered words; the first player to solve the full route wins. |
+| VS | A two-player point duel with host-selected 3-round Quick, 5-round Classic, 9-round Epic, or Endless play. Both players receive the same word each round and see each other's name, score, and feedback patterns in real time, but never the opponent's letters. The first correct guess wins one point and advances both screens to the next shared word. Exhausting seven attempts forfeits that round and gives the opponent its point. Finite matches end after the selected number of rounds; Endless continues until the players leave. |
 
 The app opens on the home screen. Game-adjacent marketing, mode selection, and streak progress live outside the focused puzzle screen.
 
@@ -84,24 +87,29 @@ Lifeline prices and behavior:
 | Sense | 3 | First tap with no stock purchases one token; the next tap consumes it and unlocks the puzzle clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered bubble for five seconds. |
 | Peek | 5 | Can be stocked, consumed, purchased again, and reused. Every use reveals a new unrevealed answer position until no useful positions remain. |
 | Clear | 4 | Can be stocked, consumed, purchased again, and reused. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
-| Skip | 6 | Can be stocked, consumed, purchased again, and reused. It always asks for confirmation. Daily counts as a loss; Streak counts as a loss and resets the run; Practice, Sprint, and Insight begin a fresh puzzle. |
+| Skip | 6 | Can be stocked, consumed, purchased again, and reused. It always asks for confirmation. Daily counts as a loss; Streak counts as a loss and resets the run; Practice, Sprint, and Insight begin a fresh puzzle. Adventure reveals the current answer as a loss and keeps the player on the same required level. |
 
 Inventory and coins persist in `localStorage`. The bottom dock shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Buying and using are deliberately separate taps so a purchase is not consumed accidentally.
 
 ## Current experience and visual system
 
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
-- Home: generated observatory hero art, a seven-day streak progress rail, a Daily call-to-action, and a compact four-mode launcher. The launcher is a small 2×2 grid on phones and a slim four-across row on desktop, with thumbnail art beside concise labels.
+- Home: generated observatory hero art, a seven-day streak progress rail, a Daily call-to-action, a major Adventure launcher above the compact four-mode solo launcher, and two generated-art multiplayer launchers. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport so neither behaves like a nearly full-screen takeover. The Adventure entry does not expose difficulty, current-level, full-route, or tier-total labels.
+- Adventure: three original generated portrait environments—Sky Garden, Ember Canopy, and Cosmic Prism—each contain a monumental endless golden ladder as part of the raster artwork. The old winding-road scenes are no longer referenced, and no CSS rails or rung elements duplicate the illustrated ladder. Only the active zone asset is loaded at runtime; exactly eight semantic level markers align to eight evenly spaced painted-rung positions. A one-level win animates the animal upward from the completed rung; reduced-motion players receive the settled state immediately. It is original genre-inspired progression presentation and does not use Candy Crush art, characters, candy motifs, branded copy, or copied level UI.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, color-state keyboard, and an evenly spaced bottom lifeline dock.
-- Default logo: option 1. Settings includes a persistent 3×3 chooser with nine original generated logo marks.
+- The selected animal avatar appears as a clean circular header icon with no square pedestal, so identity is visible on home, solo, and online screens. It is also the entry point to a personal profile sheet showing unique words solved, total solves, best attempt count, fastest word/time, best streak, general Adventure status, and coins. Beside it, the chosen generated wordmark uses two compact rows of glossy sculpted blocks spelling `SIXTH` and `SENSE`.
+- Identity Studio contains a generated 3×3 sheet of fox, owl, axolotl, panda, tiger, koala, frog, rabbit, and penguin avatars plus eight persistent highlight colors and an editable persistent username. First open requires a 2–18 character username before help or play. The username and visual identity also appear in online rooms. The header wordmark is the transparent `assets/logo-sixth-sense-clay-v1.png` image; the manifest/favicon retains its dedicated square icon.
+- Online play uses a desktop right-side progress track and a horizontally scrollable compact progress rail on phones. Race shows word completion. VS keeps both names and point totals above the board, shows finite point-progress bars, and renders each opponent attempt as six color/symbol-state pips without exposing letters. A synchronized centered transition announces the point winner and new word on both clients whenever the authoritative round number advances.
 - Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons. Visible icon art is intentionally compact inside touch targets that remain at least 44px on phones.
+- The generated house control has an optical-centering correction wherever it appears, compensating for asymmetrical transparent weight without shrinking or shifting its 44px-or-larger touch target.
 - The Daily action, mode cards, modal-title art, and decorative streak/lifeline imagery use a compact scale so controls support the game rather than dominating it.
 - The game screen is locked to one dynamic viewport and must not create page-level horizontal or vertical scrolling, including during screen-entry animation.
 - Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, result sheet timing, and win confetti.
 - All optional motion collapses under `prefers-reduced-motion`.
-- Sound uses a small Web Audio tone system and can be disabled.
+- Audio uses an original procedural Web Audio system with two independent persistent controls: Music runs a low-volume 32-step “aurora claybeat” of soft pads, bass pulses, and pentatonic plucks; Sound effects covers letters, deletion, the three tile states, invalid actions, coins, each lifeline, room actions, wins, and losses. It works without downloaded audio files and begins only after the first user gesture, as required by mobile browser autoplay rules.
 - Dark and high-contrast modes are available. Dark mode preserves four visually distinct keyboard treatments: untested purple, Aligned green, Echoing orange, and Quiet charcoal, with the `●`, `◆`, and `×` markers retained.
 - The UI supplies visible keyboard color states, color-independent symbols, semantic buttons, ARIA labels, focus styles, first-visit help, and a skip-to-content link.
+- The Settings sheet remains touch/wheel scrollable but hides its visual scrollbar for a cleaner popup edge.
 
 ## Intentional removals and simplifications
 
@@ -112,28 +120,33 @@ The following items were removed because they made the interface feel crowded or
 - The verbose “Read the signs / Every color speaks” marketing section and the genre disclaimer from the home content.
 - Text labels around the lifeline dock. Meaning is carried by original icons, accessible names, prices, stock badges, and the help modal.
 - Temporary “tries left” bubbles after valid guesses.
+- Visible Adventure difficulty and current-level hints on the launcher, map chrome, puzzle status, and profile. Numbered ladder rungs retain progression clarity, while semantic level labels remain available to assistive technology.
 
 ## Architecture and file map
 
-This is a dependency-light static application: no framework, bundler, package manifest, backend, account system, or remote database is required at runtime.
+This is a framework-free browser client with a small Vercel serverless multiplayer API. Solo play remains fully local and works without the API. Online rooms require a Postgres-compatible `DATABASE_URL`; Neon is the intended Vercel integration. There is no account system.
 
 | File or directory | Responsibility |
 | --- | --- |
 | `index.html` | Semantic home/game screens, modal content, settings, stats, icon dock, and script loading order. |
 | `styles.css` | Responsive claymorphic presentation, phone viewport fitting, dark/high-contrast themes, keyboard states, modal styling, and all motion. |
-| `game-core.js` | Environment-neutral rules: constants, answer/guess loading, repeated-letter scoring, hard-mode validation, daily selection, practice selection, and coin rewards. It exports to both browser globals and CommonJS tests. |
-| `app.js` | Browser state, rendering, input, modes, persistence, inventory/economy, modals, animations, sound, sharing, and statistics. |
-| `answer-bank.js` | Exactly 5,000 answer objects with a six-letter `word` and a `clue`. Loaded before `game-core.js` in the browser. |
+| `game-core.js` | Environment-neutral rules: constants, answer/guess loading, repeated-letter scoring, hard-mode validation, daily/practice selection, deterministic seeded Adventure shuffling/progress, and coin rewards. It exports to both browser globals and CommonJS tests. |
+| `app.js` | Browser state, rendering, input, modes, Adventure map/progress, persistence, inventory/economy, modals, animations, the procedural soundtrack/effects engine, sharing, and statistics. It exposes `window.SixthSenseAudio` so multiplayer uses the same sound palette. |
+| `multiplayer.js` | Room create/join flows, resume-token session state, polling/reconnect, online board/keyboard rendering, Race tracks, and VS series progress plus attempt patterns. |
+| `api/multiplayer.js` | Vercel serverless authority for codes, seats, room lifecycle, answer selection, guess validation/scoring, CAS revisions, idempotency, results, and redacted snapshots. It creates its Postgres tables idempotently after a database is connected. |
+| `answer-bank.js` | 10,187 answer objects with a six-letter `word`, `clue`, and `tier`. Loaded before `game-core.js` in the browser and required by the server. |
 | `word-bank.js` | Expanded accepted-guess vocabulary. Loaded before `game-core.js` in the browser. |
 | `scripts/build_word_banks.py` | Deterministically audits and regenerates both banks from a hash-verified ENABLE lexicon, pinned `wordfreq`, and WordNet. |
 | `scripts/requirements-word-banks.txt` | Pinned build-time Python dependencies for vocabulary regeneration. |
 | `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
-| `assets/` | Generated logo, hero, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
+| `assets/` | Generated logo, hero, three separate Adventure zone maps, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
+| `package.json` / `package-lock.json` | Reproducible Node dependencies plus explicit static build and test scripts. The runtime dependency is the Neon serverless Postgres driver. |
+| `vercel.json` | Vercel function duration and no-store API headers. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
-| `favicon.svg` | Fallback favicon; the selected logo is applied dynamically at runtime. |
+| `favicon.svg` | Fallback favicon; the fixed primary brand logo remains the runtime favicon. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
 | `.github/workflows/pages.yml` | Builds and deploys the static repository to GitHub Pages on each push to `main` or a manual dispatch. |
-| `.gitignore` | Excludes Vercel's local project link plus Python cache files created during vocabulary regeneration. |
+| `.gitignore` | Excludes Vercel's local project link, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
@@ -141,16 +154,18 @@ This is a dependency-light static application: no framework, bundler, package ma
 | `AGENTS.md` | Mandatory instructions for AI contributors, including this document’s update rule. |
 | `GAME_KNOWLEDGE.md` | This canonical living context and change record. |
 
-Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, then `app.js`.
+Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, `app.js`, then `multiplayer.js`.
 
 ## Data and selection
 
-- Answer pool: exactly 5,000 unique, common, six-letter words.
+- Answer pool: exactly 10,187 unique, clueable, answer-safe six-letter words.
+- Player-facing difficulty names are Normal, Hard, and Extreme. For backward-compatible data, API, and saved-state stability, their internal keys remain `easy`, `medium`, and `extreme` respectively.
+- Normal (`easy`): exactly 4,309 familiar primary answers. Hard (`medium`): 1,995 less-common answers with remaining Zipf frequency at least 2.0. Extreme: 3,883 final rare, specialist, archaic, or unusual answers.
 - Accepted guesses: exactly 15,232 unique six-letter words from the proper-name-safe ENABLE word-game lexicon, including every answer.
 - `raffle` and `rattle` are both accepted guesses and possible puzzle answers.
 - Every answer has a Sense clue.
 - The accepted vocabulary includes legitimate uncommon, technical, archaic, and inflected word-game entries, while excluding ordinary names, places, trademarks, malformed inflections, abbreviations, and corpus noise.
-- Answers are the 5,000 highest-frequency eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion. There are 10,188 clueable, answer-safe candidates; the selected frequency floor is Zipf 2.44.
+- All clueable eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion are answers. The Easy tier is frequency-ranked to exactly 4,309 with explicit familiar-word rescues. Medium uses the remaining Zipf ≥2.0 words; Extreme contains the remainder.
 - The 2026-08-27 full audit retained 14,850 old guesses, removed 17,218 unsupported entries, added 382 valid omissions, retained 4,782 old answers, and replaced 218 answers.
 - Sense clues may not contain their own answer, broken placeholder/example text, proper-name definitions, or offensive senses. The audit preserved 4,633 clean existing clues, repaired 149 retained clues, and generated clues for 218 new answers.
 - `coates` is excluded from both banks because it entered as a surname/malformed inflection with the clue for `coat`.
@@ -160,7 +175,7 @@ Do not casually regenerate either bank. Any regeneration must preserve format, l
 
 ## Runtime state and persistence
 
-All state is local to the browser. There is no login or cross-device synchronization.
+Solo state is local to the browser. There is no login or cross-device synchronization. Online room state is durable in Postgres for 24 hours, and each browser seat is protected by a random resume token whose SHA-256 hash is stored server-side.
 
 Current `localStorage` keys:
 
@@ -169,13 +184,26 @@ Current `localStorage` keys:
 - `sixth-sense.sprint.v1`
 - `sixth-sense.insight.v1`
 - `sixth-sense.streak-mode.v1`
+- `sixth-sense.adventure.v1`
 - `sixth-sense.stats.v1`
 - `sixth-sense.settings.v1`
 - `sixth-sense.visited.v1`
+- `sixth-sense.online.identity.v1`
 
-Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, reward/stat-recording guards, and Sprint deadline. The current game schema uses `version: 2`.
+Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, reward/stat-recording guards, solve-start time, Sprint deadline, and Adventure level/seed when relevant. The current game schema uses `version: 3`.
 
-Statistics include Daily play/win/streak fields, seven-slot guess distribution, wallet, persistent lifeline inventory, Streak-mode run, and best Streak-mode run. Settings include hard mode, contrast, dark mode, sound, and selected logo.
+Statistics include Daily play/win/streak fields, seven-slot guess distribution, wallet, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. New profile fields use backward-compatible defaults, so older local saves remain valid. Settings include hard mode, contrast, dark mode, independently stored music and sound-effects preferences, selected animal avatar, and selected highlight color. The former single `sound` preference migrates safely to both new controls on read.
+
+Online room rules and security:
+
+- Codes are generated by the server and omit visually ambiguous characters.
+- Race capacity is 8; VS capacity is 2. A match needs at least 2 players and only the host can start.
+- Usernames persist per device and are case-insensitively unique within an online room. Global username reservation is not claimed because the game has no account system.
+- All players receive the same server-selected sequence from the room's explicit difficulty tier. Personal solo unlock state is irrelevant.
+- The API validates accepted guesses and scores them server-side. Snapshots never include answer words. Opponents receive score patterns only; the current player receives their own submitted letters and scores.
+- Mutations use player/room revisions for compare-and-set protection plus UUID action IDs for retry idempotency.
+- The client uses 900ms bounded polling, restores its seat for the browser session, and renders temporary connection errors without destroying room state.
+- Race players who exhaust seven attempts restart that same word with a recorded failed batch. They do not advance until solving it. In VS, seven misses forfeit only the current point; both players then advance to the next word.
 
 When changing stored shapes, add a safe migration or backward-compatible defaults. Never assume old players have every new field.
 
@@ -183,16 +211,17 @@ When changing stored shapes, add a safe migration or backward-compatible default
 
 - Preserve six-letter answers and seven chances unless the user explicitly changes the product.
 - Preserve correct duplicate-letter scoring.
-- Keep `answer-bank.js` at exactly 5,000 valid clue-bearing answers unless an explicit product decision changes the target.
+- Keep Easy at exactly 4,309 and preserve all clueable answer-safe words in the complete tiered answer bank unless an explicit product decision changes the target.
 - Do not narrow accepted guesses in a way that rejects common words such as `raffle` or `rattle`.
 - Keep the puzzle screen within 360×800 and 390×844 portrait viewports without page scrolling or horizontal overflow. Also keep 430×932 and representative desktop/landscape layouts usable.
+- Keep the Adventure map within the same phone viewport without page-level scrolling; virtualize its route rather than creating thousands of level controls.
 - Keep touch targets practical, keyboard navigation functional, browser zoom enabled, and focus visible.
 - Never make color the only carrier of tile meaning.
 - Preserve reduced-motion behavior when adding animations.
 - Never make animation timing decide game legality or permanently block input.
 - Keep lifeline prices, badges, wallet deductions, and saved inventory consistent.
 - Do not commit secrets or add a client-side key.
-- Do not claim online multiplayer: this is a local single-player static game.
+- Never describe online rooms as production-ready unless a durable database is connected and two independent production browser sessions pass create/join/start/guess/reconnect tests.
 
 ## Local development
 
@@ -212,6 +241,8 @@ Core checks:
 
 ```powershell
 node --check app.js
+node --check multiplayer.js
+node --check api/multiplayer.js
 node test-core.js
 ```
 
@@ -225,13 +256,14 @@ node test-browser.js
 Current verified result on 2026-08-27:
 
 - JavaScript syntax: passed.
-- Core rules/data: passed — 5,000 answers and 15,232 accepted guesses; all answers are guessable; `coates` and representative proper names are rejected; `raffle` and `rattle` remain answers.
+- Core rules/data: passed — 10,187 answers across Easy 4,309 / Medium 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — phone playthrough, all modes, repeatable lifelines, results, desktop layout, distinct dark-theme keyboard feedback, and overflow checks.
+- Browser QA: passed — phone playthrough, required first-open username setup, Identity Studio username editing, seeded Adventure advancement, label-free Adventure chrome, bitmap-embedded endless ladder with no duplicate CSS/DOM ladder, eight evenly spaced markers per image, one-rung avatar climb, optically centered house control, current-zone asset switching, avatar profile records, solo modes, hidden-but-functional Settings scrolling, independent music/effects persistence and audio-engine startup, avatar/accent persistence, 3/5/9/Endless VS selection, visible names and point progress, synchronized mocked two-client new-word transitions, repeatable lifelines, results, desktop layout, distinct dark-theme keyboard feedback, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
 - Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; core CSS, JavaScript, answer data, manifest, and hero artwork return HTTP 200.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
-- The generic board-game validator reports missing `package.json`/npm build scripts; this is expected for the intentionally dependency-free static architecture. The repository-specific Node and Playwright checks above are the canonical validation path.
+- Multiplayer production activation is not yet verified because the Vercel project has no connected database resource or `DATABASE_URL`. The API correctly returns HTTP 503 in that state. Production two-browser room testing is mandatory immediately after connection.
+- The bundled broad project validator was rerun after the label-free Adventure build. Focused syntax/core/browser checks pass, but the validator still reports four pre-existing project-level gaps: no static `build` npm script, polling rather than a WebSocket/SSE marker, no explicit reconnect+resume marker pair, and no Force End/Play Again multiplayer flow. These are not Adventure UI failures and must remain open until multiplayer receives its production-completeness pass.
 
 When behavior changes, add or update an automated assertion. Do not rely only on visual inspection for game rules or economy state.
 
@@ -256,13 +288,111 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ## Known limitations
 
-- Progress, wallet, inventory, settings, and statistics are device/browser-local and can be cleared with site storage.
-- The game does not provide accounts, cloud saves, leaderboards, or online multiplayer.
+- Solo progress, wallet, inventory, settings, and statistics are device/browser-local and can be cleared with site storage.
+- The game does not provide accounts, cloud saves, or leaderboards.
+- The multiplayer code and UI are implemented, but production rooms remain inactive until the repository's Vercel project is connected to a durable Postgres resource and receives `DATABASE_URL`. Do not call this production-ready before the required two-browser production test.
+- The broad multiplayer project validator is not green: the current polling implementation and room lifecycle do not yet satisfy its live-transport, reconnect/resume, and Force End/Play Again requirements, and the package has no build script. Focused Adventure, core, and browser QA is green.
 - The dictionary is deliberately broad but is not a promise to contain every historical, regional, inflected, or specialist six-letter form.
 - Generated raster assets make the repository larger than a code-only static game; preserve optimized WebP versions where they exist.
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
+- Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-27 — Normal / Hard / Extreme difficulty labels
+
+- Renamed every player-facing multiplayer difficulty from Easy / Medium / Extreme to Normal / Hard / Extreme and applied the same terminology to public-facing progression documentation.
+- Preserved the internal `easy`, `medium`, and `extreme` keys so existing rooms, saves, answer-bank data, and progression logic remain fully compatible. Versioned static runtime files as `20260827.14`.
+
+### 2026-08-27 — Point-based 3/5/9/Endless VS and persistent usernames
+
+- Replaced route-race VS with authoritative shared rounds: the first correct solve earns one point, a seven-miss board awards the opponent the point, and a compare-and-set room update ensures only one result can resolve a round. Both players' boards reset together and a synchronized transition announces the point winner and new word.
+- Replaced VS Marathon 10 with Epic 9 and added Endless. Race remains unchanged at 3/5/10. Finite VS ends after exactly 3, 5, or 9 points have been contested; Endless appends a fresh tier-correct answer after every round and does not auto-finish.
+- Added persistent first-open username onboarding, username editing inside Identity Studio, profile name display, read-only reuse in room lobbies, and case-insensitive duplicate-name rejection inside each room. Global uniqueness still requires a future account service.
+- Added visible two-player names/scores above the VS board, point-based progress cards, and server helper tests plus mocked two-client browser coverage for simultaneous round transitions. Versioned static runtime files as `20260827.13`.
+
+### 2026-08-27 — Selectable 3/5/10-word VS matches (superseded)
+
+- Exposed the shared Sprint (3), Normal (5), and Marathon (10) game-length control in the one-on-one VS lobby and sends the chosen length in the authoritative room-creation request.
+- Removed the backend's forced one-word VS override. Both players now advance through the same selected route; first to complete it wins, while exhausting seven guesses on any word retains the existing immediate-concession rule.
+- Added per-player VS series bars and combined word/attempt labels while preserving live color-pattern visibility. Added server normalization tests and browser coverage for five-word VS creation, room rendering, series progress, and opponent attempt patterns. Versioned static runtime files as `20260827.12`.
+
+### 2026-08-27 — Half-screen Daily and Adventure cards
+
+- Reduced the oversized phone Daily hero and normalized both primary home modes to `50svh`, bounded to 390–470px for the supported portrait range. Daily and Adventure now carry equal visual weight at roughly half a screen each.
+- Preserved the generated artwork, copy, 48px primary actions, rounded clay surfaces, and desktop sizing. Added 390×844 browser assertions for exact half-viewport sizing and equal card heights. Versioned static runtime files as `20260827.11`.
+
+### 2026-08-27 — Eight evenly spaced Adventure levels per image
+
+- Expanded every Adventure image window to exactly eight consecutive levels. The standard window now shows three completed levels, the current avatar, and four upcoming levels; new players see levels 1–8 without loading the wider journey.
+- Reused eight fixed painted-rung positions across all three generated zone scenes, preserving even vertical spacing, header/footer clearance, and the existing one-rung avatar climb.
+- Added browser assertions for the eight-marker opening, post-win, and established-player windows plus minimum and consistent rung spacing. Versioned static runtime files as `20260827.10`.
+
+### 2026-08-27 — Infinite ladder rebuilt into original Adventure art
+
+- Replaced the earlier winding-road zone backgrounds with three completely new generated worlds whose endless golden ladder is part of the scene itself: Sky Garden (`adventure-zone-sky-ladder-v1.webp`, 216,222 bytes), Ember Canopy (`adventure-zone-ember-ladder-v1.webp`, 245,806 bytes), and Cosmic Prism (`adventure-zone-cosmic-ladder-v1.webp`, 224,590 bytes).
+- Removed the CSS rail pseudo-elements, generated rung DOM, and rung-arrival styling. The runtime now overlays only the interactive level markers and selected animal on seven fixed painted-rung positions, avoiding the doubled, artificial-looking ladder treatment.
+- Preserved the virtualized four-to-seven-marker window, one-rung climb animation, reduced-motion behavior, label-free map chrome, active-zone switching, and semantic level labels. Browser coverage now verifies the new assets, fixed rung spacing, and absence of a CSS/DOM ladder. Versioned static runtime files as `20260827.9`.
+
+### 2026-08-27 — Label-free Adventure progression
+
+- Removed visible `Easy`, zone-difficulty, and `Level N` hints from the Adventure home launcher, map header/footer, active puzzle status, and player profile. The map action now reads simply `Play`.
+- Kept numbered ladder rungs as the sole visible progression cue and retained specific current-level text in ARIA labels, so the simplified visual design does not reduce screen-reader clarity.
+- Updated browser coverage to reject difficulty/current-level copy across Adventure surfaces while verifying that the current rung still advances from 1 to 2. Versioned static runtime files as `20260827.8`.
+
+### 2026-08-27 — House control optical alignment
+
+- Corrected the visible house artwork by 2px left and 3px upward in both Adventure and online leave controls. The source PNG’s alpha-weighted artwork sits right and low inside its nominal square, so geometric centering alone appeared misaligned.
+- Preserved the existing 44–48px semantic button boxes and added a browser assertion that calculates the rendered asset’s optical center while guarding the minimum touch target. Versioned static runtime files as `20260827.7`.
+
+### 2026-08-27 — Endless Adventure ladder and climbing token
+
+- Replaced the scattered Adventure nodes with one centered vertical clay ladder. Continuous gold rails extend and fade beyond the map viewport, while each virtualized nearby level receives a matching rung, creating an endless route without loading additional levels or artwork.
+- Kept the newcomer-friendly window unchanged: Level 1 shows four rungs, and established players see no more than three previous, the current level, and three next levels.
+- Added a real progression transition: when exactly one Adventure level is gained, the selected animal enters from the completed rung below, climbs the full distance to the new current rung, and settles with a short rung glow. Reloads, losses, skips, and multi-level storage changes do not fake the climb.
+- Disabled the climb under `prefers-reduced-motion` and preserved the existing phone viewport, touch target, keyboard, semantic-current-level, zone asset, and no-scroll behavior.
+- Added browser assertions for continuous ladder rails, centered rung geometry, one-rung climb distance, and animated progression evidence. Versioned all static runtime files as `20260827.6` to avoid stale mixed builds.
+
+### 2026-08-27 — Welcoming Adventure window and player profile
+
+- Removed all full-route and per-tier word totals from the Adventure launcher, map header, map footer, and active-puzzle detail. The complete 10,187-answer route still exists unchanged internally, but new players now see only their current zone and level.
+- Reduced the virtualized map from 13 nearby nodes to a maximum of seven: up to three previous levels, the current avatar level, and up to three next levels. Level 1 intentionally exposes only levels 1–4, while established players retain enough backward context without loading the whole map.
+- Generated three separate 900×1350 zone backgrounds—Easy Valley (236,790 bytes), Medium Skies (194,520 bytes), and Hard Summit (225,872 bytes)—and changed runtime rendering to reference only the current zone asset instead of the earlier combined world illustration.
+- Made the clean circular header avatar a profile trigger. Its new sheet displays unique words solved, total solves, best attempt count, fastest word/time, best streak, current Adventure location, and wallet balance; new statistics migrate with safe defaults and wins are guarded against double-recording.
+- Added browser regression coverage for the count-free newcomer experience, four/seven-node windows, medium-zone asset switch, personal-record persistence, pedestal-free avatar trigger, and phone overflow. Versioned all static runtime files as `20260827.5` to avoid stale mixed builds.
+
+### 2026-08-27 — Complete Adventure signal trail
+
+- Added Adventure as the major solo mode above the smaller mode shelf. Its saved per-device seed shuffles every tier independently while enforcing the complete sequence of 4,309 Easy, 1,995 Medium, and 3,883 user-facing Hard answers; the route contains all 10,187 answers exactly once.
+- Generated and optimized the original 900×1350 WebP signal-trail environment (237,712 bytes): cyan beginner valley, coral middle sky, violet crystal summit, floating clay islands, observatories, and beacons. It deliberately avoids candy, copied characters, branded map language, and copied level UI.
+- Added a dedicated full-height Adventure map with 13 virtualized nearby nodes, current-avatar placement, completed/current/locked states, region and total progress, and a direct current-level action. The map and its entry animation remain inside 390×844 and 360×800 without page scrolling.
+- Adventure wins advance exactly one level and return to the trail; losses and Skip reveal the word but preserve the required level. The game record schema moved to version 3, while old records continue to merge with safe defaults.
+- Hid the visual scrollbar only on the Settings sheet while preserving `overflow-y: auto`, touch scrolling, wheel scrolling, and keyboard access.
+- Added deterministic route, uniqueness, exact tier-boundary, alternate-seed, map-order, advancement, responsive overflow, generated-art, and hidden-scrollbar browser regression coverage. Versioned the stylesheet and all runtime scripts together as `20260827.4` to prevent stale mixed builds.
+
+### 2026-08-27 — Original music and tactile sound-effects suite
+
+- Replaced the small collection of isolated sine beeps with an original, dependency-free Web Audio sound system. The background score is a gently evolving 32-step “aurora claybeat” built from soft chord pads, bass pulses, and alternating pentatonic plucks, so no licensed or downloaded music is required.
+- Added purpose-specific effects for letter entry, deletion, Aligned/Echoing/Quiet reveals, invalid and denied actions, coin purchases, Sense, Peek, Clear, Skip, room entry/start, wins, and losses. Solo and multiplayer share the same audio service.
+- Split the previous Sound setting into independent Music and Sound effects toggles. Both persist locally, react immediately, pause the music while the page is hidden, and migrate the former single preference without unexpectedly unmuting existing players.
+- Respected browser autoplay policy by unlocking audio only from a user gesture, and added browser assertions for defaults, independent persistence, soundtrack scheduling, effects dispatch, and continued phone overflow safety.
+- Versioned the five static runtime script URLs together so an ordinary refresh cannot combine the new settings markup with an older cached audio engine.
+
+### 2026-08-27 — Selected clay wordmark applied
+
+- Applied the user's chosen first option from the generated 2×2 logo study as the visible header wordmark on home, solo, and online screens.
+- Extracted the two-row `SIXTH` / `SENSE` block design to genuine alpha transparency, corrected a baked checkerboard during validation, and optimized the final asset to 640×256 pixels (338,837 bytes).
+- Replaced the temporary live-text wordmark while preserving the selected animal as an independent circular identity mark with no raised square pedestal.
+- Added browser regression coverage for the exact image asset, compact phone sizing, persistent avatar switching, and the pedestal-free avatar treatment.
+
+### 2026-08-27 — Tiered progression, animal identity, and private-room multiplayer foundation
+
+- Expanded the puzzle-answer base from 5,000 to all 10,187 clueable, answer-safe candidates and assigned deterministic Easy (4,309), Medium (1,995), and Extreme (3,883) tiers. Solo non-Daily selection silently unlocks the next tier only after every word in the current tier has been solved; accepted guesses remain 15,232.
+- Kept `raffle`, `rattle`, `brooch`, `napkin`, `pewter`, `tarmac`, `walrus`, `alcove`, `gopher`, and `magpie` in Easy because everyday familiarity is not perfectly represented by written-corpus frequency.
+- Replaced the logo chooser with a generated nine-animal avatar sheet and eight highlight colors. The fixed app logo preserves branding while player identity now has a playful multiplayer purpose.
+- Added generated Race/VS launcher art, a private-room lobby, difficulty and 3/5/10-word route controls, a desktop right-side/mobile compact progress track, and live VS color-pattern attempts.
+- Added a Vercel serverless Postgres authority with server-created room codes, durable 24-hour rooms, unique resume-token seats, capacity enforcement, host-only starts, server-side answer selection/guess validation, redacted snapshots, CAS revisions, action idempotency, and bounded polling reconnects.
+- Added Node package metadata, Neon serverless driver, Vercel function configuration, tier/progression tests, avatar/accent persistence tests, and a mocked two-player VS browser test. Production multiplayer remains intentionally marked inactive until the user connects the required database resource and the two-browser production test passes.
 
 ### 2026-08-27 — Dark-mode keyboard feedback repair
 

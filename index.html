@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260827.14">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -16,15 +16,16 @@
   <div class="ambient ambient-b" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="brand" href="#" aria-label="Sixth Sense home">
-      <span class="brand-mark" aria-hidden="true">
-        <img class="brand-logo" src="assets/logo-option-1.png" width="418" height="418" alt="">
-      </span>
-      <span class="brand-copy">
-        <strong>Sixth Sense</strong>
-        <small>Feel the word</small>
-      </span>
-    </a>
+    <div class="brand-cluster">
+      <button class="profile-trigger" id="profile-trigger" type="button" aria-label="Open your player profile">
+        <span class="avatar-art avatar-fox" id="brand-player-avatar"></span>
+      </button>
+      <a class="brand" href="#" aria-label="Sixth Sense home">
+        <span class="brand-wordmark" aria-hidden="true">
+          <img src="assets/logo-sixth-sense-clay-v1.png" width="640" height="256" alt="">
+        </span>
+      </a>
+    </div>
     <nav class="header-actions" aria-label="Game controls">
       <div class="coin-wallet header-wallet" id="coin-wallet" aria-label="20 coins"><span class="coin-symbol" aria-hidden="true"></span><strong id="coin-count">20</strong></div>
       <button class="icon-button" type="button" data-modal-open="help-modal" aria-label="How to play">
@@ -65,6 +66,16 @@
       </div>
     </section>
 
+    <section class="adventure-feature" id="adventure-feature" aria-labelledby="adventure-feature-title">
+      <img id="adventure-feature-art" src="assets/adventure-zone-sky-ladder-v1.webp" width="900" height="1350" alt="" aria-hidden="true" loading="lazy" decoding="async">
+      <div class="adventure-feature-copy">
+        <p class="eyebrow">Your next journey</p>
+        <h2 id="adventure-feature-title">Adventure</h2>
+        <p>Follow a trail that unfolds one word at a time.</p>
+        <button class="adventure-enter" type="button" data-open-adventure-map>Continue adventure</button>
+      </div>
+    </section>
+
     <section class="mode-shelf" aria-labelledby="mode-shelf-title">
       <div class="mode-shelf-heading">
         <div><p class="eyebrow">Game modes</p><h2 id="mode-shelf-title">Pick your signal</h2></div>
@@ -76,6 +87,37 @@
         <button class="mode-tile" type="button" data-start-mode="insight"><img src="assets/mode-insight-v2.webp" width="512" height="512" alt="" aria-hidden="true"><span><strong>Insight</strong><small>Clue + reveal</small></span></button>
         <button class="mode-tile" type="button" data-start-mode="streak"><img src="assets/mode-streak-v2.webp" width="512" height="512" alt="" aria-hidden="true"><span><strong>Streak</strong><small>Win runs</small></span></button>
       </div>
+    </section>
+
+    <section class="online-shelf" aria-labelledby="online-shelf-title">
+      <div class="mode-shelf-heading">
+        <div><p class="eyebrow">Play together</p><h2 id="online-shelf-title">Shared signals</h2></div>
+        <p>Private rooms with live progress.</p>
+      </div>
+      <div class="online-mode-grid">
+        <button class="online-mode-tile" type="button" data-open-online="race">
+          <span class="online-mode-art online-mode-art-race" aria-hidden="true"></span>
+          <span><strong>Race</strong><small>2–8 players · 3, 5, or 10 words</small></span>
+        </button>
+        <button class="online-mode-tile" type="button" data-open-online="vs">
+          <span class="online-mode-art online-mode-art-vs" aria-hidden="true"></span>
+          <span><strong>VS</strong><small>1v1 · 3, 5, 9, or Endless rounds</small></span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <main class="adventure-shell" id="adventure-screen" hidden>
+    <section class="adventure-map-card" aria-labelledby="adventure-map-title">
+      <img class="adventure-map-art" id="adventure-map-art" src="assets/adventure-zone-sky-ladder-v1.webp" width="900" height="1350" alt="An endless golden ladder rising through the current Adventure zone">
+      <header class="adventure-map-head">
+        <button class="icon-button adventure-back" id="adventure-back" type="button" aria-label="Back to home"><img src="assets/control-home.png" width="256" height="256" alt="" aria-hidden="true"></button>
+        <div><p class="eyebrow">Adventure map</p><h1 id="adventure-map-title">The signal trail</h1></div>
+      </header>
+      <div class="adventure-level-path" id="adventure-level-path" aria-label="Nearby Adventure levels"></div>
+      <footer class="adventure-map-foot">
+        <button class="primary-button adventure-play" id="adventure-play" type="button">Play</button>
+      </footer>
     </section>
   </main>
 
@@ -108,6 +150,45 @@
 
   </main>
 
+  <main class="online-shell" id="online-screen" hidden>
+    <section class="online-game-card" aria-label="Online Sixth Sense room">
+      <header class="online-game-head">
+        <button class="icon-button online-leave" id="online-leave" type="button" aria-label="Leave online room"><img src="assets/control-home.png" width="256" height="256" alt=""></button>
+        <div><p class="eyebrow" id="online-mode-kicker">Multiplayer Race</p><h1 id="online-room-title">Room —</h1><p class="versus-names" id="online-versus-names" hidden></p></div>
+        <div class="online-room-chip"><span id="online-room-state">Waiting</span><strong id="online-room-code">——</strong></div>
+      </header>
+      <div class="online-round-transition" id="online-round-transition" role="status" aria-live="assertive" hidden>
+        <span id="online-round-kicker">Point scored</span>
+        <strong id="online-round-title">New word</strong>
+        <small id="online-round-score"></small>
+      </div>
+      <div class="online-play-layout">
+        <div class="online-puzzle-column">
+          <p class="online-live-status" id="online-live-status" aria-live="polite">Connecting to the room…</p>
+          <div class="board online-board" id="online-board" role="grid" aria-label="Online word board"></div>
+          <div class="keyboard online-keyboard" id="online-keyboard" aria-label="Online on-screen keyboard"></div>
+          <button class="primary-button online-start" id="online-start" type="button" hidden>Start match</button>
+        </div>
+        <aside class="progress-panel" aria-labelledby="progress-panel-title">
+          <div class="progress-panel-head"><div><p class="eyebrow">Live room</p><h2 id="progress-panel-title">Player progress</h2></div><span class="live-pulse">Live</span></div>
+          <div class="player-progress-list" id="player-progress-list"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="modal username-modal" id="username-modal" aria-labelledby="username-title">
+    <form class="modal-sheet" id="username-onboarding-form">
+      <div class="username-welcome-avatar"><span class="avatar-art avatar-fox" aria-hidden="true"></span></div>
+      <p class="eyebrow">Welcome to Sixth Sense</p>
+      <h2 id="username-title">Choose your username</h2>
+      <p>This name follows your scores, avatar, and multiplayer rooms.</p>
+      <label class="username-field"><span>Username</span><input id="username-onboarding-input" maxlength="18" minlength="2" autocomplete="nickname" placeholder="Your unique name" required></label>
+      <p class="username-message" id="username-onboarding-message" aria-live="polite"></p>
+      <button class="primary-button" id="username-onboarding-save" type="submit">Start sensing</button>
+    </form>
+  </dialog>
+
   <dialog class="modal" id="help-modal" aria-labelledby="help-title">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -125,7 +206,7 @@
         <li><strong>Echoing ◆</strong> means the letter is in the answer, somewhere else.</li>
         <li><strong>Quiet ×</strong> means the letter does not appear in the answer.</li>
       </ul>
-      <div class="modal-note mode-help"><strong>Five ways to play:</strong> Daily gives everyone the same word. Practice is unlimited. Sprint gives you 90 seconds. Insight begins with a clue and revealed position. Streak chains consecutive wins.</div>
+      <div class="modal-note mode-help"><strong>Seven ways to play:</strong> Daily gives everyone the same word. Practice is unlimited. Sprint gives you 90 seconds. Insight begins with a clue and revealed position. Streak chains consecutive wins. Race puts 2–8 players on a shared 3, 5, or 10-word track. VS is a 3, 5, 9, or Endless round duel: first correct guess wins the point while both players see live color patterns.</div>
       <section class="lifeline-guide" aria-labelledby="lifeline-guide-title">
         <div class="guide-heading"><span class="coin-symbol" aria-hidden="true"></span><h3 id="lifeline-guide-title">Lifelines</h3></div>
         <div class="lifeline-guide-grid">
@@ -168,6 +249,29 @@
     </div>
   </dialog>
 
+  <dialog class="modal profile-modal" id="profile-modal" aria-labelledby="profile-title">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div><p class="eyebrow">Personal signal</p><h2 id="profile-title">Your profile</h2></div>
+        <button class="icon-button modal-close" type="button" aria-label="Close player profile">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="profile-hero">
+        <span class="avatar-art avatar-fox" id="profile-avatar" aria-hidden="true"></span>
+        <div><strong id="profile-name">Player</strong><span id="profile-zone">Adventure in progress</span></div>
+      </div>
+      <div class="profile-stat-grid">
+        <div><strong id="profile-words-solved">0</strong><span>Words solved</span></div>
+        <div><strong id="profile-total-solves">0</strong><span>Total solves</span></div>
+        <div><strong id="profile-best-attempts">—</strong><span>Best solve</span></div>
+        <div><strong id="profile-best-streak">0</strong><span>Best streak</span></div>
+        <div class="profile-fastest-stat"><strong id="profile-fastest-word">—</strong><span>Fastest word</span><small id="profile-fastest-time">No timed solve yet</small></div>
+        <div><strong id="profile-coins">20</strong><span>Coins</span></div>
+      </div>
+    </div>
+  </dialog>
+
   <dialog class="modal" id="settings-modal" aria-labelledby="settings-title">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -180,23 +284,55 @@
         <label class="setting-row"><span><strong>Hard sense</strong><small>Use every revealed clue in later guesses</small></span><input type="checkbox" id="hard-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>High contrast</strong><small>Brighter blue and orange feedback</small></span><input type="checkbox" id="contrast-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>Night clay</strong><small>Use the deep plum theme</small></span><input type="checkbox" id="dark-mode"><i aria-hidden="true"></i></label>
-        <label class="setting-row"><span><strong>Sound</strong><small>Soft tones for tiles and wins</small></span><input type="checkbox" id="sound-mode"><i aria-hidden="true"></i></label>
+        <label class="setting-row"><span><strong>Music</strong><small>Original dreamy claybeat soundtrack</small></span><input type="checkbox" id="music-mode"><i aria-hidden="true"></i></label>
+        <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, reveals, and wins</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
       </div>
-      <section class="logo-studio" aria-labelledby="logo-studio-title">
-        <div><p class="eyebrow">Identity studio</p><h3 id="logo-studio-title">Choose your mark</h3></div>
-        <div class="logo-choice-grid" role="group" aria-label="Nine Sixth Sense logo options">
-          <button class="logo-choice" type="button" data-logo-option="1" aria-label="Choose logo option 1" aria-pressed="true"><img src="assets/logo-option-1.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="2" aria-label="Choose logo option 2" aria-pressed="false"><img src="assets/logo-option-2.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="3" aria-label="Choose logo option 3" aria-pressed="false"><img src="assets/logo-option-3.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="4" aria-label="Choose logo option 4" aria-pressed="false"><img src="assets/logo-option-4.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="5" aria-label="Choose logo option 5" aria-pressed="false"><img src="assets/logo-option-5.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="6" aria-label="Choose logo option 6" aria-pressed="false"><img src="assets/logo-option-6.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="7" aria-label="Choose logo option 7" aria-pressed="false"><img src="assets/logo-option-7.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="8" aria-label="Choose logo option 8" aria-pressed="false"><img src="assets/logo-option-8.png" width="418" height="418" alt=""></button>
-          <button class="logo-choice" type="button" data-logo-option="9" aria-label="Choose logo option 9" aria-pressed="false"><img src="assets/logo-option-9.png" width="418" height="418" alt=""></button>
+      <section class="identity-studio" aria-labelledby="identity-studio-title">
+        <div><p class="eyebrow">Identity studio</p><h3 id="identity-studio-title">Choose your avatar</h3><p>Your animal and highlight color travel with you into every room.</p></div>
+        <div class="username-editor">
+          <label for="settings-username">Username</label>
+          <div><input id="settings-username" maxlength="18" minlength="2" autocomplete="nickname"><button class="secondary-button" id="save-settings-username" type="button">Save name</button></div>
+          <small id="settings-username-message" aria-live="polite">Your room name must be unique among the players you join.</small>
         </div>
+        <div class="avatar-choice-grid" role="group" aria-label="Choose a fun animal avatar">
+          <button class="avatar-choice" type="button" data-avatar-option="fox" aria-label="Choose fox avatar" aria-pressed="true"><span class="avatar-art avatar-fox"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="owl" aria-label="Choose owl avatar" aria-pressed="false"><span class="avatar-art avatar-owl"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="axolotl" aria-label="Choose axolotl avatar" aria-pressed="false"><span class="avatar-art avatar-axolotl"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="panda" aria-label="Choose panda avatar" aria-pressed="false"><span class="avatar-art avatar-panda"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="tiger" aria-label="Choose tiger avatar" aria-pressed="false"><span class="avatar-art avatar-tiger"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="koala" aria-label="Choose koala avatar" aria-pressed="false"><span class="avatar-art avatar-koala"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="frog" aria-label="Choose frog avatar" aria-pressed="false"><span class="avatar-art avatar-frog"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="rabbit" aria-label="Choose rabbit avatar" aria-pressed="false"><span class="avatar-art avatar-rabbit"></span></button>
+          <button class="avatar-choice" type="button" data-avatar-option="penguin" aria-label="Choose penguin avatar" aria-pressed="false"><span class="avatar-art avatar-penguin"></span></button>
+        </div>
+        <fieldset class="accent-picker"><legend>Highlight color</legend><div class="accent-choice-row">
+          <button type="button" data-accent-option="coral" style="--swatch:#ff4f83" aria-label="Coral highlight" aria-pressed="true"></button>
+          <button type="button" data-accent-option="mango" style="--swatch:#ff9f2f" aria-label="Mango highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="sun" style="--swatch:#f3cf32" aria-label="Sun highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="leaf" style="--swatch:#22b66f" aria-label="Leaf highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="aqua" style="--swatch:#08b9c8" aria-label="Aqua highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="sky" style="--swatch:#347cf4" aria-label="Sky highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="violet" style="--swatch:#7c45e8" aria-label="Violet highlight" aria-pressed="false"></button>
+          <button type="button" data-accent-option="berry" style="--swatch:#d83cac" aria-label="Berry highlight" aria-pressed="false"></button>
+        </div></fieldset>
       </section>
       <p class="settings-foot">Sixth Sense stores puzzle progress only on this device.</p>
+    </div>
+  </dialog>
+
+  <dialog class="modal online-lobby-modal" id="online-lobby-modal" aria-labelledby="online-lobby-title">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div><p class="eyebrow" id="online-lobby-kicker">Multiplayer Race</p><h2 id="online-lobby-title">Create or join a room</h2></div>
+        <button class="icon-button modal-close" type="button" aria-label="Close multiplayer lobby"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <div class="online-identity-preview"><span class="avatar-art avatar-fox" id="online-avatar-preview"></span><label><span>Your username</span><input id="online-player-name" maxlength="18" autocomplete="nickname" placeholder="Player name" readonly></label></div>
+      <fieldset class="room-options" id="online-difficulty-options"><legend>Word difficulty</legend><div class="segmented-options"><label><input type="radio" name="online-difficulty" value="easy" checked><span>Normal</span></label><label><input type="radio" name="online-difficulty" value="medium"><span>Hard</span></label><label><input type="radio" name="online-difficulty" value="extreme"><span>Extreme</span></label></div></fieldset>
+      <fieldset class="room-options" id="online-distance-options"><legend>Game length</legend><div class="segmented-options" id="online-distance-grid"><label><input type="radio" name="online-distance" value="3" checked><span>Sprint <small>3</small></span></label><label><input type="radio" name="online-distance" value="5"><span>Normal <small>5</small></span></label><label><input type="radio" name="online-distance" value="10"><span>Marathon <small>10</small></span></label></div></fieldset>
+      <button class="primary-button online-create-room" id="online-create-room" type="button">Create private room</button>
+      <div class="join-divider"><span>or join with a code</span></div>
+      <div class="join-room-row"><label><span class="sr-only">Six-character room code</span><input id="online-join-code" maxlength="6" inputmode="text" autocomplete="off" placeholder="ROOM CODE"></label><button class="secondary-button" id="online-join-room" type="button">Join room</button></div>
+      <p class="online-lobby-message" id="online-lobby-message" aria-live="polite"></p>
     </div>
   </dialog>
 
@@ -212,9 +348,10 @@
   </dialog>
 
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js"></script>
-  <script src="word-bank.js"></script>
-  <script src="game-core.js"></script>
-  <script src="app.js"></script>
+  <script src="answer-bank.js?v=20260827.14"></script>
+  <script src="word-bank.js?v=20260827.14"></script>
+  <script src="game-core.js?v=20260827.14"></script>
+  <script src="app.js?v=20260827.14"></script>
+  <script src="multiplayer.js?v=20260827.14"></script>
 </body>
 </html>

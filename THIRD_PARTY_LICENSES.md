@@ -8,7 +8,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## wordfreq
 
-The 5,000-answer pool is frequency-ranked using [wordfreq](https://github.com/rspeer/wordfreq), distributed under the Apache License 2.0. The build-time package is not bundled with the game.
+The three answer tiers are frequency-ranked using [wordfreq](https://github.com/rspeer/wordfreq), distributed under the Apache License 2.0. The build-time package is not bundled with the game.
 
 Copyright 2015–2023 Luminoso Technologies, Inc., Robyn Speer, and contributors.
 

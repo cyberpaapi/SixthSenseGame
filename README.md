@@ -18,9 +18,11 @@ Then open `http://localhost:4173`.
 
 ## Included
 
-- Five modes: Daily, unlimited Practice, 90-second Sprint, assisted Insight, and persistent Streak runs
+- Eight modes: Daily, Adventure, Practice, Sprint, Insight, Streak, private-room Race, and live one-on-one VS
+- A persistent 10,187-level Adventure signal trail with a per-device randomized route: all 4,309 Normal words, then 1,995 Hard words, then 3,883 Extreme words
 - Separate home and play screens, keeping the puzzle view focused
-- Exactly 5,000 frequency-ranked common answers, each with a Sense clue
+- 10,187 clueable answers in Normal (4,309), Hard (1,995), and Extreme (3,883) player-facing tiers
+- Silent solo progression from Normal into Hard and then Extreme as each tier is completed
 - 15,232 independently validated six-letter guesses from a proper-name-safe word-game lexicon
 - Correct repeated-letter scoring
 - A compact bottom icon dock for coin-powered Sense, Peek, Clear, and Skip lifelines
@@ -33,9 +35,12 @@ Then open `http://localhost:4173`.
 - Purposeful purchase, use, reveal, removal, wallet, and screen-entry motion with reduced-motion support
 - Optional hard mode
 - Dark and high-contrast themes
-- Sound, statistics, streaks, countdown, and result sharing
+- An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
+- Statistics, streaks, countdown, and result sharing
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
-- Nine original generated logo marks with an in-app 3×3 persistent logo chooser
+- Nine original generated animal avatars with a persistent highlight-color picker
+- Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
+- Room-code multiplayer server for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with live attempt patterns, visible names/scores, and synchronized new-word transitions (requires a Vercel `DATABASE_URL` connection)
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 
 ## Verify
@@ -43,6 +48,8 @@ Then open `http://localhost:4173`.
 ```powershell
 node test-core.js
 node --check app.js
+node --check multiplayer.js
+node --check api/multiplayer.js
 ```
 
 ## Maintainer and AI context

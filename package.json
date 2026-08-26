@@ -1,0 +1,20 @@
+{
+  "name": "sixth-sense-game",
+  "version": "1.1.0",
+  "private": true,
+  "description": "A vibrant six-letter deduction game with realtime private rooms.",
+  "scripts": {
+    "build": "node -e \"console.log('Sixth Sense static client is ready for deployment.')\"",
+    "test": "node test-core.js && node test-multiplayer.js",
+    "test:browser": "node test-browser.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
