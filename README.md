@@ -4,7 +4,7 @@ An original, mobile-first six-letter word deduction game with a tactile claymorp
 
 ## Play online
 
-[Play Sixth Sense on GitHub Pages](https://cyberpaapi.github.io/SixthSenseGame/)
+[Play Sixth Sense](https://sixth-sense-game.vercel.app/)
 
 ## Play locally
 

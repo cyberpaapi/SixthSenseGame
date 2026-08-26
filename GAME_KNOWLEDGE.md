@@ -10,7 +10,7 @@ Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
 Current source branch: `main`
 
-Current delivery: static browser game published at `https://cyberpaapi.github.io/SixthSenseGame/`; local development URL `http://127.0.0.1:4173/`
+Current delivery: static browser game published at `https://sixth-sense-game.vercel.app/`; local development URL `http://127.0.0.1:4173/`
 
 ## Maintenance contract
 
@@ -130,6 +130,7 @@ This is a dependency-light static application: no framework, bundler, package ma
 | `favicon.svg` | Fallback favicon; the selected logo is applied dynamically at runtime. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
 | `.github/workflows/pages.yml` | Builds and deploys the static repository to GitHub Pages on each push to `main` or a manual dispatch. |
+| `.gitignore` | Excludes Vercel's local `.vercel` project-link metadata from source control. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
@@ -220,6 +221,7 @@ Current verified result on 2026-08-26:
 - Core rules/data: passed — 5,000 answers and 32,068 accepted guesses.
 - Browser QA: passed — phone playthrough, all modes, repeatable lifelines, results, desktop layout, dark theme, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
+- Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; core CSS, JavaScript, answer data, manifest, and hero artwork return HTTP 200.
 
 When behavior changes, add or update an automated assertion. Do not rely only on visual inspection for game rules or economy state.
 
@@ -236,9 +238,11 @@ Release workflow:
 5. Review `git diff`.
 6. Commit only intended files with a focused message.
 7. Push to `main` or use a feature branch/PR when requested.
-8. Verify the remote commit and GitHub Pages deployment.
+8. Verify the remote commit and Vercel production deployment.
 
-GitHub Pages publishes from the repository root through `.github/workflows/pages.yml` whenever `main` is updated. The workflow uses GitHub's official checkout, Pages configuration, artifact upload, and deployment actions. The production URL is `https://cyberpaapi.github.io/SixthSenseGame/`. The `.nojekyll` marker documents that this is a plain static site. All runtime scripts and assets use repository-relative paths, so they resolve correctly below `/SixthSenseGame/`. The repository is public because the account plan does not support Pages for private repositories.
+Vercel project `aryanchandwani-gmailcoms-projects/sixth-sense-game` is connected to the GitHub repository and is the primary production route. Vercel deploys the dependency-free repository root and assigns the stable production alias `https://sixth-sense-game.vercel.app/`. Local `.vercel` linkage metadata is intentionally ignored rather than committed.
+
+GitHub Pages remains configured as a secondary route through `.github/workflows/pages.yml`, but its initial publication was blocked by the GitHub Actions and Pages incident active on 2026-08-26. The repository was made public because the account plan does not support Pages for private repositories. Do not advertise the Pages URL unless a future verification confirms it is live.
 
 ## Known limitations
 
@@ -249,6 +253,13 @@ GitHub Pages publishes from the repository root through `.github/workflows/pages
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-26 — Vercel production deployment
+
+- Published the static game to Vercel at `https://sixth-sense-game.vercel.app/` after GitHub reported a major Actions outage and degraded Pages service during the requested release.
+- Connected Vercel project `aryanchandwani-gmailcoms-projects/sixth-sense-game` to `cyberpaapi/SixthSenseGame` so GitHub remains the source of truth and future production updates can follow `main`.
+- Verified the production document, stylesheet, application script, 5,000-answer bank, manifest, and home artwork all return HTTP 200, and confirmed Vercel reports the production deployment as Ready.
+- Switched the README play link to the stable Vercel alias and ignored local `.vercel` metadata.
 
 ### 2026-08-26 — Public GitHub Pages release
 
