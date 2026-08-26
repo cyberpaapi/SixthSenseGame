@@ -40,7 +40,7 @@ Then open `http://localhost:4173`.
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine original generated animal avatars with a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
-- Room-code multiplayer server for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with live attempt patterns, visible names/scores, and synchronized new-word transitions (requires a Vercel `DATABASE_URL` connection)
+- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with visible names/scores, refresh rejoin, live attempt patterns, and synchronized new-word transitions
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 
 ## Verify
@@ -50,6 +50,7 @@ node test-core.js
 node --check app.js
 node --check multiplayer.js
 node --check api/multiplayer.js
+npm run test:production-multiplayer
 ```
 
 ## Maintainer and AI context

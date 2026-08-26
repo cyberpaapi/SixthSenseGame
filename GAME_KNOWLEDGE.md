@@ -146,7 +146,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `favicon.svg` | Fallback favicon; the fixed primary brand logo remains the runtime favicon. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
 | `.github/workflows/pages.yml` | Builds and deploys the static repository to GitHub Pages on each push to `main` or a manual dispatch. |
-| `.gitignore` | Excludes Vercel's local project link, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
+| `.gitignore` | Excludes Vercel's local project link, pulled environment files, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `test-production-multiplayer.js` | Public-URL Playwright acceptance test using two isolated browser contexts for create/join/start, opponent attempt visibility, and synchronized VS round advancement. |
@@ -257,14 +257,14 @@ node test-browser.js
 Current verified result on 2026-08-27:
 
 - JavaScript syntax: passed.
-- Core rules/data: passed — 10,187 answers across Easy 4,309 / Medium 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
+- Core rules/data: passed — 10,187 answers across player-facing Normal 4,309 / Hard 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
 - Browser QA: passed — phone playthrough, required first-open username setup, Identity Studio username editing, seeded Adventure advancement, label-free Adventure chrome, bitmap-embedded endless ladder with no duplicate CSS/DOM ladder, eight evenly spaced markers per image, one-rung avatar climb, optically centered house control, current-zone asset switching, avatar profile records, solo modes, hidden-but-functional Settings scrolling, independent music/effects persistence and audio-engine startup, avatar/accent persistence, 3/5/9/Endless VS selection, visible names and point progress, synchronized mocked two-client new-word transitions, repeatable lifelines, results, desktop layout, distinct dark-theme keyboard feedback, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
-- Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; core CSS, JavaScript, answer data, manifest, and hero artwork return HTTP 200.
+- Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; runtime `20260827.14`, core CSS, JavaScript, answer data, manifest, artwork, and the serverless multiplayer API are live.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
-- Multiplayer production activation is not yet verified because the Vercel project has no connected database resource or `DATABASE_URL`. The API correctly returns HTTP 503 in that state. Production two-browser room testing is mandatory immediately after connection.
-- The bundled broad project validator was rerun after the label-free Adventure build. Focused syntax/core/browser checks pass, but the validator still reports four pre-existing project-level gaps: no static `build` npm script, polling rather than a WebSocket/SSE marker, no explicit reconnect+resume marker pair, and no Force End/Play Again multiplayer flow. These are not Adventure UI failures and must remain open until multiplayer receives its production-completeness pass.
+- Multiplayer production: activated through the Vercel Neon integration on its free plan with `DATABASE_URL` connected to Production, Preview, and Development. A public-URL acceptance test passed create/join/start with two isolated browser contexts, same-seat refresh rejoin, opponent attempt visibility in 1,967ms, server-hidden answers, and synchronized VS round advancement.
+- The bundled broad project validator now reports three marker gaps: polling rather than WebSocket/SSE, its expected literal reconnect+snapshot marker is absent even though refresh/reopen seat restoration is implemented and production-tested, and there is no Force End/Play Again room lifecycle. The explicit static build now passes.
 
 When behavior changes, add or update an automated assertion. Do not rely only on visual inspection for game rules or economy state.
 
@@ -291,14 +291,21 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 - Solo progress, wallet, inventory, settings, and statistics are device/browser-local and can be cleared with site storage.
 - The game does not provide accounts, cloud saves, or leaderboards.
-- The multiplayer code and UI are implemented, but production rooms remain inactive until the repository's Vercel project is connected to a durable Postgres resource and receives `DATABASE_URL`. Do not call this production-ready before the required two-browser production test.
-- The broad multiplayer project validator is not green: the current polling implementation and room lifecycle do not yet satisfy its live-transport, reconnect/resume, and Force End/Play Again requirements, and the package has no build script. Focused Adventure, core, and browser QA is green.
+- Production multiplayer uses 900ms bounded polling rather than WebSockets/SSE. It is playable and production-tested, but is not yet a push-realtime architecture.
+- Online rooms expire after 24 hours and currently have no Force End or Play Again command. Players can leave and create a new room instead.
 - The dictionary is deliberately broad but is not a promise to contain every historical, regional, inflected, or specialist six-letter form.
 - Generated raster assets make the repository larger than a code-only static game; preserve optimized WebP versions where they exist.
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-27 — Live Vercel/Neon multiplayer activation
+
+- Published the complete current build from GitHub `main`, fixed Vercel's repository-root output configuration, and verified the stable production alias serves runtime `20260827.14`.
+- Provisioned the Vercel Neon `sixth-sense-db` resource on the free plan and connected its managed `DATABASE_URL` to Production, Preview, and Development. The API initialized its durable schema on the first production room request; no database credentials enter the repository or client bundle.
+- Added persistent active-seat restoration after refresh/reopen plus foreground/online catch-up, and added a reusable public-URL Playwright acceptance test.
+- Production QA passed with two isolated browser contexts: create, join, host start, same-seat refresh rejoin, live opponent attempt patterns at 1,967ms observer latency, hidden answers, and synchronized round advancement.
 
 ### 2026-08-27 — Normal / Hard / Extreme difficulty labels
 
