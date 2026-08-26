@@ -11,8 +11,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: sixth-sense-pages
+  cancel-in-progress: true
 
 jobs:
   deploy:

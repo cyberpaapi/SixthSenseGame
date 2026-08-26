@@ -256,6 +256,7 @@ GitHub Pages publishes from the repository root through `.github/workflows/pages
 - Enabled HTTPS GitHub Pages from the root of `main` at `https://cyberpaapi.github.io/SixthSenseGame/` so the current static build has a stable public play link.
 - Added `.nojekyll` after GitHub's initial legacy branch build failed, ensuring the dependency-free game is deployed as plain static files.
 - Replaced the unreliable generated legacy build with an explicit GitHub Pages Actions workflow using GitHub's official deployment actions.
+- Isolated the custom deployment concurrency group from stale legacy Pages jobs so new releases can supersede earlier custom deploys cleanly.
 - Added the production play link to `README.md` and verified the repository-relative hosting setup.
 
 ### 2026-08-26 — Compact game-mode launcher redesign
