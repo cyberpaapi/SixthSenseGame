@@ -21,8 +21,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.waitForSelector("#help-modal[open]");
     await page.click(".modal-got-it");
     assert.equal(await page.evaluate(() => window.SixthSenseCore.ANSWERS.length), 5000);
+    assert.equal(await page.evaluate(() => window.SixthSenseCore.WORDS.size), 15232);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("rattle")), true);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("raffle")), true);
+    assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("coates")), false);
     assert.equal(await page.locator("#home-screen").isVisible(), true);
     assert.equal(await page.locator("#game-screen").isHidden(), true);
     assert.equal(await page.locator("[data-start-mode]").count(), 5);

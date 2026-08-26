@@ -21,7 +21,7 @@ Then open `http://localhost:4173`.
 - Five modes: Daily, unlimited Practice, 90-second Sprint, assisted Insight, and persistent Streak runs
 - Separate home and play screens, keeping the puzzle view focused
 - Exactly 5,000 frequency-ranked common answers, each with a Sense clue
-- A comprehensive 30,000+ word accepted-guess dictionary
+- 15,232 independently validated six-letter guesses from a proper-name-safe word-game lexicon
 - Correct repeated-letter scoring
 - A compact bottom icon dock for coin-powered Sense, Peek, Clear, and Skip lifelines
 - Price-under-icon and top-right inventory badges that never show redundant zeroes

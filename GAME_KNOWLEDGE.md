@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 
-Last verified: 2026-08-26
+Last verified: 2026-08-27
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -125,12 +125,15 @@ This is a dependency-light static application: no framework, bundler, package ma
 | `app.js` | Browser state, rendering, input, modes, persistence, inventory/economy, modals, animations, sound, sharing, and statistics. |
 | `answer-bank.js` | Exactly 5,000 answer objects with a six-letter `word` and a `clue`. Loaded before `game-core.js` in the browser. |
 | `word-bank.js` | Expanded accepted-guess vocabulary. Loaded before `game-core.js` in the browser. |
+| `scripts/build_word_banks.py` | Deterministically audits and regenerates both banks from a hash-verified ENABLE lexicon, pinned `wordfreq`, and WordNet. |
+| `scripts/requirements-word-banks.txt` | Pinned build-time Python dependencies for vocabulary regeneration. |
+| `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
 | `assets/` | Generated logo, hero, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
 | `favicon.svg` | Fallback favicon; the selected logo is applied dynamically at runtime. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
 | `.github/workflows/pages.yml` | Builds and deploys the static repository to GitHub Pages on each push to `main` or a manual dispatch. |
-| `.gitignore` | Excludes Vercel's local `.vercel` project-link metadata from source control. |
+| `.gitignore` | Excludes Vercel's local project link plus Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
@@ -143,10 +146,14 @@ Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-c
 ## Data and selection
 
 - Answer pool: exactly 5,000 unique, common, six-letter words.
-- Accepted guesses: currently 32,068 unique six-letter words, including every answer.
+- Accepted guesses: exactly 15,232 unique six-letter words from the proper-name-safe ENABLE word-game lexicon, including every answer.
 - `raffle` and `rattle` are both accepted guesses and possible puzzle answers.
 - Every answer has a Sense clue.
-- The broad accepted vocabulary prevents ordinary dictionary words from being rejected, while the answer list is curated/ranked toward familiar puzzle words.
+- The accepted vocabulary includes legitimate uncommon, technical, archaic, and inflected word-game entries, while excluding ordinary names, places, trademarks, malformed inflections, abbreviations, and corpus noise.
+- Answers are the 5,000 highest-frequency eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion. There are 10,188 clueable, answer-safe candidates; the selected frequency floor is Zipf 2.44.
+- The 2026-08-27 full audit retained 14,850 old guesses, removed 17,218 unsupported entries, added 382 valid omissions, retained 4,782 old answers, and replaced 218 answers.
+- Sense clues may not contain their own answer, broken placeholder/example text, proper-name definitions, or offensive senses. The audit preserved 4,633 clean existing clues, repaired 149 retained clues, and generated clues for 218 new answers.
+- `coates` is excluded from both banks because it entered as a surname/malformed inflection with the clue for `coat`.
 - Source notices are preserved in `THIRD_PARTY_LICENSES.md`.
 
 Do not casually regenerate either bank. Any regeneration must preserve format, licenses, six-letter filtering, uniqueness, all-answer inclusion, clue completeness, required common words, and automated counts.
@@ -215,13 +222,15 @@ $env:CHROME_BIN='C:\Program Files\Google\Chrome\Application\chrome.exe'
 node test-browser.js
 ```
 
-Current verified result on 2026-08-26:
+Current verified result on 2026-08-27:
 
 - JavaScript syntax: passed.
-- Core rules/data: passed — 5,000 answers and 32,068 accepted guesses.
+- Core rules/data: passed — 5,000 answers and 15,232 accepted guesses; all answers are guessable; `coates` and representative proper names are rejected; `raffle` and `rattle` remain answers.
+- Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
 - Browser QA: passed — phone playthrough, all modes, repeatable lifelines, results, desktop layout, dark theme, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
 - Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; core CSS, JavaScript, answer data, manifest, and hero artwork return HTTP 200.
+- The generic board-game validator reports missing `package.json`/npm build scripts; this is expected for the intentionally dependency-free static architecture. The repository-specific Node and Playwright checks above are the canonical validation path.
 
 When behavior changes, add or update an automated assertion. Do not rely only on visual inspection for game rules or economy state.
 
@@ -253,6 +262,14 @@ GitHub Pages remains configured as a secondary route through `.github/workflows/
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-27 — Full vocabulary curation audit
+
+- Replaced the permissive 32,068-entry frequency/dictionary union with all 15,232 six-letter ENABLE entries, a public-domain lexicon made for word games. This removed 17,218 names, places, trademarks, malformed forms, abbreviations, and corpus artifacts while adding 382 valid words the old merge missed.
+- Rebuilt the 5,000-answer pool from the validated guesses using `wordfreq`, non-proper WordNet clues, and an answer-only safety set. The audit retained 4,782 previous answers and replaced 218; the pool remains exactly 5,000.
+- Audited every Sense clue, preserving 4,633 clean clues, repairing 149 retained clues, and generating 218 new clues. Generated clues are rejected if they reveal their answer, contain broken WordNet example fragments, or select proper-name/offensive senses.
+- Removed `coates` from guesses and answers. Preserved `raffle` and `rattle` in both banks.
+- Added a hash-verified deterministic generator, pinned build dependencies, exact-count and contamination regression tests, updated licensing, and `VOCABULARY_AUDIT.md` so later contributors can reproduce and assess the curation.
 
 ### 2026-08-26 — Vercel production deployment
 
