@@ -28,6 +28,17 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("[data-start-mode]").count(), 5);
     assert.equal(await page.locator(".mini-stats").count(), 0);
     assert.equal(await page.locator(".streak-rail").isVisible(), true);
+    const homeControlSizing = await page.evaluate(() => {
+      const headerButton = document.querySelector(".header-actions .icon-button").getBoundingClientRect();
+      const headerArt = document.querySelector(".header-actions .icon-button img").getBoundingClientRect();
+      const daily = document.querySelector(".daily-quest").getBoundingClientRect();
+      const modeArt = document.querySelector(".mode-tile img").getBoundingClientRect();
+      return { headerButton: headerButton.width, headerArt: headerArt.width, dailyHeight: daily.height, modeArtHeight: modeArt.height };
+    });
+    assert(homeControlSizing.headerButton >= 44, "compact header art must retain a 44px touch target");
+    assert(homeControlSizing.headerArt <= 36, "header artwork should remain visually compact");
+    assert(homeControlSizing.dailyHeight <= 70, "Daily action should use the compact button treatment");
+    assert(homeControlSizing.modeArtHeight < 130, "mode artwork should not dominate the home screen");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "0");
     assert.match(await page.locator("#home-title").textContent(), /Seven chances/);
     assert.equal(await page.locator(".mode-tile img").count(), 4);
@@ -48,6 +59,13 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator(".lifeline-button img").count(), 4);
     assert.equal(await page.locator(".lifeline-price:visible").count(), 4);
     assert.equal(await page.locator(".lifeline-stock:visible").count(), 0);
+    const lifelineSizing = await page.locator(".lifeline-button").first().evaluate(button => {
+      const hit = button.getBoundingClientRect();
+      const art = button.querySelector("img").getBoundingClientRect();
+      return { hit: hit.width, art: art.width };
+    });
+    assert(lifelineSizing.hit >= 44, "lifeline touch targets must remain accessible");
+    assert(lifelineSizing.art <= 40, "lifeline artwork should remain visually compact");
     assert.equal(await page.locator(".lifeline-heading").count(), 0);
     assert.equal(await page.evaluate(() => Boolean(document.querySelector("#keyboard + .lifeline-dock"))), true, "lifelines should sit below the keyboard");
     assert.equal(await page.locator(".topbar .brand-mark img").count(), 1);

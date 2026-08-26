@@ -94,7 +94,8 @@ Inventory and coins persist in `localStorage`. The bottom dock shows only icons.
 - Home: generated observatory hero art, a seven-day streak progress rail, a Daily call-to-action, and visual tiles for all five modes.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, color-state keyboard, and an evenly spaced bottom lifeline dock.
 - Default logo: option 1. Settings includes a persistent 3×3 chooser with nine original generated logo marks.
-- Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons.
+- Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons. Visible icon art is intentionally compact inside touch targets that remain at least 44px on phones.
+- The Daily action, mode cards, modal-title art, and decorative streak/lifeline imagery use a compact scale so controls support the game rather than dominating it.
 - The game screen is locked to one dynamic viewport and must not create page-level horizontal or vertical scrolling, including during screen-entry animation.
 - Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, result sheet timing, and win confetti.
 - All optional motion collapses under `prefers-reduced-motion`.
@@ -246,6 +247,12 @@ GitHub Pages is not configured as of this document’s last update. Do not silen
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-26 — Compact control and icon scale
+
+- Reduced the visible size of header art, the Daily action, mode-card imagery, modal-title icons, help icons, lifeline art, and standard action buttons because the previous controls felt visually oversized.
+- Kept header and lifeline touch targets at least 44px even when their artwork is smaller, preserving reliable phone interaction and accessibility.
+- Added browser assertions for compact visible art, shorter home actions, and minimum tap-target sizes so future styling changes do not reintroduce oversized controls or tiny hit areas.
 
 ### 2026-08-26 — GitHub source of truth and living AI context
 
