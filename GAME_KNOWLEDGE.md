@@ -128,6 +128,7 @@ This is a dependency-light static application: no framework, bundler, package ma
 | `assets/` | Generated logo, hero, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
 | `favicon.svg` | Fallback favicon; the selected logo is applied dynamically at runtime. |
+| `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
@@ -236,7 +237,7 @@ Release workflow:
 7. Push to `main` or use a feature branch/PR when requested.
 8. Verify the remote commit and GitHub Pages deployment.
 
-GitHub Pages publishes directly from the repository root of `main` using the legacy branch source. The production URL is `https://cyberpaapi.github.io/SixthSenseGame/`. All runtime scripts and assets use repository-relative paths, so they resolve correctly below `/SixthSenseGame/`. The repository is public because the account plan does not support Pages for private repositories.
+GitHub Pages publishes directly from the repository root of `main` using the legacy branch source. The production URL is `https://cyberpaapi.github.io/SixthSenseGame/`. The `.nojekyll` marker bypasses Jekyll processing. All runtime scripts and assets use repository-relative paths, so they resolve correctly below `/SixthSenseGame/`. The repository is public because the account plan does not support Pages for private repositories.
 
 ## Known limitations
 
@@ -252,6 +253,7 @@ GitHub Pages publishes directly from the repository root of `main` using the leg
 
 - Made `cyberpaapi/SixthSenseGame` public because the current GitHub plan does not support Pages for private repositories and the user approved publishing it.
 - Enabled HTTPS GitHub Pages from the root of `main` at `https://cyberpaapi.github.io/SixthSenseGame/` so the current static build has a stable public play link.
+- Added `.nojekyll` after GitHub's initial legacy branch build failed, ensuring the dependency-free game is deployed as plain static files.
 - Added the production play link to `README.md` and verified the repository-relative hosting setup.
 
 ### 2026-08-26 — Compact game-mode launcher redesign
