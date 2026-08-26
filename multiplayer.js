@@ -10,6 +10,7 @@
   const POLL_MS = 900;
   const SETTINGS_KEY = "sixth-sense.settings.v1";
   const IDENTITY_KEY = "sixth-sense.online.identity.v1";
+  const ACTIVE_ROOM_KEY = "sixth-sense.active-room.v1";
   const LENGTH_OPTIONS = Object.freeze({
     race: [{ value: "3", label: "Sprint", detail: "3" }, { value: "5", label: "Normal", detail: "5" }, { value: "10", label: "Marathon", detail: "10" }],
     vs: [{ value: "3", label: "Quick", detail: "3" }, { value: "5", label: "Classic", detail: "5" }, { value: "9", label: "Epic", detail: "9" }, { value: "endless", label: "Endless", detail: "∞" }]
@@ -172,7 +173,7 @@
     state.current = "";
     state.activeRound = result.snapshot.room.mode === "vs" ? Number(result.snapshot.room.currentRound) || 0 : result.snapshot.me.currentWordIndex;
     state.snapshot = result.snapshot;
-    sessionStorage.setItem(`sixth-sense.room.${state.roomCode}`, JSON.stringify({ token: state.token, playerId: state.playerId }));
+    localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ roomCode: state.roomCode, token: state.token, playerId: state.playerId }));
     if (els.lobby.open) els.lobby.close();
     els.home.hidden = true;
     els.solo.hidden = true;
@@ -189,6 +190,7 @@
     state.pollTimer = null;
     state.snapshot = null;
     state.current = "";
+    localStorage.removeItem(ACTIVE_ROOM_KEY);
     clearTimeout(state.transitionTimer);
     els.roundTransition.hidden = true;
     els.screen.hidden = true;
@@ -202,6 +204,18 @@
   function schedulePoll(delay = POLL_MS) {
     clearTimeout(state.pollTimer);
     state.pollTimer = setTimeout(poll, delay);
+  }
+
+  async function restoreActiveRoom() {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(ACTIVE_ROOM_KEY)); } catch (_) { saved = null; }
+    if (!saved || !/^[A-HJ-NP-Z2-9]{6}$/.test(saved.roomCode || "") || !saved.token || !saved.playerId) return;
+    try {
+      const result = await api("snapshot", { roomCode: saved.roomCode, resumeToken: saved.token });
+      enterRoom({ roomCode: saved.roomCode, resumeToken: saved.token, playerId: saved.playerId, snapshot: result.snapshot });
+    } catch (_) {
+      localStorage.removeItem(ACTIVE_ROOM_KEY);
+    }
   }
 
   async function poll() {
@@ -475,4 +489,7 @@
     else if (event.key === "Backspace" || event.key === "Delete") handleKey("BACK");
     else if (/^[a-zA-Z]$/.test(event.key)) handleKey(event.key.toUpperCase());
   });
+  window.addEventListener("online", () => { if (!els.screen.hidden) schedulePoll(0); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && !els.screen.hidden) schedulePoll(0); });
+  restoreActiveRoom();
 })();

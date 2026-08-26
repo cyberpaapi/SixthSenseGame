@@ -149,6 +149,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `.gitignore` | Excludes Vercel's local project link, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
+| `test-production-multiplayer.js` | Public-URL Playwright acceptance test using two isolated browser contexts for create/join/start, opponent attempt visibility, and synchronized VS round advancement. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
 | `README.md` | Concise setup and feature overview. |
 | `AGENTS.md` | Mandatory instructions for AI contributors, including this document’s update rule. |
@@ -202,7 +203,7 @@ Online room rules and security:
 - All players receive the same server-selected sequence from the room's explicit difficulty tier. Personal solo unlock state is irrelevant.
 - The API validates accepted guesses and scores them server-side. Snapshots never include answer words. Opponents receive score patterns only; the current player receives their own submitted letters and scores.
 - Mutations use player/room revisions for compare-and-set protection plus UUID action IDs for retry idempotency.
-- The client uses 900ms bounded polling, restores its seat for the browser session, and renders temporary connection errors without destroying room state.
+- The client uses 900ms bounded polling, persists one opaque active-room seat credential in site-scoped local storage, automatically restores that seat after refresh/reopen, catches up immediately after foreground/online recovery, and renders temporary connection errors without destroying room state.
 - Race players who exhaust seven attempts restart that same word with a recorded failed batch. They do not advance until solving it. In VS, seven misses forfeit only the current point; both players then advance to the next word.
 
 When changing stored shapes, add a safe migration or backward-compatible defaults. Never assume old players have every new field.

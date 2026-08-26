@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node -e \"console.log('Sixth Sense static client is ready for deployment.')\"",
     "test": "node test-core.js && node test-multiplayer.js",
-    "test:browser": "node test-browser.js"
+    "test:browser": "node test-browser.js",
+    "test:production-multiplayer": "node test-production-multiplayer.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2"
