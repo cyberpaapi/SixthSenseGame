@@ -33,12 +33,15 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       const headerArt = document.querySelector(".header-actions .icon-button img").getBoundingClientRect();
       const daily = document.querySelector(".daily-quest").getBoundingClientRect();
       const modeArt = document.querySelector(".mode-tile img").getBoundingClientRect();
-      return { headerButton: headerButton.width, headerArt: headerArt.width, dailyHeight: daily.height, modeArtHeight: modeArt.height };
+      const modeShelf = document.querySelector(".mode-shelf").getBoundingClientRect();
+      return { headerButton: headerButton.width, headerArt: headerArt.width, dailyHeight: daily.height, modeArtHeight: modeArt.height, modeShelfHeight: modeShelf.height };
     });
     assert(homeControlSizing.headerButton >= 44, "compact header art must retain a 44px touch target");
     assert(homeControlSizing.headerArt <= 36, "header artwork should remain visually compact");
     assert(homeControlSizing.dailyHeight <= 70, "Daily action should use the compact button treatment");
     assert(homeControlSizing.modeArtHeight < 130, "mode artwork should not dominate the home screen");
+    assert(homeControlSizing.modeShelfHeight <= 250, "the phone mode launcher should remain compact");
+    assert.equal(await page.locator("#mode-shelf-title").textContent(), "Pick your signal");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "0");
     assert.match(await page.locator("#home-title").textContent(), /Seven chances/);
     assert.equal(await page.locator(".mode-tile img").count(), 4);

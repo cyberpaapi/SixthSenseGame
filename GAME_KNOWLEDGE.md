@@ -91,7 +91,7 @@ Inventory and coins persist in `localStorage`. The bottom dock shows only icons.
 ## Current experience and visual system
 
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
-- Home: generated observatory hero art, a seven-day streak progress rail, a Daily call-to-action, and visual tiles for all five modes.
+- Home: generated observatory hero art, a seven-day streak progress rail, a Daily call-to-action, and a compact four-mode launcher. The launcher is a small 2×2 grid on phones and a slim four-across row on desktop, with thumbnail art beside concise labels.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, color-state keyboard, and an evenly spaced bottom lifeline dock.
 - Default logo: option 1. Settings includes a persistent 3×3 chooser with nine original generated logo marks.
 - Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons. Visible icon art is intentionally compact inside touch targets that remain at least 44px on phones.
@@ -247,6 +247,12 @@ GitHub Pages is not configured as of this document’s last update. Do not silen
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-26 — Compact game-mode launcher redesign
+
+- Replaced the large poster-style Practice, Sprint, Insight, and Streak cards with compact horizontal launchers because the previous section felt oversized, repetitive, and visually heavier than the game.
+- Reduced the section heading to “Pick your signal,” shortened each mode description, and changed the phone layout to a shallow 2×2 grid with 52px thumbnails. Desktop now uses a slim four-across row.
+- Added a browser assertion that keeps the entire phone mode launcher at 250px or less while preserving full-button tap targets and semantic mode labels.
 
 ### 2026-08-26 — Compact control and icon scale
 

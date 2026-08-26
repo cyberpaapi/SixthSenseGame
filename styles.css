@@ -328,19 +328,19 @@ body[data-screen="game"] .game-screen {
 .daily-quest small { color: #a13c55; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
 .daily-quest strong { margin-top: 3px; font: 900 clamp(16px, 2vw, 19px)/1.15 "Nunito", sans-serif; }
 
-.mode-shelf { padding: 28px; border: 1px solid rgba(255,255,255,.48); border-radius: 32px; background: linear-gradient(145deg, rgba(255,255,255,.95), rgba(239,231,255,.94)); box-shadow: 16px 20px 38px rgba(47, 9, 89, .26), inset 2px 2px 4px rgba(255,255,255,.8); }
-.mode-shelf-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.mode-shelf { padding: 22px; border: 1px solid rgba(255,255,255,.48); border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,.95), rgba(239,231,255,.94)); box-shadow: 16px 20px 38px rgba(47, 9, 89, .26), inset 2px 2px 4px rgba(255,255,255,.8); }
+.mode-shelf-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 14px; }
 .mode-shelf-heading .eyebrow { color: #a7125d; }
-.mode-shelf-heading h2 { margin: 2px 0 0; color: #2f1249; font-size: clamp(25px, 3vw, 34px); }
-.mode-shelf-heading > p { max-width: 270px; margin: 0 0 4px; color: #695173; font-size: 13px; font-weight: 700; text-align: right; }
-.mode-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.mode-tile { min-width: 0; overflow: hidden; padding: 6px 6px 12px; border: 1px solid rgba(101, 57, 165, .16); border-radius: 22px; background: #fff; color: #32134f; box-shadow: 7px 10px 20px rgba(75, 34, 120, .15), inset 1px 1px 2px rgba(255,255,255,.9); text-align: left; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s ease; }
-.mode-tile:hover { transform: translateY(-4px); border-color: rgba(119, 60, 211, .38); box-shadow: 10px 16px 26px rgba(75, 34, 120, .22); }
+.mode-shelf-heading h2 { margin: 2px 0 0; color: #2f1249; font-size: clamp(23px, 2.5vw, 30px); }
+.mode-shelf-heading > p { max-width: 220px; margin: 0 0 3px; color: #695173; font-size: 12px; font-weight: 700; text-align: right; }
+.mode-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.mode-tile { min-width: 0; min-height: 82px; overflow: hidden; display: grid; grid-template-columns: 68px minmax(0, 1fr); align-items: center; gap: 10px; padding: 7px; border: 1px solid rgba(101, 57, 165, .16); border-radius: 19px; background: #fff; color: #32134f; box-shadow: 6px 8px 16px rgba(75, 34, 120, .14), inset 1px 1px 2px rgba(255,255,255,.9); text-align: left; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s ease; }
+.mode-tile:hover { transform: translateY(-3px); border-color: rgba(119, 60, 211, .38); box-shadow: 8px 12px 21px rgba(75, 34, 120, .2); }
 .mode-tile:active { transform: scale(.975); box-shadow: 4px 6px 12px rgba(75, 34, 120, .16), inset 3px 3px 8px rgba(78, 36, 124, .1); }
-.mode-tile img { width: 100%; height: auto; aspect-ratio: 1.45; display: block; border-radius: 16px; object-fit: cover; object-position: center; }
-.mode-tile > span { display: flex; flex-direction: column; padding: 9px 8px 0; }
-.mode-tile strong { font: 900 17px/1.1 "Nunito", sans-serif; }
-.mode-tile small { margin-top: 5px; color: #705b7c; font-size: 11px; font-weight: 600; line-height: 1.25; }
+.mode-tile img { width: 68px; height: 68px; display: block; border-radius: 15px; object-fit: cover; object-position: center; }
+.mode-tile > span { min-width: 0; display: flex; flex-direction: column; padding: 0; }
+.mode-tile strong { font: 900 16px/1.05 "Nunito", sans-serif; }
+.mode-tile small { margin-top: 5px; color: #705b7c; font-size: 10px; font-weight: 700; line-height: 1.15; }
 .secondary-button {
   min-height: 46px;
   display: inline-flex;
@@ -819,16 +819,15 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
   .lobby-copy > p:not(.eyebrow) { max-width: 340px; margin-top: 14px; font-size: 15px; }
   .daily-quest { width: 100%; min-height: 68px; margin-top: 18px; border-radius: 20px; }
   .daily-quest img { width: 48px; height: 48px; flex-basis: 48px; border-radius: 14px; }
-  .mode-shelf { padding: 20px 12px 16px; border-radius: 26px; }
-  .mode-shelf-heading { display: block; margin: 0 7px 15px; }
-  .mode-shelf-heading h2 { font-size: 25px; }
-  .mode-shelf-heading > p { margin: 6px 0 0; max-width: none; font-size: 11px; text-align: left; }
+  .mode-shelf { padding: 16px 12px 14px; border-radius: 24px; }
+  .mode-shelf-heading { display: flex; align-items: end; margin: 0 4px 12px; gap: 10px; }
+  .mode-shelf-heading h2 { font-size: 21px; }
+  .mode-shelf-heading > p { margin: 0 0 2px auto; max-width: 112px; font-size: 9px; line-height: 1.2; text-align: right; }
   .mode-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .mode-tile { padding: 5px 5px 10px; border-radius: 18px; }
-  .mode-tile img { border-radius: 14px; }
-  .mode-tile > span { padding: 8px 7px 0; }
-  .mode-tile strong { font-size: 14px; }
-  .mode-tile small { min-height: 28px; font-size: 9px; }
+  .mode-tile { min-height: 66px; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; padding: 6px; border-radius: 16px; }
+  .mode-tile img { width: 52px; height: 52px; border-radius: 12px; }
+  .mode-tile strong { font-size: 13px; }
+  .mode-tile small { margin-top: 4px; min-height: 0; font-size: 8px; }
   .game-card { min-height: calc(100dvh - 72px); padding: 12px 12px max(10px, env(safe-area-inset-bottom)); border-radius: 30px 30px 0 0; border-left: 0; border-right: 0; }
   .game-hud { min-height: 38px; padding-bottom: 7px; }
   .board { --tile-size: min(13.7vw, 55px); }
