@@ -141,7 +141,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
 | `assets/` | Generated logo, hero, three separate Adventure zone maps, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
 | `package.json` / `package-lock.json` | Reproducible Node dependencies plus explicit static build and test scripts. The runtime dependency is the Neon serverless Postgres driver. |
-| `vercel.json` | Vercel function duration and no-store API headers. |
+| `vercel.json` | Explicit repository-root static output, Vercel function duration, and no-store API headers. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
 | `favicon.svg` | Fallback favicon; the fixed primary brand logo remains the runtime favicon. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
@@ -282,7 +282,7 @@ Release workflow:
 7. Push to `main` or use a feature branch/PR when requested.
 8. Verify the remote commit and Vercel production deployment.
 
-Vercel project `aryanchandwani-gmailcoms-projects/sixth-sense-game` is connected to the GitHub repository and is the primary production route. Vercel deploys the dependency-free repository root and assigns the stable production alias `https://sixth-sense-game.vercel.app/`. Local `.vercel` linkage metadata is intentionally ignored rather than committed.
+Vercel project `aryanchandwani-gmailcoms-projects/sixth-sense-game` is connected to the GitHub repository and is the primary production route. Vercel installs the small server dependency set, deploys the static client from the repository root, and assigns the stable production alias `https://sixth-sense-game.vercel.app/`. Local `.vercel` linkage metadata is intentionally ignored rather than committed.
 
 GitHub Pages is active as a secondary route through `.github/workflows/pages.yml` at `https://cyberpaapi.github.io/SixthSenseGame/`. Its initial publication was delayed by the GitHub Actions and Pages incident active on 2026-08-26, but GitHub now reports the site as built and the latest completed deployment as successful. The repository remains public because the account plan does not support Pages for private repositories.
 
