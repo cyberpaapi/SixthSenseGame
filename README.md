@@ -2,6 +2,10 @@
 
 An original, mobile-first six-letter word deduction game with a tactile claymorphic interface.
 
+## Play online
+
+[Play Sixth Sense on GitHub Pages](https://cyberpaapi.github.io/SixthSenseGame/)
+
 ## Play locally
 
 Serve this folder with any static server, for example:

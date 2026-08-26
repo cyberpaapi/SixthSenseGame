@@ -10,7 +10,7 @@ Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
 Current source branch: `main`
 
-Current delivery: static browser game; local development URL `http://127.0.0.1:4173/`
+Current delivery: static browser game published at `https://cyberpaapi.github.io/SixthSenseGame/`; local development URL `http://127.0.0.1:4173/`
 
 ## Maintenance contract
 
@@ -225,7 +225,7 @@ When behavior changes, add or update an automated assertion. Do not rely only on
 
 GitHub repository `cyberpaapi/SixthSenseGame` is the source of truth. The static game is compatible with repository-relative hosting because assets and scripts use relative paths.
 
-Expected workflow:
+Release workflow:
 
 1. Check `git status` and preserve unrelated work.
 2. Make the smallest coherent change.
@@ -234,9 +234,9 @@ Expected workflow:
 5. Review `git diff`.
 6. Commit only intended files with a focused message.
 7. Push to `main` or use a feature branch/PR when requested.
-8. Verify the remote commit and any GitHub Actions/Pages workflow.
+8. Verify the remote commit and GitHub Pages deployment.
 
-GitHub Pages is not configured as of this document’s last update. Do not silently introduce another hosting platform. If Pages is added later, record its workflow, URL, base-path behavior, and verification here.
+GitHub Pages publishes directly from the repository root of `main` using the legacy branch source. The production URL is `https://cyberpaapi.github.io/SixthSenseGame/`. All runtime scripts and assets use repository-relative paths, so they resolve correctly below `/SixthSenseGame/`. The repository is public because the account plan does not support Pages for private repositories.
 
 ## Known limitations
 
@@ -247,6 +247,12 @@ GitHub Pages is not configured as of this document’s last update. Do not silen
 - Google Fonts are imported from the network; system fallbacks remain available if that request fails.
 
 ## Change log and rationale
+
+### 2026-08-26 — Public GitHub Pages release
+
+- Made `cyberpaapi/SixthSenseGame` public because the current GitHub plan does not support Pages for private repositories and the user approved publishing it.
+- Enabled HTTPS GitHub Pages from the root of `main` at `https://cyberpaapi.github.io/SixthSenseGame/` so the current static build has a stable public play link.
+- Added the production play link to `README.md` and verified the repository-relative hosting setup.
 
 ### 2026-08-26 — Compact game-mode launcher redesign
 
