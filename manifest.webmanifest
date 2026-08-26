@@ -1,0 +1,10 @@
+{
+  "name": "Sixth Sense",
+  "short_name": "Sixth Sense",
+  "description": "A tactile daily six-letter word puzzle.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#6d31ec",
+  "theme_color": "#6d31ec",
+  "icons": [{"src":"assets/logo-option-1.png","sizes":"418x418","type":"image/png"}]
+}
