@@ -45,6 +45,12 @@
     roundScore: document.querySelector("#online-round-score"),
     start: document.querySelector("#online-start"),
     leave: document.querySelector("#online-leave"),
+    leaveDialog: document.querySelector("#online-leave-modal"),
+    leaveKicker: document.querySelector("#online-leave-kicker"),
+    leaveTitle: document.querySelector("#online-leave-title"),
+    leaveCopy: document.querySelector("#online-leave-copy"),
+    leaveCancel: document.querySelector("#online-leave-cancel"),
+    leaveConfirm: document.querySelector("#online-leave-confirm"),
     lifelines: [...document.querySelectorAll("[data-online-lifeline]")]
   };
 
@@ -56,6 +62,7 @@
     snapshot: null,
     current: "",
     activeRound: null,
+    renderedSnapshotSignature: "",
     pollTimer: null,
     transitionTimer: null,
     busy: false
@@ -170,6 +177,10 @@
     els.create.disabled = busy;
     els.join.disabled = busy;
     if (message) setLobbyMessage(message);
+    if (state.snapshot && !els.screen.hidden) {
+      renderKeyboard();
+      renderLifelines();
+    }
   }
 
   function enterRoom(result) {
@@ -179,6 +190,7 @@
     state.current = "";
     state.activeRound = result.snapshot.room.mode === "vs" ? Number(result.snapshot.room.currentRound) || 0 : result.snapshot.me.currentWordIndex;
     state.snapshot = result.snapshot;
+    state.renderedSnapshotSignature = "";
     localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ roomCode: state.roomCode, token: state.token, playerId: state.playerId }));
     if (els.lobby.open) els.lobby.close();
     els.home.hidden = true;
@@ -195,6 +207,7 @@
     clearTimeout(state.pollTimer);
     state.pollTimer = null;
     state.snapshot = null;
+    state.renderedSnapshotSignature = "";
     state.current = "";
     localStorage.removeItem(ACTIVE_ROOM_KEY);
     clearTimeout(state.transitionTimer);
@@ -205,6 +218,16 @@
     document.body.dataset.screen = "home";
     window.scrollTo({ top: 0, behavior: "smooth" });
     playAudio("open");
+  }
+
+  function requestLeave() {
+    if (els.screen.hidden || !state.snapshot) return;
+    const isVs = state.snapshot.room.mode === "vs";
+    els.leaveKicker.textContent = "Leave this match?";
+    els.leaveTitle.textContent = isVs ? "Leave VS room" : "Leave race";
+    els.leaveCopy.textContent = "Your saved seat on this device will be cleared, so you can’t resume this match after leaving. The room stays open for the other player.";
+    if (!els.leaveDialog.open) els.leaveDialog.showModal();
+    setTimeout(() => els.leaveCancel.focus(), 60);
   }
 
   function schedulePoll(delay = POLL_MS) {
@@ -236,9 +259,16 @@
     schedulePoll();
   }
 
+  function snapshotSignature(snapshot) {
+    return JSON.stringify(snapshot);
+  }
+
   function renderSnapshot() {
     const snapshot = state.snapshot;
     if (!snapshot) return;
+    const signature = snapshotSignature(snapshot);
+    if (signature === state.renderedSnapshotSignature) return false;
+    state.renderedSnapshotSignature = signature;
     const room = snapshot.room;
     const nextRound = room.mode === "vs" ? Number(room.currentRound) || 0 : snapshot.me.currentWordIndex;
     const roundAdvanced = room.mode === "vs" && state.activeRound !== null && nextRound > state.activeRound;
@@ -262,6 +292,7 @@
     renderLifelines();
     renderProgress();
     if (roundAdvanced) showRoundTransition();
+    return true;
   }
 
   function renderVersusNames() {
@@ -580,7 +611,9 @@
   els.join.addEventListener("click", joinRoom);
   els.joinCode.addEventListener("input", () => { els.joinCode.value = els.joinCode.value.replace(/[^a-z0-9]/gi, "").toUpperCase(); });
   els.start.addEventListener("click", startMatch);
-  els.leave.addEventListener("click", leaveRoom);
+  els.leave.addEventListener("click", requestLeave);
+  els.leaveCancel.addEventListener("click", () => els.leaveDialog.close());
+  els.leaveConfirm.addEventListener("click", () => { els.leaveDialog.close(); leaveRoom(); });
   els.lifelines.forEach(item => item.querySelector("button").addEventListener("click", () => useLifeline(item)));
   document.addEventListener("sixth-sense-economy-change", renderLifelines);
   document.addEventListener("sixth-sense-identity-change", async event => {
@@ -596,7 +629,7 @@
       els.status.textContent = friendlyError(error);
     }
   });
-  document.querySelector(".brand").addEventListener("click", () => { if (!els.screen.hidden) leaveRoom(); });
+  document.addEventListener("sixth-sense-request-online-leave", requestLeave);
   document.addEventListener("keydown", event => {
     if (els.screen.hidden || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.key === "Enter") handleKey("ENTER");

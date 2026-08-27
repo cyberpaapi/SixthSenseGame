@@ -42,7 +42,7 @@ Then open `http://localhost:4173`.
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
-- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with explicit leave controls, shared lifelines, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
+- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with a red confirmed Back action, shared lifelines, stable polling without repeated full-board repaints, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 
 ## Verify

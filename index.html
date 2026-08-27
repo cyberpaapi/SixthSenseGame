@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260827.16">
+  <link rel="stylesheet" href="styles.css?v=20260827.17">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -148,7 +148,7 @@
   <main class="online-shell" id="online-screen" hidden>
     <section class="online-game-card" aria-label="Online Sixth Sense room">
       <header class="online-game-head">
-        <button class="online-leave" id="online-leave" type="button" aria-label="Leave game"><img src="assets/control-home.png" width="256" height="256" alt=""><span>Leave game</span></button>
+        <button class="online-leave" id="online-leave" type="button" aria-label="Back — leave multiplayer game"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7M8 12h11"></path></svg><span>Back</span></button>
         <div><p class="eyebrow" id="online-mode-kicker">Multiplayer Race</p><h1 id="online-room-title">Room —</h1><p class="versus-names" id="online-versus-names" hidden></p></div>
         <div class="online-room-chip"><span id="online-room-state">Waiting</span><strong id="online-room-code">——</strong></div>
       </header>
@@ -414,11 +414,22 @@
     </div>
   </dialog>
 
+  <dialog class="modal confirm-modal online-leave-modal" id="online-leave-modal" aria-labelledby="online-leave-title">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div><p class="eyebrow" id="online-leave-kicker">Leave this match?</p><h2 id="online-leave-title">Leave VS room</h2></div>
+        <button class="icon-button modal-close" type="button" aria-label="Close leave confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <p id="online-leave-copy">Your saved seat on this device will be cleared, so you can’t resume this match after leaving.</p>
+      <div class="confirm-actions"><button class="secondary-button" id="online-leave-cancel" type="button">Stay in game</button><button class="destructive-button" id="online-leave-confirm" type="button">Leave match</button></div>
+    </div>
+  </dialog>
+
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260827.16"></script>
-  <script src="word-bank.js?v=20260827.16"></script>
-  <script src="game-core.js?v=20260827.16"></script>
-  <script src="app.js?v=20260827.16"></script>
-  <script src="multiplayer.js?v=20260827.16"></script>
+  <script src="answer-bank.js?v=20260827.17"></script>
+  <script src="word-bank.js?v=20260827.17"></script>
+  <script src="game-core.js?v=20260827.17"></script>
+  <script src="app.js?v=20260827.17"></script>
+  <script src="multiplayer.js?v=20260827.17"></script>
 </body>
 </html>

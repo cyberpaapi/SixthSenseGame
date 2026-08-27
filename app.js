@@ -1401,7 +1401,15 @@
     els.adventureOpenButtons.forEach(button => button.addEventListener("click", openAdventureMap));
     els.adventureBack.addEventListener("click", () => { showScreen("home"); playEffect("open"); });
     els.adventurePlay.addEventListener("click", startAdventureLevel);
-    els.brand.addEventListener("click", event => { event.preventDefault(); showScreen("home"); playEffect("open"); });
+    els.brand.addEventListener("click", event => {
+      event.preventDefault();
+      if (document.body.dataset.screen === "online") {
+        document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
+        return;
+      }
+      showScreen("home");
+      playEffect("open");
+    });
     els.profileTrigger.addEventListener("click", () => { renderProfile(); els.profileDialog.showModal(); playEffect("open"); });
     els.profileCustomize.addEventListener("click", () => {
       closeDialog(els.profileDialog);
