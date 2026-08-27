@@ -37,7 +37,8 @@ Then open `http://localhost:4173`.
 - Optional hard mode
 - Dark and high-contrast themes
 - An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
-- Statistics, streaks, countdown, and result sharing
+- A dedicated victory flow with performance copy, solved-word reveal, earned coins, nearby progression, layered confetti, a richer completion chord, result sharing, and one-tap replay
+- Statistics remain a separate, player-opened screen instead of interrupting every successful solve
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room

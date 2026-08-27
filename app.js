@@ -94,6 +94,24 @@
     nextPuzzleWrap: document.querySelector("#next-puzzle-wrap"),
     countdown: document.querySelector("#countdown"),
     celebration: document.querySelector("#celebration"),
+    resultDialog: document.querySelector("#result-modal"),
+    resultConfetti: document.querySelector("#result-confetti"),
+    resultExit: document.querySelector("#result-exit"),
+    resultKicker: document.querySelector("#result-kicker"),
+    resultTitle: document.querySelector("#result-title"),
+    resultSummary: document.querySelector("#result-summary"),
+    resultWord: document.querySelector("#result-word"),
+    resultAttempts: document.querySelector("#result-attempts"),
+    resultAttemptIcon: document.querySelector(".result-attempt-icon"),
+    resultCoins: document.querySelector("#result-coins"),
+    resultStreakReward: document.querySelector("#result-streak-reward"),
+    resultProgressLabel: document.querySelector("#result-progress-label"),
+    resultProgressValue: document.querySelector("#result-progress-value"),
+    resultProgressTrack: document.querySelector("#result-progress-track"),
+    resultProgressFill: document.querySelector("#result-progress-fill"),
+    resultProgressNext: document.querySelector("#result-progress-next"),
+    resultPrimary: document.querySelector("#result-primary"),
+    resultShare: document.querySelector("#result-share"),
     avatarChoices: [...document.querySelectorAll("[data-avatar-option]")],
     decorationChoices: [...document.querySelectorAll("[data-decoration-option]")],
     accentChoices: [...document.querySelectorAll("[data-accent-option]")],
@@ -673,6 +691,7 @@
     if (won && !game.rewarded) {
       reward = Core.rewardForAttempts(game.guesses.length);
       stats.coins += reward;
+      game.solveReward = reward;
       game.rewarded = true;
     }
     if (won && !stats.completedWords.includes(game.answer)) stats.completedWords.push(game.answer);
@@ -721,6 +740,7 @@
       announce(totalReward ? `Solved in ${game.guesses.length} — +${totalReward} coins!` : "Beautiful intuition.");
       celebrate();
       playEffect("win");
+      try { navigator.vibrate?.([22, 34, 48]); } catch (_) { /* Haptics are an optional enhancement. */ }
     } else {
       announce(`The word was ${game.answer.toUpperCase()}.`);
       playEffect("lose");
@@ -731,7 +751,12 @@
       setTimeout(openAdventureMap, 720);
       return;
     }
-    setTimeout(() => document.querySelector("#stats-modal").showModal(), 800);
+    renderResult(won, reward, streakReward);
+    setTimeout(() => {
+      if (!els.resultDialog.open) els.resultDialog.showModal();
+      if (won) celebrateResultDialog();
+      els.resultPrimary.focus({ preventScroll: true });
+    }, 680);
   }
 
   function invalid(message) {
@@ -913,6 +938,78 @@
     els.nextPuzzleWrap.hidden = mode !== "daily";
   }
 
+  function resultPerformance(attempts) {
+    return [
+      { title: "Pure intuition", summary: "One read. One answer. That is a rare signal." },
+      { title: "Brilliant read", summary: "You found the pattern almost instantly." },
+      { title: "Sharp deduction", summary: "Fast, focused, and beautifully read." },
+      { title: "Strong signal", summary: "Every clue landed exactly where it needed to." },
+      { title: "Signal secured", summary: "Patient deduction turned noise into an answer." },
+      { title: "Clutch finish", summary: "You held the thread and closed it out." },
+      { title: "Last-chance legend", summary: "Seven tries, zero surrender. Signal found." }
+    ][Math.max(0, Math.min(Core.MAX_GUESSES - 1, attempts - 1))];
+  }
+
+  function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0) {
+    const attempts = game.guesses.length;
+    const performance = resultPerformance(Math.max(1, attempts));
+    const earned = won ? reward + streakReward : 0;
+    els.resultDialog.classList.toggle("is-loss", !won);
+    els.resultKicker.textContent = won ? "Puzzle complete" : "Signal ended";
+    els.resultTitle.textContent = won ? performance.title : "Signal missed";
+    els.resultSummary.textContent = won ? performance.summary : "The answer is yours now. Carry the pattern into the next word.";
+    els.resultWord.setAttribute("aria-label", `${won ? "Solved word" : "Answer"}: ${game.answer.toUpperCase()}`);
+    els.resultWord.innerHTML = [...game.answer.toUpperCase()].map((letter, index) => `<span style="--letter-delay:${.08 + index * .055}s">${letter}</span>`).join("");
+    els.resultAttemptIcon.textContent = won ? String(attempts) : "×";
+    els.resultAttempts.textContent = won ? `Solved in ${attempts}` : `${attempts} ${attempts === 1 ? "try" : "tries"} used`;
+    els.resultCoins.textContent = won ? `+${earned} ${earned === 1 ? "coin" : "coins"}` : "No coins";
+    els.resultStreakReward.hidden = !(won && streakReward > 0);
+
+    let value = 0;
+    if (mode === "daily") {
+      const streakStep = stats.currentStreak ? ((stats.currentStreak - 1) % 7) + 1 : 0;
+      const remaining = 7 - streakStep;
+      value = (streakStep / 7) * 100;
+      els.resultProgressLabel.textContent = "Daily streak";
+      els.resultProgressValue.textContent = `${stats.currentStreak} ${stats.currentStreak === 1 ? "day" : "days"}`;
+      els.resultProgressNext.textContent = remaining === 0 ? `Seven-day bonus unlocked · +${DAILY_STREAK_REWARD} coins` : `${remaining} ${remaining === 1 ? "day" : "days"} to the +${DAILY_STREAK_REWARD} coin bonus`;
+    } else if (mode === "streak") {
+      const run = Number(stats.streakRun) || 0;
+      const nextGoal = Math.max(5, (Math.floor(run / 5) + 1) * 5);
+      value = ((run % 5) / 5) * 100;
+      els.resultProgressLabel.textContent = "Streak run";
+      els.resultProgressValue.textContent = `${run} ${run === 1 ? "word" : "words"}`;
+      els.resultProgressNext.textContent = `${nextGoal - run} to the next five-word milestone`;
+    } else {
+      const solved = stats.completedWords.length;
+      const nextGoal = Math.max(10, (Math.floor(solved / 10) + 1) * 10);
+      value = ((solved % 10) / 10) * 100;
+      els.resultProgressLabel.textContent = "Words discovered";
+      els.resultProgressValue.textContent = solved.toLocaleString();
+      els.resultProgressNext.textContent = `${nextGoal - solved} to your next collection milestone`;
+    }
+    els.resultProgressFill.style.width = `${value}%`;
+    els.resultProgressTrack.setAttribute("aria-valuenow", String(Math.round(value)));
+    els.resultProgressTrack.setAttribute("aria-valuetext", els.resultProgressNext.textContent);
+    els.resultPrimary.textContent = mode === "daily" ? "Return home" : won ? "Next word" : "Try another word";
+  }
+
+  function exitResult() {
+    if (els.resultDialog.open) els.resultDialog.close();
+    showScreen("home");
+  }
+
+  function continueFromResult() {
+    if (els.resultDialog.open) els.resultDialog.close();
+    if (mode === "daily") {
+      showScreen("home");
+      return;
+    }
+    setMode(mode, true);
+    showScreen("game");
+    playEffect("start");
+  }
+
   async function shareResult() {
     if (game.status === "playing") return;
     const header = `Sixth Sense ${mode === "daily" ? `#${game.puzzleNumber}` : MODE_CONFIG[mode].label.replace(" Puzzle", "")} ${game.status === "won" ? `${game.guesses.length}/${Core.MAX_GUESSES}` : `—/${Core.MAX_GUESSES}`}`;
@@ -930,18 +1027,68 @@
   function celebrate() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     els.celebration.innerHTML = "";
-    const colors = ["#ff766d", "#2e917e", "#e29955", "#a57acb", "#f3c85f"];
-    for (let i = 0; i < 34; i += 1) {
+    const colors = ["#ff4f83", "#16b987", "#ffbf2f", "#7754e8", "#20b9e8", "#ff7438"];
+    for (let i = 0; i < 44; i += 1) {
       const piece = document.createElement("i");
       piece.className = "confetti";
       piece.style.left = `${Math.random() * 100}%`;
       piece.style.background = colors[i % colors.length];
-      piece.style.setProperty("--drift", `${Math.random() * 180 - 90}px`);
-      piece.style.setProperty("--fall-time", `${1.8 + Math.random() * 1.5}s`);
-      piece.style.animationDelay = `${Math.random() * .35}s`;
+      piece.style.setProperty("--drift", `${Math.random() * 240 - 120}px`);
+      piece.style.setProperty("--fall-time", `${1.7 + Math.random() * 1.4}s`);
+      piece.style.setProperty("--confetti-width", `${5 + Math.random() * 7}px`);
+      piece.style.setProperty("--confetti-height", `${9 + Math.random() * 11}px`);
+      piece.style.animationDelay = `${Math.random() * .42}s`;
       els.celebration.appendChild(piece);
     }
-    setTimeout(() => { els.celebration.innerHTML = ""; }, 3800);
+    for (let i = 0; i < 30; i += 1) {
+      const burst = document.createElement("i");
+      const angle = (Math.PI * 2 * i) / 30 + Math.random() * .18;
+      const distance = 130 + Math.random() * 230;
+      burst.className = "confetti is-burst";
+      burst.style.background = colors[(i + 2) % colors.length];
+      burst.style.setProperty("--burst-x", `${Math.cos(angle) * distance}px`);
+      burst.style.setProperty("--burst-y", `${Math.sin(angle) * distance}px`);
+      burst.style.setProperty("--burst-rotate", `${480 + Math.random() * 620}deg`);
+      burst.style.setProperty("--burst-time", `${.7 + Math.random() * .45}s`);
+      burst.style.setProperty("--confetti-width", `${5 + Math.random() * 6}px`);
+      burst.style.setProperty("--confetti-height", `${8 + Math.random() * 9}px`);
+      els.celebration.appendChild(burst);
+    }
+    ["#5be3bd", "#ffd54f"].forEach((color, index) => {
+      const ring = document.createElement("i");
+      ring.className = "celebration-ring";
+      ring.style.setProperty("--ring-color", color);
+      ring.style.animationDelay = `${index * .13}s`;
+      els.celebration.appendChild(ring);
+    });
+    for (let i = 0; i < 12; i += 1) {
+      const spark = document.createElement("i");
+      const angle = (Math.PI * 2 * i) / 12;
+      spark.className = "celebration-spark";
+      spark.style.setProperty("--spark-x", `${Math.cos(angle) * (90 + Math.random() * 90)}px`);
+      spark.style.setProperty("--spark-y", `${Math.sin(angle) * (90 + Math.random() * 90)}px`);
+      spark.style.setProperty("--spark-color", colors[i % colors.length]);
+      spark.style.setProperty("--spark-delay", `${.03 + Math.random() * .12}s`);
+      els.celebration.appendChild(spark);
+    }
+    setTimeout(() => { els.celebration.innerHTML = ""; }, 3600);
+  }
+
+  function celebrateResultDialog() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    els.resultConfetti.innerHTML = "";
+    const colors = ["#ff4f83", "#13ad79", "#ffbf2f", "#7754e8", "#22bde0"];
+    for (let index = 0; index < 26; index += 1) {
+      const piece = document.createElement("i");
+      piece.style.left = `${4 + Math.random() * 92}%`;
+      piece.style.background = colors[index % colors.length];
+      piece.style.setProperty("--result-drift", `${Math.random() * 90 - 45}px`);
+      piece.style.setProperty("--result-fall", `${1.35 + Math.random() * .75}s`);
+      piece.style.setProperty("--result-delay", `${Math.random() * .28}s`);
+      piece.style.setProperty("--result-rotate", `${360 + Math.random() * 520}deg`);
+      els.resultConfetti.appendChild(piece);
+    }
+    setTimeout(() => { els.resultConfetti.innerHTML = ""; }, 2500);
   }
 
   function ensureAudio() {
@@ -1057,8 +1204,12 @@
     } else if (name === "skip") {
       [659, 494, 370].forEach((frequency, index) => later(index * .065, { frequency, endFrequency: frequency * .93, duration: .15, volume: .024, wave: "triangle", filter: 1900 }));
     } else if (name === "win") {
-      [523, 659, 784, 1047].forEach((frequency, index) => later(index * .095, { frequency, duration: .46, volume: .04 - index * .004, wave: index < 2 ? "triangle" : "sine", pan: index % 2 ? .25 : -.25, filter: 3000 }));
-      [1319, 1568, 2093].forEach((frequency, index) => later(.22 + index * .07, { frequency, duration: .25, volume: .012, wave: "sine", pan: .45 - index * .45 }));
+      tone({ frequency: 196, endFrequency: 261.63, duration: .48, volume: .047, wave: "triangle", filter: 900 });
+      scheduleNoise({ at: now + .015, duration: .11, volume: .018, filter: 1500 }, effectsGain);
+      [523, 659, 784, 1047].forEach((frequency, index) => later(.035 + index * .085, { frequency, duration: .5, volume: .042 - index * .004, wave: index < 2 ? "triangle" : "sine", pan: index % 2 ? .28 : -.28, filter: 3300 }));
+      [1319, 1568, 2093, 2637].forEach((frequency, index) => later(.24 + index * .065, { frequency, duration: .28, volume: .014 - index * .0015, wave: "sine", pan: .48 - index * .32 }));
+      [784, 988, 1175].forEach((frequency, index) => later(.52 + index * .075, { frequency, duration: .38, volume: .022 - index * .003, wave: "triangle", pan: (index - 1) * .28, filter: 2800 }));
+      scheduleNoise({ at: now + .5, duration: .2, volume: .012, filter: 2300 }, effectsGain);
     } else if (name === "lose") {
       [330, 262, 196].forEach((frequency, index) => later(index * .12, { frequency, endFrequency: frequency * .9, duration: .28, volume: .029, wave: "triangle", filter: 1300 }));
     } else if (name === "start" || name === "room" || name === "open") {
@@ -1258,6 +1409,13 @@
       setTimeout(() => els.identityStudio.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 80);
       playEffect("open");
     });
+    els.resultExit.addEventListener("click", exitResult);
+    els.resultPrimary.addEventListener("click", continueFromResult);
+    els.resultShare.addEventListener("click", shareResult);
+    els.resultDialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      exitResult();
+    });
     els.shareButton.addEventListener("click", shareResult);
     els.newPracticeButton.addEventListener("click", () => {
       closeDialog(document.querySelector("#stats-modal"));
@@ -1291,7 +1449,9 @@
     }));
     document.querySelectorAll(".modal-close, .modal-got-it").forEach(button => button.addEventListener("click", () => closeDialog(button.closest("dialog"))));
     document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("click", event => {
-      if (event.target === dialog && dialog !== els.usernameDialog) closeDialog(dialog);
+      if (event.target !== dialog || dialog === els.usernameDialog) return;
+      if (dialog === els.resultDialog) exitResult();
+      else closeDialog(dialog);
     }));
     Object.entries(els.settings).forEach(([key, input]) => input.addEventListener("change", () => {
       settings[key] = input.checked;

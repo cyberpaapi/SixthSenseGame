@@ -207,14 +207,28 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const answer = await page.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of answer) await page.click(`[data-key="${letter.toUpperCase()}"]`);
     await page.click('[data-key="ENTER"]');
-    await page.waitForSelector("#stats-modal[open]", { timeout: 4000 });
+    await page.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await page.locator('[data-row="1"] .tile.exact').count(), 6);
-    assert.equal(await page.locator("#share-button").isEnabled(), true);
+    assert.equal(await page.locator("#result-word span").count(), 6, "the victory screen should make the solved word the visual focus");
+    assert.equal((await page.locator("#result-word").getAttribute("aria-label")).endsWith(answer.toUpperCase()), true);
+    assert.equal(await page.locator("#result-attempts").textContent(), "Solved in 2");
+    assert.equal(await page.locator("#result-coins").textContent(), "+12 coins");
+    assert.equal(await page.locator("#result-primary").textContent(), "Return home");
+    assert.equal(await page.locator("#result-share").isEnabled(), true);
+    assert(await page.locator("#celebration .confetti").count() >= 70, "completion should trigger a full confetti burst");
+    assert.equal(await page.locator("#result-confetti i").count(), 26, "the reward card should keep a visible confetti cascade above its backdrop");
+    assert.equal(await page.locator("#result-modal img[src*='result-signal-crest-v1.webp']").count(), 1, "the victory art should be purpose-made and optimized");
+    assert(await page.evaluate(() => document.querySelector("#result-modal").scrollWidth <= document.querySelector("#result-modal").clientWidth), "the result screen must not overflow horizontally");
+    assert.equal(await page.locator("#stats-modal").getAttribute("open"), null, "ordinary Statistics must stay separate from the completion moment");
     assert.equal(await page.locator("#coin-count").textContent(), "14", "a two-attempt solve should award 12 coins");
     assert.equal(await page.locator("#stat-coins").textContent(), "14");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "1");
-    await page.click("#stats-modal .modal-close");
-    await page.screenshot({ path: path.join(evidenceDir, "mobile-390x844.png"), fullPage: true });
+    assert.equal(await page.locator("#result-progress-track").getAttribute("aria-valuenow"), "14");
+    assert((await page.evaluate(() => window.SixthSenseAudio.state().scheduledEffects)) >= 9, "the solved row and victory moment should schedule layered completion audio");
+    await page.waitForTimeout(850);
+    await page.screenshot({ path: path.join(evidenceDir, "victory-result-390x844.png"), fullPage: true });
+    await page.click("#result-exit");
+    assert.equal(await page.locator("#home-screen").isVisible(), true, "the result screen should offer an immediate escape to home");
     assert.deepEqual(errors, []);
     await phone.close();
 
@@ -250,10 +264,28 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
     await rewardPage.click('[data-key="ENTER"]');
-    await rewardPage.waitForSelector("#stats-modal[open]", { timeout: 4000 });
+    await rewardPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await rewardPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).streakReward), 30, "the seventh consecutive Daily solve must grant the streak reward");
-    assert.equal(await rewardPage.locator("#daily-reward-earned").isVisible(), true, "the earned streak reward must be shown with an icon");
+    assert.equal(await rewardPage.locator("#result-streak-reward").isVisible(), true, "the earned streak reward must be celebrated in the result screen");
+    assert.equal(await rewardPage.locator("#result-coins").textContent(), "+44 coins", "the result should combine the one-try reward and seven-day bonus");
     await rewardContext.close();
+
+    const reducedContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+    const reducedPage = await reducedContext.newPage();
+    await reducedPage.addInitScript(() => {
+      localStorage.setItem("sixth-sense.visited.v1", "yes");
+      localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "StillFox" }));
+      localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
+    });
+    await reducedPage.goto(baseUrl, { waitUntil: "networkidle" });
+    await reducedPage.click('[data-start-mode="daily"]');
+    const reducedAnswer = await reducedPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
+    for (const letter of reducedAnswer) await reducedPage.click(`[data-key="${letter.toUpperCase()}"]`);
+    await reducedPage.click('[data-key="ENTER"]');
+    await reducedPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
+    assert.equal(await reducedPage.locator("#celebration .confetti, #result-confetti i").count(), 0, "reduced-motion players should receive the complete result without optional confetti motion");
+    assert.equal(await reducedPage.locator("#result-word span").count(), 6, "reduced motion must preserve the full solved-word result");
+    await reducedContext.close();
 
     const adventure = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const adventurePage = await adventure.newPage();
@@ -312,6 +344,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
     assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 1, "winning must advance exactly one Adventure level");
     assert.equal(await adventurePage.locator("#stats-modal").isHidden(), true, "Adventure should return straight to its map instead of opening results");
+    assert.equal(await adventurePage.locator("#result-modal").isHidden(), true, "Adventure should keep its dedicated map-return progression instead of opening a result overlay");
     assert.equal(await adventurePage.locator("#adventure-screen").isVisible(), true);
     assert.equal(await adventurePage.locator(".adventure-level-node").count(), 8, "level two should retain an eight-level image window");
     assert.equal(await adventurePage.locator('.adventure-level-node[aria-current="step"] .avatar-art').count(), 1);
@@ -580,6 +613,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(new Set(repeatedClear.eliminatedLetters).size, 6, "repeated Clear letters should remain unique");
 
     await repeatPage.click(".brand");
+    await repeatPage.evaluate(() => { Math.random = () => 0; });
     await repeatPage.click('[data-start-mode="practice"]');
     await repeatPage.click("#skip-puzzle-button");
     await repeatPage.click("#skip-puzzle-button");
@@ -589,6 +623,17 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.click("#skip-puzzle-button");
     assert.equal(await repeatPage.locator("#skip-modal").isVisible(), true, "a second purchased Skip should also be usable");
     await repeatPage.click("#cancel-skip-button");
+    const practiceAnswer = await repeatPage.evaluate(() => window.SixthSenseCore.practiceAnswer(window.SixthSenseCore.dailyAnswer().word, () => 0, []).word);
+    for (const letter of practiceAnswer) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
+    await repeatPage.click('[data-key="ENTER"]');
+    await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
+    assert.equal(await repeatPage.locator("#result-primary").textContent(), "Next word", "repeatable solo modes should make replay the primary result action");
+    await repeatPage.click("#result-primary");
+    assert.equal(await repeatPage.locator("#game-screen").isVisible(), true);
+    assert.equal(await repeatPage.locator("#result-modal").getAttribute("open"), null);
+    assert.equal(await repeatPage.locator("#game-board .tile.filled").count(), 0, "the replay action should present a clean board immediately");
+    await repeatPage.click('[data-key="A"]');
+    assert.notEqual(await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).answer), practiceAnswer, "Next word should immediately advance the healthy core play loop");
     assert(await repeatPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "repeatable lifelines must not introduce game-screen scrolling");
     await repeats.close();
 

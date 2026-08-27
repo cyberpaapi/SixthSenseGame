@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260827.15">
+  <link rel="stylesheet" href="styles.css?v=20260827.16">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -224,6 +224,49 @@
     </div>
   </dialog>
 
+  <dialog class="result-modal" id="result-modal" aria-labelledby="result-title" aria-describedby="result-summary">
+    <div class="result-sheet">
+      <div class="result-confetti" id="result-confetti" aria-hidden="true"></div>
+      <button class="result-exit" id="result-exit" type="button" aria-label="Return to home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 3l8.5 7.5M5.5 9.5v10h13v-10M9.5 19.5v-6h5v6"></path></svg>
+      </button>
+      <div class="result-hero" aria-hidden="true">
+        <span class="result-halo"></span>
+        <img src="assets/result-signal-crest-v1.webp" width="640" height="640" alt="">
+      </div>
+      <p class="result-kicker" id="result-kicker">Puzzle complete</p>
+      <h2 id="result-title">Signal found</h2>
+      <p class="result-summary" id="result-summary">A sharp piece of deduction.</p>
+      <div class="result-word" id="result-word" aria-label="Solved word"></div>
+      <div class="result-rewards" aria-label="Puzzle rewards">
+        <div class="result-metric">
+          <span class="result-metric-icon result-attempt-icon" aria-hidden="true">7</span>
+          <span><small>Performance</small><strong id="result-attempts">Solved in 3</strong></span>
+        </div>
+        <div class="result-metric result-coin-metric">
+          <span class="coin-symbol" aria-hidden="true"></span>
+          <span><small>Earned</small><strong id="result-coins">+10 coins</strong></span>
+        </div>
+      </div>
+      <div class="result-streak-reward" id="result-streak-reward" hidden>
+        <img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true">
+        <span><small>Seven-day bonus</small><strong>+30 coins</strong></span>
+      </div>
+      <div class="result-progress">
+        <div class="result-progress-copy"><span id="result-progress-label">Keep the signal alive</span><strong id="result-progress-value">1 day</strong></div>
+        <div class="result-progress-track" id="result-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="result-progress-fill"></i></div>
+        <small id="result-progress-next">Six days to the next streak reward</small>
+      </div>
+      <div class="result-actions">
+        <button class="result-primary" id="result-primary" type="button">Next word</button>
+        <button class="result-share" id="result-share" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"></path></svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog class="modal" id="stats-modal" aria-labelledby="stats-title">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -372,10 +415,10 @@
   </dialog>
 
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260827.15"></script>
-  <script src="word-bank.js?v=20260827.15"></script>
-  <script src="game-core.js?v=20260827.15"></script>
-  <script src="app.js?v=20260827.15"></script>
-  <script src="multiplayer.js?v=20260827.15"></script>
+  <script src="answer-bank.js?v=20260827.16"></script>
+  <script src="word-bank.js?v=20260827.16"></script>
+  <script src="game-core.js?v=20260827.16"></script>
+  <script src="app.js?v=20260827.16"></script>
+  <script src="multiplayer.js?v=20260827.16"></script>
 </body>
 </html>
