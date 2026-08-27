@@ -309,7 +309,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 ### 2026-08-27 — Confirmed multiplayer Back path and polling flicker repair
 
 - Replaced the multiplayer house/“Leave game” control with a compact red clay Back action and arrow. VS and Race now present a mode-aware confirmation before removing the saved seat; “Stay in game” is the safe first action, “Leave match” is explicitly destructive, and the header brand uses the same confirmation rather than bypassing it.
-- Stopped unchanged 900ms multiplayer polls from rebuilding the board, keyboard, lifeline dock, progress cards, and Race avatars. Snapshot signatures now preserve the existing DOM and scroll position until authoritative room data actually changes; joining also explicitly refreshes transient enabled states instead of relying on a later repaint.
+- Stopped unchanged 900ms multiplayer polls from rebuilding the board, keyboard, lifeline dock, progress cards, and Race avatars. Snapshot signatures now preserve the existing DOM and scroll position until authoritative room data actually changes; joining and host Start completion explicitly refresh transient enabled states instead of relying on a later repaint.
 - Changed phone background attachment from fixed to scroll to avoid compositor instability at the bottom boundary. Added 390×844 browser regressions for the red Back treatment, both confirmation choices, persistent board identity across multiple polls, lifeline availability after join, and mobile background behavior. Versioned the static runtime as `20260827.17`.
 
 ### 2026-08-27 — Focused victory loop and ethical replay momentum

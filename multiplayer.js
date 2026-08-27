@@ -603,7 +603,12 @@
       renderSnapshot();
       playAudio("start");
     } catch (error) { setPlayStatus(friendlyError(error)); }
-    finally { state.busy = false; els.start.disabled = false; }
+    finally {
+      state.busy = false;
+      els.start.disabled = false;
+      renderKeyboard();
+      renderLifelines();
+    }
   }
 
   document.querySelectorAll("[data-open-online]").forEach(button => button.addEventListener("click", () => openLobby(button.dataset.openOnline)));
