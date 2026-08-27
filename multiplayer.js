@@ -2,7 +2,7 @@
   "use strict";
 
   const Core = window.SixthSenseCore;
-  const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", ["ENTER", ..."ZXCVBNM", "BACK"]];
+  const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", [..."ZXCVBNM", "BACK"]];
   const MARKERS = { exact: "●", present: "◆", absent: "×" };
   const PRIORITY = { absent: 1, present: 2, exact: 3 };
   const DIFFICULTY_LABELS = Object.freeze({ easy: "Normal", medium: "Hard", extreme: "Extreme" });
@@ -390,7 +390,7 @@
         button.disabled = !canPlay || (key.length === 1 && eliminated.has(letter));
         button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}${eliminated.has(letter) ? " is-eliminated" : ""}`;
         button.dataset.onlineKey = key;
-        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : key === "ENTER" ? "Submit guess" : `Letter ${key}${status ? `, ${status}` : ""}`);
+        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}${status ? `, ${status}` : ""}`);
         if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
         else button.textContent = key;
         if (status) {
@@ -420,6 +420,7 @@
     }
     else return;
     renderBoard();
+    if (key !== "BACK" && state.current.length === Core.WORD_LENGTH) void submitGuess();
   }
 
   async function submitGuess() {

@@ -40,7 +40,7 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 
 - Word length: 6 letters.
 - Maximum guesses: 7.
-- Accepted input: keyboard, onscreen keyboard, touch, Enter, and Backspace/Delete.
+- Accepted input: physical keyboard, onscreen keyboard, touch, optional physical Enter, and Backspace/Delete. Entering the sixth letter submits the row immediately in solo, Race, and VS; there is no onscreen Enter key.
 - A guess must contain exactly six letters and exist in the accepted-guess dictionary.
 - Scoring handles repeated letters correctly: exact positions are allocated first, then remaining answer-letter counts are used for misplaced matches.
 - The player wins by submitting the answer within seven guesses.
@@ -96,7 +96,7 @@ Inventory and coins persist in `localStorage`. The bottom dock appears in solo a
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
 - Home: generated observatory hero art, a seven-day streak progress rail with a 30-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS launchers, and the compact four-mode solo launcher. Play Together now appears above Game Modes. The two redundant section subtitles were removed, and Race/VS use newly generated independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
 - Adventure: three original generated portrait environments—Sky Garden, Ember Canopy, and Cosmic Prism—each contain a monumental endless golden ladder as part of the raster artwork. The old winding-road scenes are no longer referenced, and no CSS rails or rung elements duplicate the illustrated ladder. Only the active zone asset is loaded at runtime; exactly eight semantic level markers align to eight evenly spaced painted-rung positions. A one-level win animates the animal upward from the completed rung; reduced-motion players receive the settled state immediately. It is original genre-inspired progression presentation and does not use Candy Crush art, characters, candy motifs, branded copy, or copied level UI.
-- Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, color-state keyboard, and an evenly spaced bottom lifeline dock.
+- Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, a full-width color-state keyboard, and an evenly spaced bottom lifeline dock. The three keyboard rows contain 27 controls—26 letters plus Delete—with a proportionally centered final row; the removed Enter key is unnecessary because the sixth letter submits automatically.
 - Successful solo completion outside Adventure opens a dedicated victory sheet instead of the generic Statistics modal. The sheet leads with a generated signal crest and animated six-tile answer, then shows attempt-specific mastery copy, solve coins plus any seven-day bonus, one nearby streak/collection milestone, Share, and a single prominent Return home or Next word action. Losses use the same structure with calmer recovery copy and no celebration. Adventure retains its more meaningful direct map return.
 - The selected animal avatar appears as a clean circular header icon with no square pedestal, so identity is visible on home, solo, and online screens. It is also the entry point to a personal profile sheet showing unique words solved, total solves, best attempt count, fastest word/time, best streak, general Adventure status, and coins. Beside it, the chosen generated wordmark uses two compact rows of glossy sculpted blocks spelling `SIXTH` and `SENSE`.
 - Identity Studio contains nine free generated animals plus nine generated premium animals—red panda, capybara, raccoon, snow leopard, phoenix, dragon, unicorn, otter, and chameleon—unlockable for 45–65 coins. Four generated premium avatar frames—Aurora, Sunburst, Prism, and Champion—cost 30–45 coins. Purchases persist locally, equip immediately on the header/profile/Adventure token, and synchronize into an active room. Eight free highlight colors and the editable username remain. The top-left profile now links directly to these controls.
@@ -121,6 +121,7 @@ The following items were removed because they made the interface feel crowded or
 - The verbose “Read the signs / Every color speaks” marketing section and the genre disclaimer from the home content.
 - Text labels around the lifeline dock. Meaning is carried by original icons, accessible names, prices, stock badges, and the help modal.
 - Temporary “tries left” bubbles after valid guesses.
+- The onscreen Enter key. Completing all six letter positions now submits automatically, while physical Enter remains as an accessible optional keyboard command.
 - Visible Adventure difficulty and current-level hints on the launcher, map chrome, puzzle status, and profile. Numbered ladder rungs retain progression clarity, while semantic level labels remain available to assistive technology.
 
 ## Architecture and file map
@@ -263,7 +264,7 @@ Current verified result on 2026-08-27:
 - JavaScript syntax: passed.
 - Core rules/data: passed — 10,187 answers across player-facing Normal 4,309 / Hard 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — dedicated phone victory flow with generated art, animated answer, exact attempt/coin totals, separate Statistics, full-screen and in-sheet confetti, layered completion audio scheduling, seven-day bonus, one-tap Practice replay, result escape, and reduced-motion handling; plus 390×844 and 360×800 no-scroll puzzle HUD, solve/Skip Adventure auto-return and one-rung movement, Time Tackle, cosmetics/profile navigation, Settings scroll, red multiplayer Back styling, leave/cancel confirmation paths, unchanged-poll DOM preservation across multiple 900ms cycles, mobile scrolling backgrounds, multiplayer lifelines/Race/VS synchronization, dark-theme feedback, desktop layout, and overflow checks.
+- Browser QA: passed — dedicated phone victory flow with generated art, animated answer, exact attempt/coin totals, separate Statistics, full-screen and in-sheet confetti, layered completion audio scheduling, seven-day bonus, one-tap Practice replay, result escape, and reduced-motion handling; plus automatic sixth-letter submission in solo and multiplayer, 27-key/no-Enter assertions, full-width Daily keyboard geometry, 390×844 and 360×800 no-scroll puzzle HUD, solve/Skip Adventure auto-return and one-rung movement, Time Tackle, cosmetics/profile navigation, Settings scroll, red multiplayer Back styling, leave/cancel confirmation paths, unchanged-poll DOM preservation across multiple 900ms cycles, mobile scrolling backgrounds, multiplayer lifelines/Race/VS synchronization, dark-theme feedback, desktop layout, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
 - Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; runtime `20260827.17`, the red confirmed Back flow, stable multiplayer polling, core CSS, JavaScript, answer data, manifest, victory artwork, and the migrated serverless multiplayer API are live.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
@@ -305,6 +306,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-27 — Automatic six-letter submission and full-width puzzle keyboard
+
+- Removed the onscreen Enter control from solo, Race, and VS. Typing or tapping the sixth letter now immediately runs the same dictionary, hard-mode, scoring, animation, and authoritative multiplayer submission path that Enter previously triggered; physical Enter remains available as a non-required keyboard alternative.
+- Fixed the Daily keyboard’s collapsed width by giving the shared keyboard an explicit full play-surface width. The final seven-letter-plus-Delete row is centered at 85% so its keys retain the same visual scale as the ten-key first row instead of stretching unevenly.
+- Updated every automated playthrough to solve without Enter and added explicit 27-key, absent-Enter, Daily keyboard-width, multiplayer payload, phone overflow, and result-flow regressions. Versioned the static runtime as `20260827.18`.
 
 ### 2026-08-27 — Confirmed multiplayer Back path and polling flicker repair
 

@@ -82,7 +82,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#game-screen").isVisible(), true);
     assert.equal(await page.locator("#game-board .board-row").count(), 7);
     assert.equal(await page.locator("#game-board .tile").count(), 42);
-    assert.equal(await page.locator("#keyboard .key").count(), 28);
+    assert.equal(await page.locator("#keyboard .key").count(), 27);
+    assert.equal(await page.locator('[data-key="ENTER"]').count(), 0, "automatic submission must remove the onscreen Enter key");
     assert.equal(await page.locator(".game-card-head, #puzzle-label, #puzzle-heading, .mode-switch").count(), 0);
     assert.equal(await page.locator(".topbar .brand").isVisible(), true);
     assert.equal(await page.locator("#game-mode-label").textContent(), "Daily Puzzle");
@@ -111,9 +112,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
         return rect.left + rect.width / 2;
       });
       const steps = centers.slice(1).map((center, index) => center - centers[index]);
-      return { boardKeyboardGap: keyboard.top - board.bottom, lifelineStepSpread: Math.max(...steps) - Math.min(...steps) };
+      return { boardKeyboardGap: keyboard.top - board.bottom, keyboardWidth: keyboard.width, boardWidth: board.width, lifelineStepSpread: Math.max(...steps) - Math.min(...steps) };
     });
     assert(layoutMetrics.boardKeyboardGap >= 12, "keyboard must not overlap the last board row");
+    assert(layoutMetrics.keyboardWidth >= layoutMetrics.boardWidth, "the Daily keyboard must use the full puzzle width instead of shrinking around its letters");
     assert(layoutMetrics.lifelineStepSpread <= 1, "lifeline icons should be equally spaced");
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "phone view must not overflow horizontally");
     assert(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "game screen must not scroll vertically");
@@ -176,7 +178,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       throw new Error("No keyboard-state probe word found");
     });
     for (const letter of probe.guess) await page.click(`[data-key="${letter.toUpperCase()}"]`);
-    await page.click('[data-key="ENTER"]');
     await page.waitForFunction(() => document.querySelectorAll('[data-row="0"] .tile.exact, [data-row="0"] .tile.present, [data-row="0"] .tile.absent').length === 6);
     const stateLetters = Object.fromEntries(["exact", "present", "absent"].map(status => [status, Object.keys(probe.states).find(letter => probe.states[letter] === status)]));
     await page.waitForFunction(({ stateLetters }) => Object.entries(stateLetters).every(([status, letter]) => document.querySelector(`[data-key="${letter.toUpperCase()}"]`)?.classList.contains(status)), { stateLetters });
@@ -206,7 +207,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
 
     const answer = await page.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of answer) await page.click(`[data-key="${letter.toUpperCase()}"]`);
-    await page.click('[data-key="ENTER"]');
     await page.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await page.locator('[data-row="1"] .tile.exact').count(), 6);
     assert.equal(await page.locator("#result-word span").count(), 6, "the victory screen should make the solved word the visual focus");
@@ -263,7 +263,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await rewardPage.click('[data-start-mode="daily"]');
     const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
-    await rewardPage.click('[data-key="ENTER"]');
     await rewardPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await rewardPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).streakReward), 30, "the seventh consecutive Daily solve must grant the streak reward");
     assert.equal(await rewardPage.locator("#result-streak-reward").isVisible(), true, "the earned streak reward must be celebrated in the result screen");
@@ -281,7 +280,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await reducedPage.click('[data-start-mode="daily"]');
     const reducedAnswer = await reducedPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of reducedAnswer) await reducedPage.click(`[data-key="${letter.toUpperCase()}"]`);
-    await reducedPage.click('[data-key="ENTER"]');
     await reducedPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await reducedPage.locator("#celebration .confetti, #result-confetti i").count(), 0, "reduced-motion players should receive the complete result without optional confetti motion");
     assert.equal(await reducedPage.locator("#result-word span").count(), 6, "reduced motion must preserve the full solved-word result");
@@ -340,7 +338,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await adventurePage.locator("#mode-detail").textContent(), "");
     const adventureAnswer = await adventurePage.evaluate(seed => window.SixthSenseCore.adventureAnswer(0, seed).word, adventureSeed);
     for (const letter of adventureAnswer) await adventurePage.click(`[data-key="${letter.toUpperCase()}"]`);
-    await adventurePage.click('[data-key="ENTER"]');
     await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
     assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 1, "winning must advance exactly one Adventure level");
     assert.equal(await adventurePage.locator("#stats-modal").isHidden(), true, "Adventure should return straight to its map instead of opening results");
@@ -482,6 +479,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       ]
     });
     let createPayload = null;
+    let submittedOnlineGuess = null;
     const mockOnlineApi = async route => {
       const body = route.request().postDataJSON();
       let payload;
@@ -495,6 +493,9 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       } else if (body.action === "lifeline") {
         selfLifelines = { round: sharedRound, clue: "A test clue", peeked: [], eliminatedLetters: [] };
         payload = { effect: { kind: "sense", clue: "A test clue" }, snapshot: versusSnapshot("self") };
+      } else if (body.action === "guess") {
+        submittedOnlineGuess = body.guess;
+        payload = { snapshot: versusSnapshot("self") };
       } else if (body.resumeToken === "create-token") payload = { snapshot: createPayload?.mode === "race" ? raceCreatedSnapshot : createdSnapshot };
       else payload = { snapshot: versusSnapshot(body.resumeToken === "host-token" ? "host" : "self") };
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) });
@@ -543,7 +544,11 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.match((await onlinePage.locator(".player-progress").first().textContent()), /0 points/);
     assert.equal(await onlinePage.locator(".attempt-patterns > span").count(), 1, "VS should show the opponent's attempt pattern live");
     assert.equal(await onlinePage.locator("#online-board .tile").count(), 42);
-    assert.equal(await onlinePage.locator("#online-keyboard .key").count(), 28);
+    assert.equal(await onlinePage.locator("#online-keyboard .key").count(), 27);
+    assert.equal(await onlinePage.locator('[data-online-key="ENTER"]').count(), 0, "multiplayer must use the same automatic six-letter submission");
+    for (const letter of "rattle") await onlinePage.click(`[data-online-key="${letter.toUpperCase()}"]`);
+    await onlinePage.waitForTimeout(120);
+    assert.equal(submittedOnlineGuess, "rattle", "typing the sixth multiplayer letter must submit without Enter");
     assert.equal(await onlinePage.locator("[data-online-lifeline]").count(), 4, "multiplayer must expose all four lifelines");
     assert.equal(await onlinePage.locator("#online-leave").textContent().then(text => text.trim()), "Back", "every multiplayer mode needs an explicit exit");
     await onlinePage.click('[data-online-lifeline="sense"] button');
@@ -644,7 +649,6 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.click("#cancel-skip-button");
     const practiceAnswer = await repeatPage.evaluate(() => window.SixthSenseCore.practiceAnswer(window.SixthSenseCore.dailyAnswer().word, () => 0, []).word);
     for (const letter of practiceAnswer) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
-    await repeatPage.click('[data-key="ENTER"]');
     await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await repeatPage.locator("#result-primary").textContent(), "Next word", "repeatable solo modes should make replay the primary result action");
     await repeatPage.click("#result-primary");

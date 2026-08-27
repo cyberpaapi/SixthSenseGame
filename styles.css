@@ -684,8 +684,9 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
 .clue-button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 .clue-copy { margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 1.35; }
 
-.keyboard { max-width: 620px; margin: 16px auto 0; display: grid; gap: 7px; }
+.keyboard { width:100%; min-width:0; max-width:620px; margin:16px auto 0; display:grid; gap:7px; }
 .keyboard-row { display: flex; justify-content: center; gap: 6px; }
+.keyboard-row:last-child { width:85%; margin-inline:auto; }
 .key {
   height: 52px;
   min-width: 0;

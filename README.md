@@ -25,6 +25,7 @@ Then open `http://localhost:4173`.
 - Silent solo progression from Normal into Hard and then Extreme as each tier is completed
 - 15,232 independently validated six-letter guesses from a proper-name-safe word-game lexicon
 - Correct repeated-letter scoring
+- Automatic submission as soon as the sixth letter is entered, with no onscreen Enter key and a full-width phone keyboard
 - A compact bottom icon dock for coin-powered Sense, Peek, Clear, and Skip lifelines
 - Price-under-icon and top-right inventory badges that never show redundant zeroes
 - A fixed one-viewport play layout with no page-level game-screen scrolling

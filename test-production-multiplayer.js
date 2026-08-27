@@ -17,7 +17,6 @@ async function seedIdentity(page, name, avatar, accent) {
 
 async function submitWord(page, word) {
   for (const letter of word) await page.click(`[data-online-key="${letter.toUpperCase()}"]`);
-  await page.click('[data-online-key="ENTER"]');
 }
 
 (async () => {

@@ -17,7 +17,7 @@
   };
   const MARKERS = { exact: "●", present: "◆", absent: "×" };
   const PRIORITY = { absent: 1, present: 2, exact: 3 };
-  const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", ["ENTER", ..."ZXCVBNM", "BACK"]];
+  const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", [..."ZXCVBNM", "BACK"]];
   const BASE_AVATARS = ["fox", "owl", "axolotl", "panda", "tiger", "koala", "frog", "rabbit", "penguin"];
   const PREMIUM_AVATARS = ["red-panda", "capybara", "raccoon", "snow-leopard", "phoenix", "dragon", "unicorn", "otter", "chameleon"];
   const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
@@ -476,7 +476,7 @@
         button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}`;
         button.dataset.key = key;
         const statusLabel = status ? { exact: "correct position", present: "in the word", absent: "not in the word" }[status] : "untested";
-        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : key === "ENTER" ? "Submit guess" : `Letter ${key}, ${statusLabel}`);
+        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}, ${statusLabel}`);
         if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
         else button.textContent = key;
         if (status) {
@@ -646,6 +646,7 @@
       lastTile.classList.add("is-pop");
       lastTile.addEventListener("animationend", () => lastTile.classList.remove("is-pop"), { once: true });
     }
+    if (key !== "BACK" && game.current.length === Core.WORD_LENGTH) submitGuess();
   }
 
   function submitGuess() {
