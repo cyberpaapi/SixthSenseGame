@@ -18,7 +18,11 @@
   const MARKERS = { exact: "●", present: "◆", absent: "×" };
   const PRIORITY = { absent: 1, present: 2, exact: 3 };
   const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", ["ENTER", ..."ZXCVBNM", "BACK"]];
-  const AVATARS = ["fox", "owl", "axolotl", "panda", "tiger", "koala", "frog", "rabbit", "penguin"];
+  const BASE_AVATARS = ["fox", "owl", "axolotl", "panda", "tiger", "koala", "frog", "rabbit", "penguin"];
+  const PREMIUM_AVATARS = ["red-panda", "capybara", "raccoon", "snow-leopard", "phoenix", "dragon", "unicorn", "otter", "chameleon"];
+  const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
+  const DECORATIONS = ["none", "aurora", "sunburst", "prism", "champion"];
+  const DAILY_STREAK_REWARD = 30;
   const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#f3cf32", leaf: "#22b66f", aqua: "#08b9c8", sky: "#347cf4", violet: "#7c45e8", berry: "#d83cac" });
   const ADVENTURE_TIERS = Object.freeze({
     easy: { title: "Sky Garden", art: "assets/adventure-zone-sky-ladder-v1.webp", alt: "An endless golden ladder rising through the current Adventure zone" },
@@ -28,12 +32,12 @@
   const MODE_CONFIG = Object.freeze({
     daily: { label: "Daily Puzzle", ready: "Daily puzzle ready." },
     practice: { label: "Practice Puzzle", ready: "Practice puzzle ready." },
-    sprint: { label: "Sprint Puzzle", ready: "Sprint started — 90 seconds." },
+    sprint: { label: "Time Tackle", ready: "Time Tackle started — ten minutes." },
     insight: { label: "Insight Puzzle", ready: "Insight ready — clue and reveal unlocked." },
     streak: { label: "Streak Puzzle", ready: "Streak puzzle ready." },
     adventure: { label: "Adventure Puzzle", ready: "Adventure level ready." }
   });
-  const defaultSettings = { hard: false, contrast: false, dark: false, music: true, effects: true, avatar: "fox", accent: "coral" };
+  const defaultSettings = { hard: false, contrast: false, dark: false, music: true, effects: true, avatar: "fox", accent: "coral", decoration: "none", unlockedAvatars: [], unlockedDecorations: [] };
   const defaultInventory = { sense: 0, peek: 0, clear: 0, skip: 0 };
 
   const els = {
@@ -50,10 +54,12 @@
     coinWallet: document.querySelector("#coin-wallet"),
     coinCount: document.querySelector("#coin-count"),
     statCoins: document.querySelector("#stat-coins"),
+    dailyRewardEarned: document.querySelector("#daily-reward-earned"),
     streakProgressCount: document.querySelector("#streak-progress-count"),
     streakProgressMessage: document.querySelector("#streak-progress-message"),
     streakProgressFill: document.querySelector("#streak-progress-fill"),
     streakTrack: document.querySelector("#streak-track"),
+    streakRewardPreview: document.querySelector("#streak-reward-preview"),
     modeButtons: [...document.querySelectorAll(".mode-button")],
     homeScreen: document.querySelector("#home-screen"),
     gameScreen: document.querySelector("#game-screen"),
@@ -77,6 +83,7 @@
     profileFastestWord: document.querySelector("#profile-fastest-word"),
     profileFastestTime: document.querySelector("#profile-fastest-time"),
     profileCoins: document.querySelector("#profile-coins"),
+    profileCustomize: document.querySelector("#profile-customize"),
     startButtons: [...document.querySelectorAll("[data-start-mode]")],
     skipDialog: document.querySelector("#skip-modal"),
     skipCopy: document.querySelector("#skip-copy"),
@@ -88,6 +95,7 @@
     countdown: document.querySelector("#countdown"),
     celebration: document.querySelector("#celebration"),
     avatarChoices: [...document.querySelectorAll("[data-avatar-option]")],
+    decorationChoices: [...document.querySelectorAll("[data-decoration-option]")],
     accentChoices: [...document.querySelectorAll("[data-accent-option]")],
     usernameDialog: document.querySelector("#username-modal"),
     usernameForm: document.querySelector("#username-onboarding-form"),
@@ -96,6 +104,8 @@
     settingsUsername: document.querySelector("#settings-username"),
     settingsUsernameSave: document.querySelector("#save-settings-username"),
     settingsUsernameMessage: document.querySelector("#settings-username-message"),
+    settingsDialog: document.querySelector("#settings-modal"),
+    identityStudio: document.querySelector(".identity-studio"),
     brandPlayerAvatar: document.querySelector("#brand-player-avatar"),
     favicon: document.querySelector("#app-favicon"),
     settings: {
@@ -110,7 +120,10 @@
   let mode = "daily";
   let game = null;
   let settings = loadSettings();
-  settings.avatar = AVATARS.includes(settings.avatar) ? settings.avatar : "fox";
+  settings.unlockedAvatars = [...new Set(Array.isArray(settings.unlockedAvatars) ? settings.unlockedAvatars : [])].filter(avatar => PREMIUM_AVATARS.includes(avatar));
+  settings.unlockedDecorations = [...new Set(Array.isArray(settings.unlockedDecorations) ? settings.unlockedDecorations : [])].filter(decoration => DECORATIONS.includes(decoration) && decoration !== "none");
+  settings.avatar = AVATARS.includes(settings.avatar) && (BASE_AVATARS.includes(settings.avatar) || settings.unlockedAvatars.includes(settings.avatar)) ? settings.avatar : "fox";
+  settings.decoration = DECORATIONS.includes(settings.decoration) && (settings.decoration === "none" || settings.unlockedDecorations.includes(settings.decoration)) ? settings.decoration : "none";
   settings.accent = ACCENTS[settings.accent] ? settings.accent : "coral";
   let playerIdentity = loadJson(STORAGE.identity, { name: "" });
   playerIdentity.name = cleanUsername(playerIdentity.name);
@@ -137,6 +150,7 @@
     seed: Number.isInteger(Number(stats.adventure?.seed)) && Number(stats.adventure.seed) > 0 ? Number(stats.adventure.seed) >>> 0 : createAdventureSeed(),
     level: Math.max(0, Math.min(Core.ADVENTURE_TOTAL, Math.floor(Number(stats.adventure?.level) || 0)))
   };
+  stats.lastDailyRewardStreak = Math.max(0, Math.floor(Number(stats.lastDailyRewardStreak) || 0));
   saveJson(STORAGE.stats, stats);
   let inputLocked = false;
   let toastTimer = null;
@@ -241,7 +255,7 @@
       modeRecorded: false,
       personalRecorded: false,
       startedAt: Date.now(),
-      deadline: gameMode === "sprint" ? Date.now() + 90000 : null
+      deadline: gameMode === "sprint" ? Date.now() + 600000 : null
     };
     if (gameMode === "insight") {
       const seed = [...answer.word].reduce((sum, letter) => sum + letter.charCodeAt(0), 0);
@@ -359,7 +373,7 @@
       node.setAttribute("aria-label", isComplete ? `Adventure level ${levelNumber}, complete` : isCurrent ? `Adventure level ${levelNumber}, current level` : `Adventure level ${levelNumber}, locked`);
       if (isCurrent) {
         node.setAttribute("aria-current", "step");
-        node.innerHTML = `<span class="avatar-art avatar-${settings.avatar}${animateProgress ? " is-climbing" : ""}" aria-hidden="true"></span><small aria-hidden="true">${levelNumber.toLocaleString()}</small>`;
+        node.innerHTML = `<span class="avatar-art avatar-${settings.avatar}${animateProgress ? " is-climbing" : ""}" data-decoration="${settings.decoration}" aria-hidden="true"></span><small aria-hidden="true">${levelNumber.toLocaleString()}</small>`;
         node.addEventListener("click", startAdventureLevel);
       } else {
         node.textContent = isComplete ? "✓" : levelNumber.toLocaleString();
@@ -534,6 +548,7 @@
     els.coinCount.textContent = stats.coins;
     els.coinWallet.setAttribute("aria-label", `${stats.coins} coin${stats.coins === 1 ? "" : "s"}`);
     els.statCoins.textContent = stats.coins;
+    document.dispatchEvent(new CustomEvent("sixth-sense-economy-change", { detail: { coins: stats.coins, inventory: { ...stats.inventory } } }));
   }
 
   function updateModeStatus() {
@@ -654,6 +669,7 @@
 
   function completeGame(won) {
     let reward = 0;
+    let streakReward = 0;
     if (won && !game.rewarded) {
       reward = Core.rewardForAttempts(game.guesses.length);
       stats.coins += reward;
@@ -677,6 +693,12 @@
         stats.currentStreak = stats.lastWinDate === Core.dateKey(yesterday) ? stats.currentStreak + 1 : 1;
         stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
         stats.lastWinDate = Core.dateKey();
+        if (stats.currentStreak % 7 === 0 && stats.lastDailyRewardStreak < stats.currentStreak) {
+          streakReward = DAILY_STREAK_REWARD;
+          stats.coins += streakReward;
+          stats.lastDailyRewardStreak = stats.currentStreak;
+          game.streakReward = streakReward;
+        }
       } else {
         stats.currentStreak = 0;
       }
@@ -687,7 +709,7 @@
       stats.bestModeStreak = Math.max(stats.bestModeStreak, stats.streakRun);
       game.modeRecorded = true;
     }
-    if (mode === "adventure" && won && !game.modeRecorded) {
+    if (mode === "adventure" && (won || game.skipped) && !game.modeRecorded) {
       if (Number(game.adventureLevel) === stats.adventure.level) stats.adventure.level = Math.min(Core.ADVENTURE_TOTAL, stats.adventure.level + 1);
       game.modeRecorded = true;
     }
@@ -695,7 +717,8 @@
     saveGame();
     renderLifelines();
     if (won) {
-      announce(reward ? `Solved in ${game.guesses.length} — +${reward} coins!` : "Beautiful intuition.");
+      const totalReward = reward + streakReward;
+      announce(totalReward ? `Solved in ${game.guesses.length} — +${totalReward} coins!` : "Beautiful intuition.");
       celebrate();
       playEffect("win");
     } else {
@@ -704,6 +727,10 @@
     }
     renderStats();
     updateResultControls();
+    if (mode === "adventure") {
+      setTimeout(openAdventureMap, 720);
+      return;
+    }
     setTimeout(() => document.querySelector("#stats-modal").showModal(), 800);
   }
 
@@ -800,7 +827,7 @@
   function openSkipConfirmation() {
     if (game.status !== "playing") return;
     if (!buyLifeline("skip", "Skip")) return;
-    els.skipCopy.textContent = mode === "daily" ? "Use one Skip? Today’s answer will be revealed and it counts as a loss." : mode === "streak" ? "Use one Skip? This puzzle ends and your Streak run resets." : mode === "adventure" ? "Use one Skip? This answer will be revealed, but the trail stays on this level until you solve it." : `Use one Skip? A fresh ${MODE_CONFIG[mode].label.toLowerCase()} will begin.`;
+    els.skipCopy.textContent = mode === "daily" ? "Use one Skip? Today’s answer will be revealed and it counts as a loss." : mode === "streak" ? "Use one Skip? This puzzle ends and your Streak run resets." : mode === "adventure" ? "Use one Skip? This word will be revealed and your token will move to the next rung." : `Use one Skip? A fresh ${MODE_CONFIG[mode].label.toLowerCase()} will begin.`;
     els.skipDialog.showModal();
   }
 
@@ -831,10 +858,12 @@
     const streakStep = stats.currentStreak ? ((stats.currentStreak - 1) % 7) + 1 : 0;
     const daysRemaining = 7 - streakStep;
     els.streakProgressCount.textContent = stats.currentStreak;
-    els.streakProgressMessage.textContent = daysRemaining === 0 ? "Full signal lit — keep it glowing" : `${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} to the full signal`;
+    els.streakProgressMessage.textContent = daysRemaining === 0 ? `Reward unlocked · +${DAILY_STREAK_REWARD} coins` : `${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} to +${DAILY_STREAK_REWARD} coins`;
     els.streakProgressFill.style.width = `${(streakStep / 7) * 100}%`;
     els.streakTrack.setAttribute("aria-valuenow", String(streakStep));
     els.streakTrack.setAttribute("aria-valuetext", `${stats.currentStreak} day streak; ${daysRemaining} days to the next seven-day signal`);
+    els.streakRewardPreview.classList.toggle("is-earned", daysRemaining === 0);
+    els.dailyRewardEarned.hidden = !(mode === "daily" && Number(game?.streakReward) > 0);
     document.querySelector("#stat-played").textContent = stats.played;
     document.querySelector("#stat-winrate").textContent = winrate;
     document.querySelector("#stat-streak").textContent = stats.currentStreak;
@@ -864,7 +893,7 @@
   function renderProfile() {
     const { progress } = adventureState();
     const bestStreak = Math.max(Number(stats.maxStreak) || 0, Number(stats.bestModeStreak) || 0);
-    els.profileAvatar.className = `avatar-art avatar-${settings.avatar}`;
+    decorateAvatar(els.profileAvatar);
     els.profileName.textContent = playerIdentity.name || "Player";
     els.profileZone.textContent = progress.complete ? "Adventure complete" : "Adventure in progress";
     els.profileWordsSolved.textContent = stats.completedWords.length.toLocaleString();
@@ -1101,20 +1130,77 @@
     else stopMusic();
   }
 
+  function decorateAvatar(element, avatar = settings.avatar, decoration = settings.decoration) {
+    if (!element) return;
+    element.className = `avatar-art avatar-${avatar}`;
+    element.dataset.decoration = decoration || "none";
+  }
+
+  function renderIdentityShop() {
+    els.avatarChoices.forEach(button => {
+      const avatar = button.dataset.avatarOption;
+      const unlocked = BASE_AVATARS.includes(avatar) || settings.unlockedAvatars.includes(avatar);
+      button.classList.toggle("is-locked", !unlocked);
+      button.setAttribute("aria-pressed", String(unlocked && avatar === settings.avatar));
+      const price = button.querySelector(":scope > small");
+      if (price) price.hidden = unlocked;
+      button.setAttribute("aria-label", unlocked ? `Choose ${avatar.replaceAll("-", " ")} avatar` : `Unlock ${avatar.replaceAll("-", " ")} avatar for ${button.dataset.unlockCost} coins`);
+    });
+    els.decorationChoices.forEach(button => {
+      const decoration = button.dataset.decorationOption;
+      const unlocked = decoration === "none" || settings.unlockedDecorations.includes(decoration);
+      button.classList.toggle("is-locked", !unlocked);
+      button.setAttribute("aria-pressed", String(unlocked && decoration === settings.decoration));
+      const price = button.querySelector(":scope > small");
+      if (price && decoration !== "none") price.hidden = unlocked;
+      decorateAvatar(button.querySelector(".avatar-art"), settings.avatar, decoration);
+    });
+  }
+
   function applySettings() {
     document.body.classList.toggle("is-dark", Boolean(settings.dark));
     document.body.classList.toggle("high-contrast", Boolean(settings.contrast));
     Object.entries(els.settings).forEach(([key, input]) => { input.checked = Boolean(settings[key]); });
     document.documentElement.style.setProperty("--player-accent", ACCENTS[settings.accent]);
     document.body.dataset.playerAvatar = settings.avatar;
-    els.brandPlayerAvatar.className = `avatar-art avatar-${settings.avatar}`;
-    els.profileAvatar.className = `avatar-art avatar-${settings.avatar}`;
+    decorateAvatar(els.brandPlayerAvatar);
+    decorateAvatar(els.profileAvatar);
     els.profileTrigger.setAttribute("aria-label", `Open ${playerIdentity.name || "your"} player profile`);
     els.settingsUsername.value = playerIdentity.name;
-    els.avatarChoices.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.avatarOption === settings.avatar)));
+    renderIdentityShop();
     els.accentChoices.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.accentOption === settings.accent)));
     document.querySelector('meta[name="theme-color"]').content = settings.dark ? "#150933" : "#6d31ec";
     syncAudioSettings();
+    document.dispatchEvent(new CustomEvent("sixth-sense-identity-change", { detail: { name: playerIdentity.name, avatar: settings.avatar, accent: settings.accent, decoration: settings.decoration } }));
+  }
+
+  function unlockCosmetic(button, type) {
+    const value = type === "avatar" ? button.dataset.avatarOption : button.dataset.decorationOption;
+    const unlocked = type === "avatar" ? BASE_AVATARS.includes(value) || settings.unlockedAvatars.includes(value) : value === "none" || settings.unlockedDecorations.includes(value);
+    if (!unlocked) {
+      const cost = Math.max(0, Number(button.dataset.unlockCost) || 0);
+      if (stats.coins < cost) {
+        els.settingsUsernameMessage.textContent = `${value.replaceAll("-", " ")} needs ${cost} coins. You have ${stats.coins}.`;
+        replayAnimation(button, "is-unavailable");
+        replayAnimation(els.coinWallet, "is-denied");
+        playEffect("denied");
+        return;
+      }
+      stats.coins -= cost;
+      if (type === "avatar") settings.unlockedAvatars.push(value);
+      else settings.unlockedDecorations.push(value);
+      els.settingsUsernameMessage.textContent = `${value.replaceAll("-", " ")} unlocked and equipped.`;
+      saveJson(STORAGE.stats, stats);
+      renderEconomy();
+      replayAnimation(els.coinWallet, "is-spending");
+      playEffect("purchase");
+    }
+    if (type === "avatar") settings.avatar = value;
+    else settings.decoration = value;
+    saveJson(STORAGE.settings, settings);
+    applySettings();
+    renderAdventure();
+    playEffect("choice", { semitone: Math.max(0, AVATARS.indexOf(settings.avatar)) });
   }
 
   function updateCountdown() {
@@ -1166,6 +1252,12 @@
     els.adventurePlay.addEventListener("click", startAdventureLevel);
     els.brand.addEventListener("click", event => { event.preventDefault(); showScreen("home"); playEffect("open"); });
     els.profileTrigger.addEventListener("click", () => { renderProfile(); els.profileDialog.showModal(); playEffect("open"); });
+    els.profileCustomize.addEventListener("click", () => {
+      closeDialog(els.profileDialog);
+      els.settingsDialog.showModal();
+      setTimeout(() => els.identityStudio.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 80);
+      playEffect("open");
+    });
     els.shareButton.addEventListener("click", shareResult);
     els.newPracticeButton.addEventListener("click", () => {
       closeDialog(document.querySelector("#stats-modal"));
@@ -1176,13 +1268,8 @@
       setMode(mode, true);
       showScreen("game");
     });
-    els.avatarChoices.forEach(button => button.addEventListener("click", () => {
-      settings.avatar = button.dataset.avatarOption;
-      saveJson(STORAGE.settings, settings);
-      applySettings();
-      renderAdventure();
-      playEffect("choice", { semitone: AVATARS.indexOf(settings.avatar) });
-    }));
+    els.avatarChoices.forEach(button => button.addEventListener("click", () => unlockCosmetic(button, "avatar")));
+    els.decorationChoices.forEach(button => button.addEventListener("click", () => unlockCosmetic(button, "decoration")));
     els.accentChoices.forEach(button => button.addEventListener("click", () => {
       settings.accent = button.dataset.accentOption;
       saveJson(STORAGE.settings, settings);
@@ -1231,6 +1318,27 @@
     };
     window.SixthSenseAdventure = {
       state: () => ({ ...stats.adventure, ...Core.adventureProgress(stats.adventure.level) })
+    };
+    window.SixthSenseEconomy = {
+      state: () => ({ coins: stats.coins, inventory: { ...stats.inventory }, costs: { ...Core.LIFELINE_COSTS } }),
+      purchase: kind => {
+        if (!Object.hasOwn(defaultInventory, kind) || stats.inventory[kind] > 0) return false;
+        if (!spendCoins(kind, kind[0].toUpperCase() + kind.slice(1))) return false;
+        stats.inventory[kind] += 1;
+        saveJson(STORAGE.stats, stats);
+        renderLifelines();
+        renderEconomy();
+        playEffect("purchase");
+        return true;
+      },
+      consume: kind => {
+        const consumed = consumeLifeline(kind);
+        if (consumed) {
+          renderLifelines();
+          renderEconomy();
+        }
+        return consumed;
+      }
     };
     applySettings();
     bindEvents();

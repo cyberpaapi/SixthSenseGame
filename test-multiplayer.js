@@ -14,8 +14,9 @@ assert(resumeToken.length >= 40, "resume tokens need strong entropy");
 assert.notEqual(tokenHash(resumeToken), resumeToken, "only a hash may be stored server-side");
 assert.equal(tokenHash(resumeToken), tokenHash(resumeToken), "resume-token hashing must be stable");
 
-assert.deepEqual(cleanPlayer({ name: "  Tiger   Ace  ", avatar: "tiger", accent: "aqua" }), { name: "Tiger Ace", avatar: "tiger", accent: "aqua" });
-assert.deepEqual(cleanPlayer({ name: "Player", avatar: "dragon", accent: "black" }), { name: "Player", avatar: "fox", accent: "coral" });
+assert.deepEqual(cleanPlayer({ name: "  Tiger   Ace  ", avatar: "tiger", accent: "aqua" }), { name: "Tiger Ace", avatar: "tiger", accent: "aqua", decoration: "none" });
+assert.deepEqual(cleanPlayer({ name: "Premium", avatar: "dragon", accent: "violet", decoration: "prism" }), { name: "Premium", avatar: "dragon", accent: "violet", decoration: "prism" });
+assert.deepEqual(cleanPlayer({ name: "Player", avatar: "unknown", accent: "black", decoration: "unknown" }), { name: "Player", avatar: "fox", accent: "coral", decoration: "none" });
 assert.throws(() => cleanPlayer({ name: "   " }), /Choose a player name/);
 
 for (const length of [3, 5, 10]) assert.deepEqual(normalizeGameLength("race", length), { wordCount: length, endless: false }, `${length}-word Race rooms must be accepted`);

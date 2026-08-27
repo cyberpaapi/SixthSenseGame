@@ -9,7 +9,8 @@ const ROOM_TTL_HOURS = 24;
 const RACE_LENGTHS = new Set([3, 5, 10]);
 const VS_LENGTHS = new Set([3, 5, 9]);
 const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#d4aa00", leaf: "#15985b", aqua: "#078995", sky: "#347cf4", violet: "#7c45e8", berry: "#c72b9b" });
-const AVATARS = new Set(["fox", "owl", "axolotl", "panda", "tiger", "koala", "frog", "rabbit", "penguin"]);
+const AVATARS = new Set(["fox", "owl", "axolotl", "panda", "tiger", "koala", "frog", "rabbit", "penguin", "red-panda", "capybara", "raccoon", "snow-leopard", "phoenix", "dragon", "unicorn", "otter", "chameleon"]);
+const DECORATIONS = new Set(["none", "aurora", "sunburst", "prism", "champion"]);
 let schemaPromise;
 
 function database() {
@@ -43,6 +44,7 @@ async function ensureSchema(sql) {
       display_name text NOT NULL,
       avatar text NOT NULL,
       accent text NOT NULL,
+      decoration text NOT NULL DEFAULT 'none',
       seat integer NOT NULL,
       current_word_index integer NOT NULL DEFAULT 0,
       attempts jsonb NOT NULL DEFAULT '[]'::jsonb,
@@ -51,6 +53,7 @@ async function ensureSchema(sql) {
       score integer NOT NULL DEFAULT 0,
       finished boolean NOT NULL DEFAULT false,
       eliminated boolean NOT NULL DEFAULT false,
+      lifeline_state jsonb NOT NULL DEFAULT '{}'::jsonb,
       revision integer NOT NULL DEFAULT 1,
       updated_at timestamptz NOT NULL DEFAULT now(),
       UNIQUE(room_code, seat)
@@ -60,6 +63,8 @@ async function ensureSchema(sql) {
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS current_round integer NOT NULL DEFAULT 0`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS last_round_winner_player_id uuid`;
     await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS score integer NOT NULL DEFAULT 0`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS decoration text NOT NULL DEFAULT 'none'`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS lifeline_state jsonb NOT NULL DEFAULT '{}'::jsonb`;
     await sql`ALTER TABLE sixth_sense_rooms DROP CONSTRAINT IF EXISTS sixth_sense_rooms_word_count_check`;
     await sql`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='sixth_sense_rooms_word_count_v2_check') THEN
@@ -84,7 +89,8 @@ function cleanPlayer(raw = {}) {
   return {
     name,
     avatar: AVATARS.has(raw.avatar) ? raw.avatar : "fox",
-    accent: ACCENTS[raw.accent] ? raw.accent : "coral"
+    accent: ACCENTS[raw.accent] ? raw.accent : "coral",
+    decoration: DECORATIONS.has(raw.decoration) ? raw.decoration : "none"
   };
 }
 
@@ -130,7 +136,7 @@ async function authenticate(sql, code, resumeToken) {
 }
 
 async function snapshot(sql, room, me) {
-  const players = await sql`SELECT id, display_name, avatar, accent, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated
+  const players = await sql`SELECT id, display_name, avatar, accent, decoration, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated, lifeline_state
     FROM sixth_sense_players WHERE room_code=${room.code} ORDER BY seat`;
   const normalized = players.map(player => {
     const attempts = parseJson(player.attempts, []);
@@ -140,6 +146,7 @@ async function snapshot(sql, room, me) {
       avatar: player.avatar,
       accent: player.accent,
       accentHex: ACCENTS[player.accent] || ACCENTS.coral,
+      decoration: player.decoration,
       seat: player.seat,
       currentWordIndex: room.mode === "vs" ? room.current_round : player.current_word_index,
       attempts: attempts.map(entry => entry.score),
@@ -171,7 +178,8 @@ async function snapshot(sql, room, me) {
       attempts: parseJson(own.attempts, []),
       score: own.score,
       finished: own.finished,
-      eliminated: own.eliminated
+      eliminated: own.eliminated,
+      lifelines: parseJson(own.lifeline_state, {})
     },
     players: normalized
   };
@@ -195,8 +203,8 @@ async function createRoom(sql, body) {
     code = null;
   }
   if (!code) throw Object.assign(new Error("Could not allocate a room code. Try again."), { status: 503 });
-  await sql`INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, seat)
-    VALUES (${playerId}, ${code}, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, 1)`;
+  await sql`INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat)
+    VALUES (${playerId}, ${code}, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, 1)`;
   const room = await getRoom(sql, code);
   const me = await authenticate(sql, code, resumeToken);
   return { roomCode: code, resumeToken, playerId, snapshot: await snapshot(sql, room, me) };
@@ -218,8 +226,8 @@ async function joinRoom(sql, body) {
           SELECT (COALESCE(MAX(seat),0) + 1)::int AS seat, COUNT(*)::int AS player_count
           FROM sixth_sense_players WHERE room_code=${code}
         )
-        INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, seat)
-        SELECT ${playerId}, locked_room.code, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, next_seat.seat
+        INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat)
+        SELECT ${playerId}, locked_room.code, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, next_seat.seat
         FROM locked_room CROSS JOIN next_seat WHERE next_seat.player_count < locked_room.capacity
           AND NOT EXISTS (SELECT 1 FROM sixth_sense_players WHERE room_code=locked_room.code AND lower(display_name)=lower(${player.name}))
         RETURNING *`;
@@ -321,7 +329,7 @@ async function submitVsGuess(sql, { code, guess, actionId, me, room }) {
   await sql`UPDATE sixth_sense_players SET attempts='[]'::jsonb,
       completed_rounds=CASE WHEN id=${roundWinnerId} THEN ${JSON.stringify(completedRounds)}::jsonb ELSE completed_rounds END,
       score=score + CASE WHEN id=${roundWinnerId} THEN 1 ELSE 0 END,
-      finished=${resolution.finished}, eliminated=false, revision=revision+1, updated_at=now()
+      finished=${resolution.finished}, eliminated=false, lifeline_state='{}'::jsonb, revision=revision+1, updated_at=now()
     WHERE room_code=${code}`;
   const own = (await sql`SELECT * FROM sixth_sense_players WHERE id=${me.id} LIMIT 1`)[0];
   return storeAction(sql, actionId, code, me.id, { snapshot: await snapshot(sql, updatedRooms[0], own) });
@@ -354,17 +362,21 @@ async function submitGuess(sql, body) {
   let failedBatches = me.failed_batches;
   let finished = false;
   let eliminated = false;
+  let lifelineState = parseJson(me.lifeline_state, {});
   if (won) {
     completedRounds = [...completedRounds, { wordIndex: me.current_word_index, attempts: attempts.length }];
     nextIndex += 1;
     nextAttempts = [];
+    lifelineState = {};
     finished = nextIndex >= room.word_count;
   } else if (exhausted && room.mode === "race") {
     failedBatches += 1;
     nextAttempts = [];
+    lifelineState = {};
   }
   const updated = await sql`UPDATE sixth_sense_players SET current_word_index=${nextIndex}, attempts=${JSON.stringify(nextAttempts)}::jsonb,
       completed_rounds=${JSON.stringify(completedRounds)}::jsonb, failed_batches=${failedBatches}, finished=${finished}, eliminated=${eliminated},
+      lifeline_state=${JSON.stringify(lifelineState)}::jsonb,
       revision=revision+1, updated_at=now()
     WHERE id=${me.id} AND revision=${me.revision} RETURNING *`;
   if (!updated.length) throw Object.assign(new Error("Two guesses arrived together; please submit again."), { status: 409 });
@@ -376,6 +388,96 @@ async function submitGuess(sql, body) {
   }
   const response = { snapshot: await snapshot(sql, activeRoom, updated[0]) };
   return storeAction(sql, actionId, code, me.id, response);
+}
+
+function activeAnswer(room, me) {
+  const answers = parseJson(room.answer_words, []);
+  const index = room.mode === "vs" ? Number(room.current_round) || 0 : Number(me.current_word_index) || 0;
+  return { answer: answers[index], index, answers };
+}
+
+async function submitLifeline(sql, body) {
+  const code = String(body.roomCode || "").toUpperCase();
+  const kind = String(body.kind || "").toLowerCase();
+  const actionId = String(body.actionId || "");
+  if (!/^[0-9a-f-]{36}$/i.test(actionId) || !["sense", "peek", "clear", "skip"].includes(kind)) throw Object.assign(new Error("Invalid lifeline request."), { status: 400 });
+  const me = await authenticate(sql, code, body.resumeToken);
+  const prior = await sql`SELECT response FROM sixth_sense_actions WHERE action_id=${actionId} AND player_id=${me.id}`;
+  if (prior.length) return parseJson(prior[0].response, prior[0].response);
+  const room = await getRoom(sql, code);
+  if (room.status !== "running" || me.finished) throw Object.assign(new Error("Lifelines are only available during an active match."), { status: 409 });
+  const { answer, index, answers } = activeAnswer(room, me);
+  if (!answer) throw Object.assign(new Error("The room puzzle state is incomplete."), { status: 409 });
+
+  if (kind === "skip" && room.mode === "vs") {
+    const players = await sql`SELECT id, score, completed_rounds FROM sixth_sense_players WHERE room_code=${code} ORDER BY seat`;
+    const opponent = players.find(player => player.id !== me.id);
+    if (!opponent) throw Object.assign(new Error("The opponent is no longer in this room."), { status: 409 });
+    const resolution = resolveVsRound({ currentRound: index, wordCount: room.word_count, endless: room.endless, players, roundWinnerId: opponent.id });
+    const nextAnswers = [...answers];
+    if (room.endless && nextAnswers.length <= resolution.nextRound) nextAnswers.push(chooseFreshAnswer(room.difficulty, nextAnswers));
+    const updatedRooms = await sql`UPDATE sixth_sense_rooms SET current_round=${resolution.nextRound}, last_round_winner_player_id=${opponent.id}, answer_words=${JSON.stringify(nextAnswers)}::jsonb,
+        status=${resolution.finished ? "finished" : "running"}, winner_player_id=${resolution.matchWinnerId}, revision=revision+1
+      WHERE code=${code} AND status='running' AND current_round=${index} AND revision=${room.revision} RETURNING *`;
+    if (!updatedRooms.length) throw Object.assign(new Error("The round changed while Skip was used."), { status: 409 });
+    const opponentRounds = [...parseJson(opponent.completed_rounds, []), { wordIndex: index, attempts: null, forfeit: true }];
+    await sql`UPDATE sixth_sense_players SET attempts='[]'::jsonb, lifeline_state='{}'::jsonb,
+        completed_rounds=CASE WHEN id=${opponent.id} THEN ${JSON.stringify(opponentRounds)}::jsonb ELSE completed_rounds END,
+        score=score + CASE WHEN id=${opponent.id} THEN 1 ELSE 0 END, finished=${resolution.finished}, revision=revision+1, updated_at=now()
+      WHERE room_code=${code}`;
+    const own = (await sql`SELECT * FROM sixth_sense_players WHERE id=${me.id} LIMIT 1`)[0];
+    return storeAction(sql, actionId, code, me.id, { effect: { kind, advanced: true }, snapshot: await snapshot(sql, updatedRooms[0], own) });
+  }
+
+  if (kind === "skip") {
+    const nextIndex = Number(me.current_word_index) + 1;
+    const finished = nextIndex >= Number(room.word_count);
+    const updated = await sql`UPDATE sixth_sense_players SET current_word_index=${nextIndex}, attempts='[]'::jsonb, lifeline_state='{}'::jsonb,
+        failed_batches=failed_batches+1, finished=${finished}, revision=revision+1, updated_at=now()
+      WHERE id=${me.id} AND revision=${me.revision} RETURNING *`;
+    if (!updated.length) throw Object.assign(new Error("The word changed while Skip was used."), { status: 409 });
+    return storeAction(sql, actionId, code, me.id, { effect: { kind, advanced: true }, snapshot: await snapshot(sql, room, updated[0]) });
+  }
+
+  const priorState = parseJson(me.lifeline_state, {});
+  const lifelines = Number(priorState.round) === index ? priorState : { round: index, clue: "", peeked: [], eliminatedLetters: [] };
+  let effect;
+  if (kind === "sense") {
+    lifelines.clue = lifelines.clue || Core.ANSWERS.find(item => item.word === answer)?.clue || "A familiar six-letter word.";
+    effect = { kind, clue: lifelines.clue };
+  } else if (kind === "peek") {
+    const used = new Set((lifelines.peeked || []).map(entry => Number(entry.position)));
+    const candidates = Array.from({ length: Core.WORD_LENGTH }, (_, position) => position).filter(position => !used.has(position));
+    if (!candidates.length) throw Object.assign(new Error("Every position is already revealed."), { status: 409 });
+    const seed = crypto.createHash("sha256").update(`${answer}:${me.id}:${candidates.length}`).digest().readUInt32BE(0);
+    const position = candidates[seed % candidates.length];
+    const reveal = { position, letter: answer[position] };
+    lifelines.peeked = [...(lifelines.peeked || []), reveal];
+    effect = { kind, ...reveal };
+  } else {
+    const used = new Set(lifelines.eliminatedLetters || []);
+    const candidates = "abcdefghijklmnopqrstuvwxyz".split("").filter(letter => !answer.includes(letter) && !used.has(letter));
+    if (!candidates.length) throw Object.assign(new Error("There are no more impossible letters to remove."), { status: 409 });
+    const seed = crypto.createHash("sha256").update(`${answer}:${me.id}:${candidates.length}`).digest().readUInt32BE(0);
+    const removed = Array.from({ length: Math.min(3, candidates.length) }, (_, offset) => candidates[(seed + offset) % candidates.length]);
+    lifelines.eliminatedLetters = [...used, ...removed];
+    effect = { kind, letters: removed };
+  }
+  const updated = await sql`UPDATE sixth_sense_players SET lifeline_state=${JSON.stringify(lifelines)}::jsonb, revision=revision+1, updated_at=now()
+    WHERE id=${me.id} AND revision=${me.revision} RETURNING *`;
+  if (!updated.length) throw Object.assign(new Error("Two actions arrived together; please try again."), { status: 409 });
+  return storeAction(sql, actionId, code, me.id, { effect, snapshot: await snapshot(sql, room, updated[0]) });
+}
+
+async function updateIdentity(sql, body) {
+  const code = String(body.roomCode || "").toUpperCase();
+  const me = await authenticate(sql, code, body.resumeToken);
+  const player = cleanPlayer(body.player);
+  const updated = await sql`UPDATE sixth_sense_players SET display_name=${player.name}, avatar=${player.avatar}, accent=${player.accent}, decoration=${player.decoration}, revision=revision+1, updated_at=now()
+    WHERE id=${me.id} AND NOT EXISTS (SELECT 1 FROM sixth_sense_players WHERE room_code=${code} AND id<>${me.id} AND lower(display_name)=lower(${player.name})) RETURNING *`;
+  if (!updated.length) throw Object.assign(new Error("That username is already taken in this room."), { status: 409 });
+  const room = await getRoom(sql, code);
+  return { snapshot: await snapshot(sql, room, updated[0]) };
 }
 
 async function getSnapshot(sql, body) {
@@ -401,6 +503,8 @@ async function handler(request, response) {
     else if (body.action === "join") result = await joinRoom(sql, body);
     else if (body.action === "start") result = await startMatch(sql, body);
     else if (body.action === "guess") result = await submitGuess(sql, body);
+    else if (body.action === "lifeline") result = await submitLifeline(sql, body);
+    else if (body.action === "identity") result = await updateIdentity(sql, body);
     else if (body.action === "snapshot") result = await getSnapshot(sql, body);
     else throw Object.assign(new Error("Unknown multiplayer action."), { status: 400 });
     return response.status(200).json(result);

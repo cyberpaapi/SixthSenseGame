@@ -44,7 +44,8 @@
     roundTitle: document.querySelector("#online-round-title"),
     roundScore: document.querySelector("#online-round-score"),
     start: document.querySelector("#online-start"),
-    leave: document.querySelector("#online-leave")
+    leave: document.querySelector("#online-leave"),
+    lifelines: [...document.querySelectorAll("[data-online-lifeline]")]
   };
 
   const state = {
@@ -74,9 +75,14 @@
   }
 
   function identity() {
-    const settings = readJson(SETTINGS_KEY, { avatar: "fox", accent: "coral" });
+    const settings = readJson(SETTINGS_KEY, { avatar: "fox", accent: "coral", decoration: "none" });
     const saved = readJson(IDENTITY_KEY, { name: "" });
-    return { name: (els.name.value || saved.name || "Player").trim().slice(0, 18), avatar: settings.avatar || "fox", accent: settings.accent || "coral" };
+    return { name: (els.name.value || saved.name || "Player").trim().slice(0, 18), avatar: settings.avatar || "fox", accent: settings.accent || "coral", decoration: settings.decoration || "none" };
+  }
+
+  function decorateAvatar(element, player) {
+    element.className = `avatar-art avatar-${player.avatar}`;
+    element.dataset.decoration = player.decoration || "none";
   }
 
   function setLobbyMessage(message, error = false) {
@@ -94,7 +100,7 @@
     const savedIdentity = readJson(IDENTITY_KEY, { name: "" });
     els.name.value = savedIdentity.name || "";
     const player = identity();
-    els.preview.className = `avatar-art avatar-${player.avatar}`;
+    decorateAvatar(els.preview, player);
     setLobbyMessage("");
     els.lobby.showModal();
     playAudio("room");
@@ -253,6 +259,7 @@
     els.start.hidden = !(room.status === "waiting" && snapshot.me.isHost && snapshot.players.length >= 2);
     renderBoard();
     renderKeyboard();
+    renderLifelines();
     renderProgress();
     if (roundAdvanced) showRoundTransition();
   }
@@ -298,6 +305,7 @@
 
   function renderBoard() {
     const attempts = currentAttempts();
+    const peeked = new Map((state.snapshot?.me?.lifelines?.peeked || []).map(entry => [Number(entry.position), entry.letter]));
     els.board.innerHTML = "";
     for (let rowIndex = 0; rowIndex < Core.MAX_GUESSES; rowIndex += 1) {
       const row = document.createElement("div");
@@ -309,10 +317,11 @@
         const tile = document.createElement("div");
         const letter = letters[column] || "";
         const status = prior?.score[column];
-        tile.className = `tile${status ? ` ${status}` : ""}`;
+        const peekedLetter = !prior && rowIndex === attempts.length && !letter ? peeked.get(column) : "";
+        tile.className = `tile${status ? ` ${status}` : ""}${peekedLetter ? " peeked" : ""}`;
         tile.setAttribute("role", "gridcell");
         tile.setAttribute("aria-label", status ? `${letter.toUpperCase()}, ${status}` : letter ? letter.toUpperCase() : "empty");
-        tile.textContent = letter;
+        tile.textContent = peekedLetter || letter;
         if (status) {
           const marker = document.createElement("small");
           marker.textContent = MARKERS[status];
@@ -336,6 +345,7 @@
 
   function renderKeyboard() {
     const states = keyStates();
+    const eliminated = new Set(state.snapshot?.me?.lifelines?.eliminatedLetters || []);
     const canPlay = state.snapshot?.room.status === "running" && !state.snapshot.me.finished && currentAttempts().length < Core.MAX_GUESSES && !state.busy;
     els.keyboard.innerHTML = "";
     KEY_ROWS.forEach(keys => {
@@ -346,8 +356,8 @@
         const letter = key.length === 1 ? key.toLowerCase() : key;
         const status = states[letter];
         button.type = "button";
-        button.disabled = !canPlay;
-        button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}`;
+        button.disabled = !canPlay || (key.length === 1 && eliminated.has(letter));
+        button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}${eliminated.has(letter) ? " is-eliminated" : ""}`;
         button.dataset.onlineKey = key;
         button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : key === "ENTER" ? "Submit guess" : `Letter ${key}${status ? `, ${status}` : ""}`);
         if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
@@ -373,7 +383,7 @@
       state.current = state.current.slice(0, -1);
       playAudio("delete");
     }
-    else if (/^[A-Z]$/.test(key) && state.current.length < Core.WORD_LENGTH) {
+    else if (/^[A-Z]$/.test(key) && state.current.length < Core.WORD_LENGTH && !(state.snapshot?.me?.lifelines?.eliminatedLetters || []).includes(key.toLowerCase())) {
       state.current += key.toLowerCase();
       playAudio("letter", { semitone: (key.charCodeAt(0) - 65) % 7 });
     }
@@ -401,6 +411,78 @@
     finally { state.busy = false; renderKeyboard(); }
   }
 
+  function renderLifelines() {
+    const economy = window.SixthSenseEconomy?.state() || { inventory: {}, costs: Core.LIFELINE_COSTS };
+    const active = state.snapshot?.room.status === "running" && !state.snapshot?.me.finished && !state.busy;
+    const effects = state.snapshot?.me?.lifelines || {};
+    const names = { sense: "Sense", peek: "Peek", clear: "Clear", skip: "Skip" };
+    els.lifelines.forEach(item => {
+      const kind = item.dataset.onlineLifeline;
+      const button = item.querySelector("button");
+      const stock = item.querySelector(".lifeline-stock");
+      const price = item.querySelector(".lifeline-price");
+      const stored = Math.max(0, Number(economy.inventory?.[kind]) || 0);
+      const senseUnlocked = kind === "sense" && Boolean(effects.clue);
+      const exhausted = kind === "peek" && (effects.peeked || []).length >= Core.WORD_LENGTH;
+      const available = !exhausted;
+      stock.hidden = !(stored > 0 || senseUnlocked);
+      stock.querySelector("b").textContent = senseUnlocked ? "1" : stored;
+      price.hidden = !active || !available || stored > 0 || senseUnlocked;
+      price.querySelector("b").textContent = economy.costs?.[kind] ?? Core.LIFELINE_COSTS[kind];
+      button.disabled = !active || !available;
+      button.setAttribute("aria-label", senseUnlocked ? "Sense: show the clue again" : stored > 0 ? `${names[kind]}: use one, ${stored} available` : `${names[kind]}: buy for ${Core.LIFELINE_COSTS[kind]} coins`);
+    });
+  }
+
+  function showLifelineEffect(effect) {
+    if (!effect) return;
+    if (effect.kind === "sense") els.status.textContent = effect.clue;
+    else if (effect.kind === "peek") els.status.textContent = `Peek: position ${Number(effect.position) + 1} is ${String(effect.letter).toUpperCase()}.`;
+    else if (effect.kind === "clear") els.status.textContent = `Clear removed ${effect.letters.map(letter => letter.toUpperCase()).join(", ")}.`;
+    else els.status.textContent = "Skip used — moving on.";
+    playAudio(effect.kind === "sense" ? "hint" : effect.kind);
+  }
+
+  async function useLifeline(item) {
+    const kind = item.dataset.onlineLifeline;
+    if (state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
+    const currentEffect = state.snapshot.me.lifelines || {};
+    if (kind === "sense" && currentEffect.clue) {
+      showLifelineEffect({ kind, clue: currentEffect.clue });
+      return;
+    }
+    const economy = window.SixthSenseEconomy;
+    if (!economy) return;
+    const wallet = economy.state();
+    if ((Number(wallet.inventory?.[kind]) || 0) < 1) {
+      if (economy.purchase(kind)) {
+        item.classList.remove("is-purchased");
+        void item.offsetWidth;
+        item.classList.add("is-purchased");
+        renderLifelines();
+      }
+      return;
+    }
+    state.busy = true;
+    renderKeyboard();
+    renderLifelines();
+    try {
+      const result = await api("lifeline", { roomCode: state.roomCode, resumeToken: state.token, kind, actionId: crypto.randomUUID() });
+      economy.consume(kind);
+      state.snapshot = result.snapshot;
+      state.current = "";
+      renderSnapshot();
+      showLifelineEffect(result.effect);
+      schedulePoll(250);
+    } catch (error) {
+      setPlayStatus(friendlyError(error));
+    } finally {
+      state.busy = false;
+      renderKeyboard();
+      renderLifelines();
+    }
+  }
+
   function setPlayStatus(message) {
     els.status.textContent = message;
     els.status.classList.remove("is-shaking");
@@ -416,12 +498,34 @@
       ? (Number(b.score) - Number(a.score) || a.seat - b.seat)
       : (b.currentWordIndex - a.currentWordIndex || a.seat - b.seat));
     els.progress.innerHTML = "";
+    els.progress.classList.toggle("is-race", !isVs);
+    if (!isVs) {
+      const course = document.createElement("div");
+      course.className = "race-course";
+      const courseHeight = Math.max(82, sorted.length * 10 + 46);
+      course.style.minHeight = `${courseHeight}px`;
+      course.innerHTML = '<span class="race-course-rail" aria-hidden="true"></span><span class="race-course-finish" aria-label="Finish line"></span>';
+      sorted.forEach((player, lane) => {
+        const completed = Math.min(player.currentWordIndex, snapshot.room.wordCount);
+        const progress = snapshot.room.wordCount ? (completed / snapshot.room.wordCount) * 100 : 0;
+        const token = document.createElement("span");
+        token.className = "race-token";
+        token.style.left = `${Math.max(6, Math.min(91, 6 + progress * .85))}%`;
+        token.style.top = `${courseHeight / 2 - 17 + (lane - (sorted.length - 1) / 2) * 9}px`;
+        token.title = `${player.name}: ${completed} of ${snapshot.room.wordCount}`;
+        const art = document.createElement("span");
+        decorateAvatar(art, player);
+        token.append(art, Object.assign(document.createElement("small"), { textContent: player.name }));
+        course.appendChild(token);
+      });
+      els.progress.appendChild(course);
+    }
     sorted.forEach((player, rank) => {
       const card = document.createElement("article");
       card.className = `player-progress${player.id === snapshot.me.id ? " is-self" : ""}`;
       card.style.setProperty("--accent", player.accentHex);
       const avatar = document.createElement("span");
-      avatar.className = `avatar-art avatar-${player.avatar}`;
+      decorateAvatar(avatar, player);
       avatar.setAttribute("aria-hidden", "true");
       const copy = document.createElement("div");
       copy.className = "player-progress-copy";
@@ -430,12 +534,7 @@
         ? `${completedWords} / ${snapshot.room.wordCount} words`
         : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${Core.MAX_GUESSES} attempts`;
       copy.innerHTML = `<strong>${escapeHtml(player.name)}${player.id === snapshot.me.id ? " · You" : ""}</strong><small>${label}</small>`;
-      if (!isVs) {
-        const track = document.createElement("span");
-        track.className = "race-track";
-        track.innerHTML = `<i style="--progress:${Math.min(100, (completedWords / snapshot.room.wordCount) * 100)}%"></i>`;
-        copy.appendChild(track);
-      } else {
+      if (isVs) {
         if (!snapshot.room.endless) {
           const track = document.createElement("span");
           track.className = "series-track";
@@ -482,6 +581,21 @@
   els.joinCode.addEventListener("input", () => { els.joinCode.value = els.joinCode.value.replace(/[^a-z0-9]/gi, "").toUpperCase(); });
   els.start.addEventListener("click", startMatch);
   els.leave.addEventListener("click", leaveRoom);
+  els.lifelines.forEach(item => item.querySelector("button").addEventListener("click", () => useLifeline(item)));
+  document.addEventListener("sixth-sense-economy-change", renderLifelines);
+  document.addEventListener("sixth-sense-identity-change", async event => {
+    if (!state.snapshot || !state.roomCode || !state.token) {
+      if (els.lobby.open) decorateAvatar(els.preview, identity());
+      return;
+    }
+    try {
+      const result = await api("identity", { roomCode: state.roomCode, resumeToken: state.token, player: event.detail || identity() });
+      state.snapshot = result.snapshot;
+      renderSnapshot();
+    } catch (error) {
+      els.status.textContent = friendlyError(error);
+    }
+  });
   document.querySelector(".brand").addEventListener("click", () => { if (!els.screen.hidden) leaveRoom(); });
   document.addEventListener("keydown", event => {
     if (els.screen.hidden || event.ctrlKey || event.metaKey || event.altKey) return;

@@ -18,7 +18,7 @@ Then open `http://localhost:4173`.
 
 ## Included
 
-- Eight modes: Daily, Adventure, Practice, Sprint, Insight, Streak, private-room Race, and live one-on-one VS
+- Eight modes: Daily, Adventure, Practice, ten-minute Time Tackle, Insight, Streak, private-room Race, and live one-on-one VS
 - A persistent 10,187-level Adventure signal trail with a per-device randomized route: all 4,309 Normal words, then 1,995 Hard words, then 3,883 Extreme words
 - Separate home and play screens, keeping the puzzle view focused
 - 10,187 clueable answers in Normal (4,309), Hard (1,995), and Extreme (3,883) player-facing tiers
@@ -29,6 +29,7 @@ Then open `http://localhost:4173`.
 - Price-under-icon and top-right inventory badges that never show redundant zeroes
 - A fixed one-viewport play layout with no page-level game-screen scrolling
 - Persistent coin wallet with attempt-based solve rewards (14 coins down to 2)
+- A visible 30-coin reward every seven consecutive Daily wins
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; each Peek and Clear finds fresh information
 - Sense clues appear in a centered five-second bubble and can be reopened anytime
@@ -38,9 +39,9 @@ Then open `http://localhost:4173`.
 - An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
 - Statistics, streaks, countdown, and result sharing
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
-- Nine original generated animal avatars with a persistent highlight-color picker
+- Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
-- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with visible names/scores, refresh rejoin, live attempt patterns, and synchronized new-word transitions
+- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with explicit leave controls, shared lifelines, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 
 ## Verify

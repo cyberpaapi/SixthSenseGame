@@ -89,10 +89,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator(".mode-spark").count(), 0);
     assert.equal(await page.locator("#coin-count").textContent(), "20");
     assert.equal(await page.locator(".topbar #coin-wallet").isVisible(), true);
-    assert.equal(await page.locator(".lifeline-button img").count(), 4);
-    assert.equal(await page.locator(".lifeline-price:visible").count(), 4);
-    assert.equal(await page.locator(".lifeline-stock:visible").count(), 0);
-    const lifelineSizing = await page.locator(".lifeline-button").first().evaluate(button => {
+    assert.equal(await page.locator("#game-screen .lifeline-button img").count(), 4);
+    assert.equal(await page.locator("#game-screen .lifeline-price:visible").count(), 4);
+    assert.equal(await page.locator("#game-screen .lifeline-stock:visible").count(), 0);
+    const lifelineSizing = await page.locator("#game-screen .lifeline-button").first().evaluate(button => {
       const hit = button.getBoundingClientRect();
       const art = button.querySelector("img").getBoundingClientRect();
       return { hit: hit.width, art: art.width };
@@ -106,7 +106,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const layoutMetrics = await page.evaluate(() => {
       const board = document.querySelector("#game-board").getBoundingClientRect();
       const keyboard = document.querySelector("#keyboard").getBoundingClientRect();
-      const centers = [...document.querySelectorAll(".lifeline-button")].map(button => {
+      const centers = [...document.querySelectorAll("#game-screen .lifeline-button")].map(button => {
         const rect = button.getBoundingClientRect();
         return rect.left + rect.width / 2;
       });
@@ -236,6 +236,25 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await compactPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "360×800 Adventure map must not scroll vertically");
     await compact.close();
 
+    const rewardContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const rewardPage = await rewardContext.newPage();
+    const yesterdayKey = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    await rewardPage.addInitScript(yesterday => {
+      localStorage.setItem("sixth-sense.visited.v1", "yes");
+      localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RewardFox" }));
+      localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 0, currentStreak: 6, maxStreak: 6, lastWinDate: yesterday, distribution: [0,0,0,0,0,0,0] }));
+    }, yesterdayKey);
+    await rewardPage.goto(baseUrl, { waitUntil: "networkidle" });
+    await rewardPage.click('[data-start-mode="daily"]');
+    const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
+    for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
+    await rewardPage.click('[data-key="ENTER"]');
+    await rewardPage.waitForSelector("#stats-modal[open]", { timeout: 4000 });
+    assert.equal(await rewardPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).streakReward), 30, "the seventh consecutive Daily solve must grant the streak reward");
+    assert.equal(await rewardPage.locator("#daily-reward-earned").isVisible(), true, "the earned streak reward must be shown with an icon");
+    await rewardContext.close();
+
     const adventure = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const adventurePage = await adventure.newPage();
     await adventurePage.addInitScript(() => {
@@ -290,10 +309,9 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const adventureAnswer = await adventurePage.evaluate(seed => window.SixthSenseCore.adventureAnswer(0, seed).word, adventureSeed);
     for (const letter of adventureAnswer) await adventurePage.click(`[data-key="${letter.toUpperCase()}"]`);
     await adventurePage.click('[data-key="ENTER"]');
-    await adventurePage.waitForSelector("#stats-modal[open]", { timeout: 4000 });
+    await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
     assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 1, "winning must advance exactly one Adventure level");
-    assert.equal(await adventurePage.locator("#new-practice-button").textContent(), "Continue the trail");
-    await adventurePage.click("#new-practice-button");
+    assert.equal(await adventurePage.locator("#stats-modal").isHidden(), true, "Adventure should return straight to its map instead of opening results");
     assert.equal(await adventurePage.locator("#adventure-screen").isVisible(), true);
     assert.equal(await adventurePage.locator(".adventure-level-node").count(), 8, "level two should retain an eight-level image window");
     assert.equal(await adventurePage.locator('.adventure-level-node[aria-current="step"] .avatar-art').count(), 1);
@@ -313,6 +331,12 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.match(await adventurePage.locator("#profile-fastest-time").textContent(), /^Solved in /);
     assert.equal(await adventurePage.locator("#profile-zone").textContent(), "Adventure in progress");
     await adventurePage.click("#profile-modal .modal-close");
+    await adventurePage.click("#adventure-play");
+    await adventurePage.click("#skip-puzzle-button");
+    await adventurePage.click("#skip-puzzle-button");
+    await adventurePage.click("#confirm-skip-button");
+    await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
+    assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 2, "Adventure Skip must return to the map and advance the token exactly one rung");
     await adventurePage.screenshot({ path: path.join(evidenceDir, "adventure-map-390x844.png"), fullPage: true });
     await adventure.close();
 
@@ -336,6 +360,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await modesPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ModeFox" }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 100 }));
     });
     await modesPage.goto(baseUrl, { waitUntil: "networkidle" });
     await modesPage.click('[data-modal-open="settings-modal"]');
@@ -355,7 +380,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const audioState = await modesPage.evaluate(() => window.SixthSenseAudio.state());
     assert.deepEqual({ music: audioState.music, effects: audioState.effects, unlocked: audioState.unlocked, musicRunning: audioState.musicRunning }, { music: true, effects: true, unlocked: true, musicRunning: true }, "music and effects should restart independently after a user gesture");
     assert(audioState.scheduledEffects >= 2, "sound-effect interactions should reach the audio engine");
-    assert.equal(await modesPage.locator(".avatar-choice").count(), 9);
+    assert.equal(await modesPage.locator(".avatar-choice").count(), 18);
+    assert.equal(await modesPage.locator("[data-decoration-option]").count(), 5);
     assert.equal(await modesPage.locator("[data-accent-option]").count(), 8);
     await modesPage.click('[data-avatar-option="tiger"]');
     await modesPage.click('[data-accent-option="aqua"]');
@@ -363,6 +389,11 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await modesPage.locator("#brand-player-avatar").evaluate(element => element.classList.contains("avatar-tiger")), "the chosen avatar should immediately replace the header icon");
     assert.equal(await modesPage.locator('[data-accent-option="aqua"]').getAttribute("aria-pressed"), "true");
     assert.deepEqual(await modesPage.evaluate(() => { const s=JSON.parse(localStorage.getItem("sixth-sense.settings.v1")); return { avatar:s.avatar, accent:s.accent }; }), { avatar: "tiger", accent: "aqua" });
+    await modesPage.click('[data-avatar-option="red-panda"]');
+    assert(await modesPage.locator("#brand-player-avatar").evaluate(element => element.classList.contains("avatar-red-panda")), "a purchased premium avatar should apply immediately");
+    assert.equal(await modesPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins), 55, "premium avatars must spend their shown coin price");
+    await modesPage.click('[data-decoration-option="aurora"]');
+    assert.equal(await modesPage.locator("#brand-player-avatar").getAttribute("data-decoration"), "aurora", "a purchased highlight should apply immediately");
     assert.equal(await modesPage.locator("#settings-username").inputValue(), "ModeFox");
     await modesPage.fill("#settings-username", "TigerNova");
     await modesPage.click("#save-settings-username");
@@ -371,12 +402,14 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await modesPage.click("#settings-modal .modal-close");
     await modesPage.click("#profile-trigger");
     assert.equal(await modesPage.locator("#profile-name").textContent(), "TigerNova", "profile must show the chosen username");
-    await modesPage.click("#profile-modal .modal-close");
+    await modesPage.click("#profile-customize");
+    assert.equal(await modesPage.locator("#settings-modal").isVisible(), true, "the top-left avatar profile must link to avatar controls");
+    await modesPage.click("#settings-modal .modal-close");
 
     await modesPage.click('[data-start-mode="sprint"]');
-    assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Sprint Puzzle");
+    assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Time Tackle");
     assert.match(await modesPage.locator("#mode-detail").textContent(), /^\d{2}:\d{2}$/);
-    assert(await modesPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "Sprint game must not scroll");
+    assert(await modesPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "Time Tackle game must not scroll");
     await modesPage.click(".brand");
     await modesPage.click('[data-start-mode="insight"]');
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Insight Puzzle");
@@ -400,10 +433,16 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       me: { id: "self", isHost: true, currentWordIndex: 0, attempts: [], score: 0, finished: false, eliminated: false },
       players: [{ id: "self", name: "TigerAce", avatar: "tiger", accent: "aqua", accentHex: "#078995", seat: 1, currentWordIndex: 0, attempts: [], score: 0, finished: false, eliminated: false }]
     };
+    const raceCreatedSnapshot = {
+      room: { code: "RACE55", mode: "race", difficulty: "easy", wordCount: 3, endless: false, currentRound: 0, lastRoundWinnerPlayerId: null, status: "waiting", revision: 1, winnerPlayerId: null },
+      me: { id: "self", isHost: true, currentWordIndex: 0, attempts: [], score: 0, finished: false, eliminated: false, lifelines: {} },
+      players: [{ id: "self", name: "TigerAce", avatar: "tiger", accent: "aqua", accentHex: "#078995", decoration: "none", seat: 1, currentWordIndex: 0, attempts: [], score: 0, finished: false, eliminated: false }]
+    };
     let sharedRound = 0;
+    let selfLifelines = {};
     const versusSnapshot = viewerId => ({
       room: { code: "SENSE6", mode: "vs", difficulty: "easy", wordCount: 9, endless: false, currentRound: sharedRound, lastRoundWinnerPlayerId: sharedRound ? "host" : null, status: "running", revision: 2 + sharedRound, winnerPlayerId: null },
-      me: { id: viewerId, isHost: viewerId === "host", currentWordIndex: sharedRound, attempts: [], score: viewerId === "host" && sharedRound ? 1 : 0, finished: false, eliminated: false },
+      me: { id: viewerId, isHost: viewerId === "host", currentWordIndex: sharedRound, attempts: [], score: viewerId === "host" && sharedRound ? 1 : 0, finished: false, eliminated: false, lifelines: viewerId === "self" ? selfLifelines : {} },
       players: [
         { id: "host", name: "OwlStar", avatar: "owl", accent: "violet", accentHex: "#7c45e8", seat: 1, currentWordIndex: sharedRound, attempts: sharedRound ? [] : [["absent","present","exact","absent","present","absent"]], score: sharedRound ? 1 : 0, finished: false, eliminated: false },
         { id: "self", name: "TigerAce", avatar: "tiger", accent: "aqua", accentHex: "#078995", seat: 2, currentWordIndex: sharedRound, attempts: [], score: 0, finished: false, eliminated: false }
@@ -415,11 +454,15 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       let payload;
       if (body.action === "create") {
         createPayload = body;
-        payload = { roomCode: "DUEL55", resumeToken: "create-token", playerId: "self", snapshot: createdSnapshot };
+        const isRace = body.mode === "race";
+        payload = { roomCode: isRace ? "RACE55" : "DUEL55", resumeToken: "create-token", playerId: "self", snapshot: isRace ? raceCreatedSnapshot : createdSnapshot };
       } else if (body.action === "join") {
         const viewerId = body.player.name === "OwlStar" ? "host" : "self";
         payload = { roomCode: "SENSE6", resumeToken: `${viewerId}-token`, playerId: viewerId, snapshot: versusSnapshot(viewerId) };
-      } else if (body.resumeToken === "create-token") payload = { snapshot: createdSnapshot };
+      } else if (body.action === "lifeline") {
+        selfLifelines = { round: sharedRound, clue: "A test clue", peeked: [], eliminatedLetters: [] };
+        payload = { effect: { kind: "sense", clue: "A test clue" }, snapshot: versusSnapshot("self") };
+      } else if (body.resumeToken === "create-token") payload = { snapshot: createPayload?.mode === "race" ? raceCreatedSnapshot : createdSnapshot };
       else payload = { snapshot: versusSnapshot(body.resumeToken === "host-token" ? "host" : "self") };
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) });
     };
@@ -452,6 +495,12 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await onlinePage.locator(".attempt-patterns > span").count(), 1, "VS should show the opponent's attempt pattern live");
     assert.equal(await onlinePage.locator("#online-board .tile").count(), 42);
     assert.equal(await onlinePage.locator("#online-keyboard .key").count(), 28);
+    assert.equal(await onlinePage.locator("[data-online-lifeline]").count(), 4, "multiplayer must expose all four lifelines");
+    assert.equal(await onlinePage.locator("#online-leave").textContent().then(text => text.trim()), "Leave game", "every multiplayer mode needs an explicit exit");
+    await onlinePage.click('[data-online-lifeline="sense"] button');
+    await onlinePage.click('[data-online-lifeline="sense"] button');
+    await onlinePage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent === "A test clue");
+    assert.equal(await onlinePage.locator('[data-online-lifeline="sense"] .lifeline-stock').isVisible(), true, "used Sense should remain reopenable in multiplayer");
     const onlineOverflow = await onlinePage.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
@@ -487,6 +536,14 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.match(await onlinePage.locator("#online-versus-names").textContent(), /OwlStar 1VS0 TigerAce/);
     assert.equal(await onlinePage.locator("#online-board .tile.exact, #online-board .tile.present, #online-board .tile.absent").count(), 0, "both boards must clear for the new shared word");
     await onlinePage.screenshot({ path: path.join(evidenceDir, "multiplayer-vs-390x844.png"), fullPage: true });
+    await onlinePage.click("#online-leave");
+    await onlinePage.click('[data-open-online="race"]');
+    await onlinePage.click("#online-create-room");
+    await onlinePage.waitForSelector(".race-course");
+    assert.equal(await onlinePage.locator(".race-token .avatar-art").count(), 1, "Race must place player avatars directly on the shared course");
+    assert.match(await onlinePage.locator(".race-course-rail").evaluate(element => getComputedStyle(element).backgroundImage), /rgb\(29, 155, 88\)|rgb\(67, 225, 135\)/, "the Race course must use a thin green rail");
+    assert.match(await onlinePage.locator(".race-course-finish").evaluate(element => getComputedStyle(element).backgroundImage), /conic-gradient/, "Race must end in a black-and-white checkered finish");
+    await onlinePage.screenshot({ path: path.join(evidenceDir, "multiplayer-race-390x844.png"), fullPage: true });
     await opponent.close();
     await online.close();
 
