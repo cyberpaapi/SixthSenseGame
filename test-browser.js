@@ -88,7 +88,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator(".topbar .brand").isVisible(), true);
     assert.equal(await page.locator("#game-mode-label").textContent(), "Daily Puzzle");
     assert.equal(await page.locator(".mode-spark").count(), 0);
-    assert.equal(await page.locator("#coin-count").textContent(), "20");
+    assert.equal(await page.locator("#coin-count").textContent(), "200");
     assert.equal(await page.locator(".topbar #coin-wallet").isVisible(), true);
     assert.equal(await page.locator("#game-screen .lifeline-button img").count(), 4);
     assert.equal(await page.locator("#game-screen .lifeline-price:visible").count(), 4);
@@ -122,45 +122,41 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.screenshot({ path: path.join(evidenceDir, "mobile-inventory-390x844.png"), fullPage: true });
 
     await page.click("#clue-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "17");
+    assert.equal(await page.locator("#coin-count").textContent(), "170");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').isVisible(), true);
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').textContent(), "1");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-price').isHidden(), true);
-    await page.click("#clue-button");
     assert.match(await page.locator("#clue-copy").textContent(), /Sense:/);
-    assert.equal(await page.locator("#coin-count").textContent(), "17");
-    assert.equal(await page.locator("#toast").evaluate(el => el.classList.contains("is-hint")), true);
-    const hintCenter = await page.locator("#toast").evaluate(el => {
+    assert.equal(await page.locator("#hint-modal").isVisible(), true);
+    assert.equal(await page.locator("#hint-ok-button").textContent(), "OK");
+    const hintStyle = await page.locator("#hint-modal .popup-sheet").evaluate(el => ({ border: getComputedStyle(el).borderColor, background: getComputedStyle(el).backgroundColor, text: getComputedStyle(document.querySelector("#hint-dialog-copy")).color }));
+    assert.match(hintStyle.border, /124, 58, 237/, "Sense popup should use a purple outline");
+    assert.match(hintStyle.background, /rgba\(255, 255, 255, 0\.6\)/, "Sense popup should use a 60% white surface");
+    assert.equal(hintStyle.text, "rgb(17, 17, 17)", "Sense popup text should stay black");
+    await page.waitForTimeout(320);
+    const hintCenter = await page.locator("#hint-modal").evaluate(el => {
       const rect = el.getBoundingClientRect();
       return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, viewportX: innerWidth / 2, viewportY: innerHeight / 2 };
     });
     assert(Math.abs(hintCenter.x - hintCenter.viewportX) <= 2, "Sense hint should be horizontally centered");
     assert(Math.abs(hintCenter.y - hintCenter.viewportY) <= 2, "Sense hint should be vertically centered");
-    const firstHint = await page.locator("#toast").textContent();
+    const firstHint = await page.locator("#hint-dialog-copy").textContent();
+    await page.click("#hint-ok-button");
     await page.click("#clue-button");
-    assert.equal(await page.locator("#toast").textContent(), firstHint, "Sense should show the same hint again");
-    assert.equal(await page.locator("#coin-count").textContent(), "17", "reopening Sense should not charge twice");
-    await page.waitForTimeout(5100);
-    assert.equal(await page.locator("#toast").isHidden(), true, "Sense hint should fade away after five seconds");
+    assert.equal(await page.locator("#hint-dialog-copy").textContent(), firstHint, "Sense should show the same hint again");
+    assert.equal(await page.locator("#coin-count").textContent(), "170", "reopening Sense should not charge twice");
+    await page.click("#hint-ok-button");
     await page.click("#peek-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "12");
-    assert.equal(await page.locator('[data-lifeline="peek"] .lifeline-stock').textContent(), "1");
-    await page.click("#peek-button");
+    assert.equal(await page.locator("#coin-count").textContent(), "120");
     assert.equal(await page.locator("#game-board .tile.peeked").count(), 1);
-    assert.equal(await page.locator("#coin-count").textContent(), "12");
+    assert.equal(await page.locator('[data-lifeline="peek"] .lifeline-price').isVisible(), true, "one tap should buy and immediately use Peek");
     await page.click("#clear-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "8");
-    await page.click("#clear-button");
+    assert.equal(await page.locator("#coin-count").textContent(), "80");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).eliminatedLetters.length), 3);
-    assert.equal(await page.locator("#coin-count").textContent(), "8");
-    await page.click("#skip-puzzle-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "2");
-    assert.equal(await page.locator('[data-lifeline="skip"] .lifeline-stock').textContent(), "1");
     await page.click("#skip-puzzle-button");
     assert.equal(await page.locator("#skip-modal").isVisible(), true);
     await page.click("#cancel-skip-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "2", "cancelling Skip should keep the purchased token");
-    assert.equal(await page.locator('[data-lifeline="skip"] .lifeline-stock').textContent(), "1");
+    assert.equal(await page.locator("#coin-count").textContent(), "80", "cancelling Skip should not buy or consume anything");
 
     const probe = await page.evaluate(() => {
       const core = window.SixthSenseCore;
@@ -212,23 +208,39 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#result-word span").count(), 6, "the victory screen should make the solved word the visual focus");
     assert.equal((await page.locator("#result-word").getAttribute("aria-label")).endsWith(answer.toUpperCase()), true);
     assert.equal(await page.locator("#result-attempts").textContent(), "Solved in 2");
-    assert.equal(await page.locator("#result-coins").textContent(), "+12 coins");
-    assert.equal(await page.locator("#result-primary").textContent(), "Return home");
-    assert.equal(await page.locator("#result-share").isEnabled(), true);
+    assert.equal(await page.locator("#result-coins").textContent(), "+120 coins");
+    assert.equal(await page.locator("#result-points").textContent(), "+600 points");
+    assert.equal(await page.locator("#result-primary").textContent(), "OK");
+    assert.equal(await page.locator("#result-share").count(), 0, "the completion card should stay focused on the result and OK action");
     assert(await page.locator("#celebration .confetti").count() >= 70, "completion should trigger a full confetti burst");
     assert.equal(await page.locator("#result-confetti i").count(), 26, "the reward card should keep a visible confetti cascade above its backdrop");
     assert.equal(await page.locator("#result-modal img[src*='result-signal-crest-v1.webp']").count(), 1, "the victory art should be purpose-made and optimized");
     assert(await page.evaluate(() => document.querySelector("#result-modal").scrollWidth <= document.querySelector("#result-modal").clientWidth), "the result screen must not overflow horizontally");
     assert.equal(await page.locator("#stats-modal").getAttribute("open"), null, "ordinary Statistics must stay separate from the completion moment");
-    assert.equal(await page.locator("#coin-count").textContent(), "14", "a two-attempt solve should award 12 coins");
-    assert.equal(await page.locator("#stat-coins").textContent(), "14");
+    assert.equal(await page.locator("#coin-count").textContent(), "200", "a two-attempt solve should award 120 coins");
+    assert.equal(await page.locator("#stat-coins").textContent(), "200");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "1");
-    assert.equal(await page.locator("#result-progress-track").getAttribute("aria-valuenow"), "14");
     assert((await page.evaluate(() => window.SixthSenseAudio.state().scheduledEffects)) >= 9, "the solved row and victory moment should schedule layered completion audio");
     await page.waitForTimeout(850);
     await page.screenshot({ path: path.join(evidenceDir, "victory-result-390x844.png"), fullPage: true });
-    await page.click("#result-exit");
-    assert.equal(await page.locator("#home-screen").isVisible(), true, "the result screen should offer an immediate escape to home");
+    await page.click("#result-primary");
+    assert.equal(await page.locator("#home-screen").isVisible(), true, "OK should return a completed Daily puzzle to home");
+    await page.click('[data-start-mode="daily"]');
+    await page.waitForSelector("#result-modal[open]", { timeout: 1200 });
+    assert.equal(await page.locator("#result-primary").textContent(), "OK", "reopening a finished Daily must restore its completion card");
+    await page.click("#result-primary");
+    await page.click('[data-start-mode="practice"]');
+    await page.click('[data-key="A"]');
+    await page.evaluate(() => history.back());
+    await page.waitForSelector("#leave-game-modal[open]");
+    assert.equal(await page.locator("#game-screen").isVisible(), true, "browser Back must not discard an active puzzle before confirmation");
+    await page.click("#leave-game-cancel");
+    assert.equal(await page.locator("#game-screen").isVisible(), true, "cancelling Back must keep the active puzzle");
+    await page.evaluate(() => history.back());
+    await page.waitForSelector("#leave-game-modal[open]");
+    await page.click("#leave-game-confirm");
+    await page.waitForSelector("#home-screen:not([hidden])");
+    assert.equal(await page.locator("#home-screen").isVisible(), true, "confirmed browser Back must return to the previous in-app screen");
     assert.deepEqual(errors, []);
     await phone.close();
 
@@ -245,6 +257,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await compactPage.locator(".topbar #coin-wallet").isVisible(), true);
     assert.equal(await compactPage.locator(".lifeline-price:visible").count(), 4);
     await compactPage.click(".brand");
+    await compactPage.click("#leave-game-confirm");
     await compactPage.click("[data-open-adventure-map]");
     assert(await compactPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "360px Adventure map must not overflow horizontally");
     assert(await compactPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "360×800 Adventure map must not scroll vertically");
@@ -264,9 +277,9 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
     await rewardPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
-    assert.equal(await rewardPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).streakReward), 30, "the seventh consecutive Daily solve must grant the streak reward");
+    assert.equal(await rewardPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).streakReward), 300, "the seventh consecutive Daily solve must grant the scaled streak reward");
     assert.equal(await rewardPage.locator("#result-streak-reward").isVisible(), true, "the earned streak reward must be celebrated in the result screen");
-    assert.equal(await rewardPage.locator("#result-coins").textContent(), "+44 coins", "the result should combine the one-try reward and seven-day bonus");
+    assert.equal(await rewardPage.locator("#result-coins").textContent(), "+440 coins", "the result should combine the one-try reward and seven-day bonus");
     await rewardContext.close();
 
     const reducedContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
@@ -338,10 +351,11 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await adventurePage.locator("#mode-detail").textContent(), "");
     const adventureAnswer = await adventurePage.evaluate(seed => window.SixthSenseCore.adventureAnswer(0, seed).word, adventureSeed);
     for (const letter of adventureAnswer) await adventurePage.click(`[data-key="${letter.toUpperCase()}"]`);
-    await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
+    await adventurePage.waitForSelector("#result-modal[open]", { timeout: 4000 });
     assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 1, "winning must advance exactly one Adventure level");
-    assert.equal(await adventurePage.locator("#stats-modal").isHidden(), true, "Adventure should return straight to its map instead of opening results");
-    assert.equal(await adventurePage.locator("#result-modal").isHidden(), true, "Adventure should keep its dedicated map-return progression instead of opening a result overlay");
+    assert.equal(await adventurePage.locator("#result-primary").textContent(), "OK", "Adventure wins should use the shared victory card");
+    assert.equal(await adventurePage.locator("#result-points").textContent(), "+700 points");
+    await adventurePage.click("#result-primary");
     assert.equal(await adventurePage.locator("#adventure-screen").isVisible(), true);
     assert.equal(await adventurePage.locator(".adventure-level-node").count(), 8, "level two should retain an eight-level image window");
     assert.equal(await adventurePage.locator('.adventure-level-node[aria-current="step"] .avatar-art').count(), 1);
@@ -363,9 +377,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await adventurePage.click("#profile-modal .modal-close");
     await adventurePage.click("#adventure-play");
     await adventurePage.click("#skip-puzzle-button");
-    await adventurePage.click("#skip-puzzle-button");
     await adventurePage.click("#confirm-skip-button");
-    await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 4000 });
+    await adventurePage.waitForSelector("#result-modal[open]", { timeout: 4000 });
+    await adventurePage.click("#result-primary");
+    await adventurePage.waitForSelector("#adventure-screen:not([hidden])", { timeout: 1200 });
     assert.equal(await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.level), 2, "Adventure Skip must return to the map and advance the token exactly one rung");
     await adventurePage.screenshot({ path: path.join(evidenceDir, "adventure-map-390x844.png"), fullPage: true });
     await adventure.close();
@@ -390,7 +405,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await modesPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ModeFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 100 }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 5000, economyVersion: 2 }));
     });
     await modesPage.goto(baseUrl, { waitUntil: "networkidle" });
     await modesPage.click('[data-modal-open="settings-modal"]');
@@ -421,9 +436,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.deepEqual(await modesPage.evaluate(() => { const s=JSON.parse(localStorage.getItem("sixth-sense.settings.v1")); return { avatar:s.avatar, accent:s.accent }; }), { avatar: "tiger", accent: "aqua" });
     await modesPage.click('[data-avatar-option="red-panda"]');
     assert(await modesPage.locator("#brand-player-avatar").evaluate(element => element.classList.contains("avatar-red-panda")), "a purchased premium avatar should apply immediately");
-    assert.equal(await modesPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins), 55, "premium avatars must spend their shown coin price");
+    assert.equal(await modesPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins), 2750, "premium avatars must spend their 50× cosmetic price");
     await modesPage.click('[data-decoration-option="aurora"]');
     assert.equal(await modesPage.locator("#brand-player-avatar").getAttribute("data-decoration"), "aurora", "a purchased highlight should apply immediately");
+    assert.equal(await modesPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins), 1250, "premium highlights must spend their 50× cosmetic price");
     assert.equal(await modesPage.locator("#settings-username").inputValue(), "ModeFox");
     await modesPage.fill("#settings-username", "TigerNova");
     await modesPage.click("#save-settings-username");
@@ -441,11 +457,13 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.match(await modesPage.locator("#mode-detail").textContent(), /^\d{2}:\d{2}$/);
     assert(await modesPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "Time Tackle game must not scroll");
     await modesPage.click(".brand");
+    await modesPage.click("#leave-game-confirm");
     await modesPage.click('[data-start-mode="insight"]');
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Insight Puzzle");
     assert.equal(await modesPage.locator("#game-board .tile.peeked").count(), 1);
     assert.match(await modesPage.locator("#clue-button").getAttribute("aria-label"), /show the clue again/);
     await modesPage.click(".brand");
+    await modesPage.click("#leave-game-confirm");
     await modesPage.click('[data-start-mode="streak"]');
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Streak Puzzle");
     assert.equal(await modesPage.locator("#mode-detail").textContent(), "0 win run");
@@ -523,10 +541,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await onlinePage.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await onlinePage.waitForTimeout(1950);
     assert.equal(await onlinePage.locator('#online-board .tile[data-poll-stable="yes"]').count(), 1, "unchanged room polls must preserve the board DOM instead of repainting it every second");
-    await onlinePage.click("#online-leave");
+    await onlinePage.evaluate(() => history.back());
     await onlinePage.waitForSelector("#online-leave-modal[open]");
     assert.equal(await onlinePage.locator("#online-leave-title").textContent(), "Leave VS room");
-    assert.equal(await onlinePage.locator("#online-screen").isVisible(), true, "asking to leave must not exit before confirmation");
+    assert.equal(await onlinePage.locator("#online-screen").isVisible(), true, "browser Back must not exit an active room before confirmation");
     await onlinePage.click("#online-leave-cancel");
     assert.equal(await onlinePage.locator("#online-screen").isVisible(), true, "Stay in game must keep the active room open");
     await onlinePage.click("#online-leave");
@@ -552,8 +570,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await onlinePage.locator("[data-online-lifeline]").count(), 4, "multiplayer must expose all four lifelines");
     assert.equal(await onlinePage.locator("#online-leave").textContent().then(text => text.trim()), "Back", "every multiplayer mode needs an explicit exit");
     await onlinePage.click('[data-online-lifeline="sense"] button');
-    await onlinePage.click('[data-online-lifeline="sense"] button');
-    await onlinePage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent === "A test clue");
+    await onlinePage.waitForSelector("#hint-modal[open]");
+    assert.equal(await onlinePage.locator("#hint-dialog-copy").textContent(), "A test clue");
+    await onlinePage.click("#hint-ok-button");
+    await onlinePage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Sense unlocked"));
     assert.equal(await onlinePage.locator('[data-online-lifeline="sense"] .lifeline-stock').isVisible(), true, "used Sense should remain reopenable in multiplayer");
     const onlineOverflow = await onlinePage.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
@@ -609,27 +629,23 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RepeatFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 50, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 2, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
     });
     await repeatPage.goto(baseUrl, { waitUntil: "networkidle" });
     await repeatPage.click('[data-start-mode="daily"]');
 
     await repeatPage.click("#peek-button");
     assert.equal(await repeatPage.locator('[data-lifeline="peek"]').evaluate(el => el.classList.contains("is-purchased")), true, "Peek purchase should animate");
-    await repeatPage.click("#peek-button");
     assert.equal(await repeatPage.locator("#game-board .tile.peeked").count(), 1);
     assert.equal(await repeatPage.locator('[data-lifeline="peek"] .lifeline-price').isVisible(), true, "Peek should be purchasable again after use");
     assert.equal(await repeatPage.locator("#peek-button").isEnabled(), true);
-    await repeatPage.click("#peek-button");
     await repeatPage.click("#peek-button");
     assert.equal(await repeatPage.locator("#game-board .tile.peeked").count(), 2, "Peek should reveal another distinct position");
     assert.equal(await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).peekUses), 2);
 
     await repeatPage.click("#clear-button");
-    await repeatPage.click("#clear-button");
     assert.equal(await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).eliminatedLetters.length), 3);
     assert.equal(await repeatPage.locator('[data-lifeline="clear"] .lifeline-price').isVisible(), true, "Clear should be purchasable again after use");
-    await repeatPage.click("#clear-button");
     await repeatPage.click("#clear-button");
     const repeatedClear = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")));
     assert.equal(repeatedClear.clearUses, 2);
@@ -637,27 +653,24 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(new Set(repeatedClear.eliminatedLetters).size, 6, "repeated Clear letters should remain unique");
 
     await repeatPage.click(".brand");
+    assert.equal(await repeatPage.locator("#leave-game-modal").isVisible(), true, "leaving an active puzzle must ask for confirmation");
+    await repeatPage.click("#leave-game-confirm");
     await repeatPage.evaluate(() => { Math.random = () => 0; });
     await repeatPage.click('[data-start-mode="practice"]');
     await repeatPage.click("#skip-puzzle-button");
-    await repeatPage.click("#skip-puzzle-button");
     await repeatPage.click("#confirm-skip-button");
     assert.equal(await repeatPage.locator('[data-lifeline="skip"] .lifeline-price').isVisible(), true, "Skip should be purchasable again after starting the fresh puzzle");
-    await repeatPage.click("#skip-puzzle-button");
     await repeatPage.click("#skip-puzzle-button");
     assert.equal(await repeatPage.locator("#skip-modal").isVisible(), true, "a second purchased Skip should also be usable");
     await repeatPage.click("#cancel-skip-button");
     const practiceAnswer = await repeatPage.evaluate(() => window.SixthSenseCore.practiceAnswer(window.SixthSenseCore.dailyAnswer().word, () => 0, []).word);
     for (const letter of practiceAnswer) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
     await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
-    assert.equal(await repeatPage.locator("#result-primary").textContent(), "Next word", "repeatable solo modes should make replay the primary result action");
+    assert.equal(await repeatPage.locator("#result-primary").textContent(), "OK", "every solo completion should use a clear OK action");
     await repeatPage.click("#result-primary");
-    assert.equal(await repeatPage.locator("#game-screen").isVisible(), true);
+    assert.equal(await repeatPage.locator("#home-screen").isVisible(), true);
     assert.equal(await repeatPage.locator("#result-modal").getAttribute("open"), null);
-    assert.equal(await repeatPage.locator("#game-board .tile.filled").count(), 0, "the replay action should present a clean board immediately");
-    await repeatPage.click('[data-key="A"]');
-    assert.notEqual(await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).answer), practiceAnswer, "Next word should immediately advance the healthy core play loop");
-    assert(await repeatPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "repeatable lifelines must not introduce game-screen scrolling");
+    assert(await repeatPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "repeatable lifelines must not introduce horizontal overflow");
     await repeats.close();
 
     const desktop = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: "light" });

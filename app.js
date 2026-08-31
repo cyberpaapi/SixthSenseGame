@@ -22,7 +22,8 @@
   const PREMIUM_AVATARS = ["red-panda", "capybara", "raccoon", "snow-leopard", "phoenix", "dragon", "unicorn", "otter", "chameleon"];
   const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
   const DECORATIONS = ["none", "aurora", "sunburst", "prism", "champion"];
-  const DAILY_STREAK_REWARD = 30;
+  const DAILY_STREAK_REWARD = 300;
+  const ECONOMY_VERSION = 2;
   const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#f3cf32", leaf: "#22b66f", aqua: "#08b9c8", sky: "#347cf4", violet: "#7c45e8", berry: "#d83cac" });
   const ADVENTURE_TIERS = Object.freeze({
     easy: { title: "Sky Garden", art: "assets/adventure-zone-sky-ladder-v1.webp", alt: "An endless golden ladder rising through the current Adventure zone" },
@@ -104,14 +105,16 @@
     resultAttempts: document.querySelector("#result-attempts"),
     resultAttemptIcon: document.querySelector(".result-attempt-icon"),
     resultCoins: document.querySelector("#result-coins"),
+    resultPoints: document.querySelector("#result-points"),
     resultStreakReward: document.querySelector("#result-streak-reward"),
-    resultProgressLabel: document.querySelector("#result-progress-label"),
-    resultProgressValue: document.querySelector("#result-progress-value"),
-    resultProgressTrack: document.querySelector("#result-progress-track"),
-    resultProgressFill: document.querySelector("#result-progress-fill"),
-    resultProgressNext: document.querySelector("#result-progress-next"),
     resultPrimary: document.querySelector("#result-primary"),
-    resultShare: document.querySelector("#result-share"),
+    hintDialog: document.querySelector("#hint-modal"),
+    hintDialogCopy: document.querySelector("#hint-dialog-copy"),
+    hintOkButton: document.querySelector("#hint-ok-button"),
+    leaveGameDialog: document.querySelector("#leave-game-modal"),
+    leaveGameCopy: document.querySelector("#leave-game-copy"),
+    leaveGameCancel: document.querySelector("#leave-game-cancel"),
+    leaveGameConfirm: document.querySelector("#leave-game-confirm"),
     avatarChoices: [...document.querySelectorAll("[data-avatar-option]")],
     decorationChoices: [...document.querySelectorAll("[data-decoration-option]")],
     accentChoices: [...document.querySelectorAll("[data-accent-option]")],
@@ -145,12 +148,28 @@
   settings.accent = ACCENTS[settings.accent] ? settings.accent : "coral";
   let playerIdentity = loadJson(STORAGE.identity, { name: "" });
   playerIdentity.name = cleanUsername(playerIdentity.name);
+  const storedStatsText = localStorage.getItem(STORAGE.stats);
+  const hadSavedStats = storedStatsText !== null;
+  let storedEconomyVersion = ECONOMY_VERSION;
+  let storedStatsHasCoins = false;
+  if (hadSavedStats) {
+    try {
+      const storedStats = JSON.parse(storedStatsText) || {};
+      storedEconomyVersion = Math.max(1, Math.floor(Number(storedStats.economyVersion) || 1));
+      storedStatsHasCoins = Object.hasOwn(storedStats, "coins");
+    }
+    catch (_) { storedEconomyVersion = 1; }
+  }
   let stats = loadJson(STORAGE.stats, {
     played: 0, wins: 0, currentStreak: 0, maxStreak: 0,
     lastWinDate: null, distribution: Array(Core.MAX_GUESSES).fill(0), coins: Core.STARTING_COINS,
-    streakRun: 0, bestModeStreak: 0, totalSolves: 0, bestSolveAttempts: null, fastestSolve: null
+    streakRun: 0, bestModeStreak: 0, totalSolves: 0, totalPoints: 0, bestSolveAttempts: null, fastestSolve: null,
+    economyVersion: ECONOMY_VERSION
   });
   stats.coins = Number.isFinite(Number(stats.coins)) ? Math.max(0, Math.floor(Number(stats.coins))) : Core.STARTING_COINS;
+  if (hadSavedStats && storedStatsHasCoins && storedEconomyVersion < ECONOMY_VERSION) stats.coins *= 10;
+  stats.economyVersion = ECONOMY_VERSION;
+  stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
   stats.distribution = Array.from({ length: Core.MAX_GUESSES }, (_, index) => Number(stats.distribution?.[index]) || 0);
   stats.inventory = Object.fromEntries(Object.keys(defaultInventory).map(kind => {
     const count = Number(stats.inventory?.[kind]);
@@ -182,6 +201,9 @@
   let scheduledEffectCount = 0;
   let lastAdventureMapLevel = null;
   let showHelpAfterUsername = false;
+  let historyReady = false;
+  let pendingLeave = null;
+  let allowNextPop = false;
 
   function loadJson(key, fallback) {
     try {
@@ -270,6 +292,7 @@
       status: "playing",
       recorded: false,
       rewarded: false,
+      pointsRewarded: false,
       modeRecorded: false,
       personalRecorded: false,
       startedAt: Date.now(),
@@ -311,7 +334,14 @@
     saveJson(STORAGE[mode], game);
   }
 
-  function showScreen(screen) {
+  function pushScreenState(screen, replace = false) {
+    if (!historyReady) return;
+    const state = { sixthSense: true, screen };
+    if (replace) history.replaceState(state, "", location.href);
+    else if (history.state?.screen !== screen) history.pushState(state, "", location.href);
+  }
+
+  function showScreen(screen, options = {}) {
     const gameVisible = screen === "game";
     const adventureVisible = screen === "adventure";
     els.homeScreen.hidden = screen !== "home";
@@ -326,6 +356,94 @@
       requestAnimationFrame(() => destination.classList.add("is-entering"));
     }
     window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    if (!options.fromHistory) pushScreenState(screen, Boolean(options.replaceHistory));
+  }
+
+  function currentScreen() {
+    return document.body.dataset.screen || "home";
+  }
+
+  function restoreCurrentHistoryState() {
+    history.pushState({ sixthSense: true, screen: currentScreen() }, "", location.href);
+  }
+
+  function defaultLeaveTarget() {
+    return mode === "adventure" ? "adventure" : "home";
+  }
+
+  function requestSoloLeave(target = defaultLeaveTarget(), fromHistory = false) {
+    pendingLeave = { target, fromHistory };
+    els.leaveGameCopy.textContent = mode === "daily"
+      ? "Your current Daily guesses are saved. You can return before today ends."
+      : mode === "adventure"
+        ? "Your guesses are saved. Leave this puzzle and return to the Adventure map?"
+        : "Your current guesses are saved, and you can return to this puzzle later.";
+    if (!els.leaveGameDialog.open) els.leaveGameDialog.showModal();
+    setTimeout(() => els.leaveGameCancel.focus({ preventScroll: true }), 60);
+  }
+
+  function cancelSoloLeave() {
+    pendingLeave = null;
+    if (els.leaveGameDialog.open) els.leaveGameDialog.close();
+  }
+
+  function confirmSoloLeave() {
+    const navigation = pendingLeave;
+    pendingLeave = null;
+    if (els.leaveGameDialog.open) els.leaveGameDialog.close();
+    if (navigation?.fromHistory) {
+      allowNextPop = true;
+      history.back();
+      return;
+    }
+    showScreen(navigation?.target || defaultLeaveTarget());
+    playEffect("open");
+  }
+
+  function closeTopDialogForBack(dialog) {
+    if (dialog === els.resultDialog) {
+      dialog.close();
+      return true;
+    }
+    if (dialog === els.usernameDialog) return false;
+    dialog.close();
+    return true;
+  }
+
+  function handleBrowserBack(event) {
+    const target = event.state?.sixthSense ? event.state.screen : "home";
+    if (allowNextPop) {
+      allowNextPop = false;
+      if (target === "adventure") {
+        showScreen("adventure", { fromHistory: true });
+        renderAdventure({ animateProgress: mode === "adventure" });
+      } else showScreen(target === "game" ? "game" : "home", { fromHistory: true });
+      return;
+    }
+    const openDialog = document.querySelector("dialog[open]");
+    if (openDialog && openDialog !== els.leaveGameDialog && openDialog.id !== "online-leave-modal") {
+      if (closeTopDialogForBack(openDialog)) restoreCurrentHistoryState();
+      return;
+    }
+    if (currentScreen() === "online") {
+      restoreCurrentHistoryState();
+      pendingLeave = { target, fromHistory: true, online: true };
+      document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
+      return;
+    }
+    if (currentScreen() === "game" && game?.status === "playing") {
+      restoreCurrentHistoryState();
+      requestSoloLeave(target, true);
+      return;
+    }
+    if (currentScreen() === "home" && target === "home") {
+      restoreCurrentHistoryState();
+      return;
+    }
+    if (target === "adventure") {
+      showScreen("adventure", { fromHistory: true });
+      renderAdventure({ animateProgress: mode === "adventure" });
+    } else showScreen(target === "game" ? "game" : "home", { fromHistory: true });
   }
 
   function setMode(nextMode, forceNew = false) {
@@ -339,6 +457,13 @@
     });
     renderAll();
     announce(MODE_CONFIG[mode].ready);
+  }
+
+  function enterSoloMode(nextMode) {
+    setMode(nextMode);
+    showScreen("game");
+    playEffect("start");
+    if (game.status !== "playing") setTimeout(() => openCurrentResult(game.status === "won"), 180);
   }
 
   function renderAll() {
@@ -539,6 +664,7 @@
       stockBadge.hidden = !showStock;
       stockBadge.querySelector("b").textContent = available;
       price.hidden = !showPrice;
+      price.querySelector("b").textContent = Core.LIFELINE_COSTS[kind];
       if (game.clueUsed && kind === "sense") {
         button.setAttribute("aria-label", "Sense: show the clue again, unlocked for this puzzle");
         button.title = "Sense — show clue again";
@@ -550,15 +676,15 @@
         button.setAttribute("aria-label", `${names[kind]}: use one, ${stored} available`);
         button.title = `${names[kind]} — ${stored} available`;
       } else {
-        button.setAttribute("aria-label", `${names[kind]}: buy for ${Core.LIFELINE_COSTS[kind]} coins`);
-        button.title = `${names[kind]} — buy for ${Core.LIFELINE_COSTS[kind]} coins`;
+        button.setAttribute("aria-label", `${names[kind]}: buy and use for ${Core.LIFELINE_COSTS[kind]} coins`);
+        button.title = `${names[kind]} — buy and use for ${Core.LIFELINE_COSTS[kind]} coins`;
       }
     });
     const notes = [];
     if (game.clueUsed) notes.push(`Sense: ${game.clue}`);
     if (game.peekedPositions.length) notes.push(`Peek: ${game.peekedPositions.map(position => `position ${position + 1} is ${game.answer[position].toUpperCase()}`).join("; ")}.`);
     if (game.eliminatedLetters.length) notes.push(`Cleared: ${game.eliminatedLetters.map(letter => letter.toUpperCase()).join(", ")}.`);
-    els.clueCopy.textContent = notes.length ? notes.join(" ") : "Sense unlocks once. Peek, Clear, and Skip can be bought and used repeatedly.";
+    els.clueCopy.textContent = notes.length ? notes.join(" ") : "Tap a lifeline to use it; if needed, its price is charged in the same tap.";
   }
 
   function renderEconomy() {
@@ -614,9 +740,8 @@
     renderLifelines();
     renderEconomy();
     animateLifeline(kind, "is-purchased");
-    announce(`${label} added — tap again to use it.`);
     playEffect("purchase");
-    return false;
+    return true;
   }
 
   function consumeLifeline(kind) {
@@ -688,12 +813,19 @@
 
   function completeGame(won) {
     let reward = 0;
+    let points = 0;
     let streakReward = 0;
     if (won && !game.rewarded) {
       reward = Core.rewardForAttempts(game.guesses.length);
       stats.coins += reward;
       game.solveReward = reward;
       game.rewarded = true;
+    }
+    if (won && !game.pointsRewarded) {
+      points = Core.pointsForAttempts(game.guesses.length);
+      stats.totalPoints += points;
+      game.solvePoints = points;
+      game.pointsRewarded = true;
     }
     if (won && !stats.completedWords.includes(game.answer)) stats.completedWords.push(game.answer);
     if (won && !game.personalRecorded) {
@@ -748,16 +880,15 @@
     }
     renderStats();
     updateResultControls();
-    if (mode === "adventure") {
-      setTimeout(openAdventureMap, 720);
-      return;
-    }
-    renderResult(won, reward, streakReward);
-    setTimeout(() => {
-      if (!els.resultDialog.open) els.resultDialog.showModal();
-      if (won) celebrateResultDialog();
-      els.resultPrimary.focus({ preventScroll: true });
-    }, 680);
+    renderResult(won, reward, streakReward, points);
+    setTimeout(() => openCurrentResult(won), 680);
+  }
+
+  function openCurrentResult(won = game.status === "won") {
+    renderResult(won, Number(game.solveReward) || 0, Number(game.streakReward) || 0, Number(game.solvePoints) || 0);
+    if (!els.resultDialog.open) els.resultDialog.showModal();
+    if (won) celebrateResultDialog();
+    els.resultPrimary.focus({ preventScroll: true });
   }
 
   function invalid(message) {
@@ -796,8 +927,14 @@
     }
     renderLifelines();
     animateLifeline("sense", "is-used-now");
-    announce(game.clue, { hint: true, duration: 5000 });
+    showHintDialog(game.clue);
     playEffect("hint");
+  }
+
+  function showHintDialog(clue) {
+    els.hintDialogCopy.textContent = String(clue || "Listen for the pattern in the word.");
+    if (!els.hintDialog.open) els.hintDialog.showModal();
+    setTimeout(() => els.hintOkButton.focus({ preventScroll: true }), 40);
   }
 
   function revealPosition() {
@@ -852,12 +989,16 @@
 
   function openSkipConfirmation() {
     if (game.status !== "playing") return;
-    if (!buyLifeline("skip", "Skip")) return;
-    els.skipCopy.textContent = mode === "daily" ? "Use one Skip? Today’s answer will be revealed and it counts as a loss." : mode === "streak" ? "Use one Skip? This puzzle ends and your Streak run resets." : mode === "adventure" ? "Use one Skip? This word will be revealed and your token will move to the next rung." : `Use one Skip? A fresh ${MODE_CONFIG[mode].label.toLowerCase()} will begin.`;
+    const purchaseCopy = stats.inventory.skip > 0 ? "Use one Skip?" : `Buy and use one Skip for ${Core.LIFELINE_COSTS.skip} coins?`;
+    els.skipCopy.textContent = mode === "daily" ? `${purchaseCopy} Today’s answer will be revealed and it counts as a loss.` : mode === "streak" ? `${purchaseCopy} This puzzle ends and your Streak run resets.` : mode === "adventure" ? `${purchaseCopy} This word will be revealed and your token will move to the next rung.` : `${purchaseCopy} A fresh ${MODE_CONFIG[mode].label.toLowerCase()} will begin.`;
     els.skipDialog.showModal();
   }
 
   function performSkip() {
+    if (!buyLifeline("skip", "Skip")) {
+      closeDialog(els.skipDialog);
+      return;
+    }
     if (!consumeLifeline("skip")) {
       closeDialog(els.skipDialog);
       return;
@@ -951,7 +1092,7 @@
     ][Math.max(0, Math.min(Core.MAX_GUESSES - 1, attempts - 1))];
   }
 
-  function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0) {
+  function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0, points = Number(game.solvePoints) || 0) {
     const attempts = game.guesses.length;
     const performance = resultPerformance(Math.max(1, attempts));
     const earned = won ? reward + streakReward : 0;
@@ -964,51 +1105,19 @@
     els.resultAttemptIcon.textContent = won ? String(attempts) : "×";
     els.resultAttempts.textContent = won ? `Solved in ${attempts}` : `${attempts} ${attempts === 1 ? "try" : "tries"} used`;
     els.resultCoins.textContent = won ? `+${earned} ${earned === 1 ? "coin" : "coins"}` : "No coins";
+    els.resultPoints.textContent = won ? `+${points} ${points === 1 ? "point" : "points"}` : "No points";
     els.resultStreakReward.hidden = !(won && streakReward > 0);
-
-    let value = 0;
-    if (mode === "daily") {
-      const streakStep = stats.currentStreak ? ((stats.currentStreak - 1) % 7) + 1 : 0;
-      const remaining = 7 - streakStep;
-      value = (streakStep / 7) * 100;
-      els.resultProgressLabel.textContent = "Daily streak";
-      els.resultProgressValue.textContent = `${stats.currentStreak} ${stats.currentStreak === 1 ? "day" : "days"}`;
-      els.resultProgressNext.textContent = remaining === 0 ? `Seven-day bonus unlocked · +${DAILY_STREAK_REWARD} coins` : `${remaining} ${remaining === 1 ? "day" : "days"} to the +${DAILY_STREAK_REWARD} coin bonus`;
-    } else if (mode === "streak") {
-      const run = Number(stats.streakRun) || 0;
-      const nextGoal = Math.max(5, (Math.floor(run / 5) + 1) * 5);
-      value = ((run % 5) / 5) * 100;
-      els.resultProgressLabel.textContent = "Streak run";
-      els.resultProgressValue.textContent = `${run} ${run === 1 ? "word" : "words"}`;
-      els.resultProgressNext.textContent = `${nextGoal - run} to the next five-word milestone`;
-    } else {
-      const solved = stats.completedWords.length;
-      const nextGoal = Math.max(10, (Math.floor(solved / 10) + 1) * 10);
-      value = ((solved % 10) / 10) * 100;
-      els.resultProgressLabel.textContent = "Words discovered";
-      els.resultProgressValue.textContent = solved.toLocaleString();
-      els.resultProgressNext.textContent = `${nextGoal - solved} to your next collection milestone`;
-    }
-    els.resultProgressFill.style.width = `${value}%`;
-    els.resultProgressTrack.setAttribute("aria-valuenow", String(Math.round(value)));
-    els.resultProgressTrack.setAttribute("aria-valuetext", els.resultProgressNext.textContent);
-    els.resultPrimary.textContent = mode === "daily" ? "Return home" : won ? "Next word" : "Try another word";
+    els.resultPrimary.textContent = "OK";
   }
 
   function exitResult() {
     if (els.resultDialog.open) els.resultDialog.close();
-    showScreen("home");
+    if (mode === "adventure") openAdventureMap();
+    else showScreen("home");
   }
 
   function continueFromResult() {
-    if (els.resultDialog.open) els.resultDialog.close();
-    if (mode === "daily") {
-      showScreen("home");
-      return;
-    }
-    setMode(mode, true);
-    showScreen("game");
-    playEffect("start");
+    exitResult();
   }
 
   async function shareResult() {
@@ -1398,7 +1507,7 @@
     els.skipButton.addEventListener("click", openSkipConfirmation);
     els.confirmSkipButton.addEventListener("click", performSkip);
     els.cancelSkipButton.addEventListener("click", () => closeDialog(els.skipDialog));
-    els.startButtons.forEach(button => button.addEventListener("click", () => { setMode(button.dataset.startMode); showScreen("game"); playEffect("start"); }));
+    els.startButtons.forEach(button => button.addEventListener("click", () => enterSoloMode(button.dataset.startMode)));
     els.adventureOpenButtons.forEach(button => button.addEventListener("click", openAdventureMap));
     els.adventureBack.addEventListener("click", () => { showScreen("home"); playEffect("open"); });
     els.adventurePlay.addEventListener("click", startAdventureLevel);
@@ -1406,6 +1515,10 @@
       event.preventDefault();
       if (document.body.dataset.screen === "online") {
         document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
+        return;
+      }
+      if (document.body.dataset.screen === "game" && game.status === "playing") {
+        requestSoloLeave();
         return;
       }
       showScreen("home");
@@ -1420,7 +1533,11 @@
     });
     els.resultExit.addEventListener("click", exitResult);
     els.resultPrimary.addEventListener("click", continueFromResult);
-    els.resultShare.addEventListener("click", shareResult);
+    els.hintOkButton.addEventListener("click", () => closeDialog(els.hintDialog));
+    els.leaveGameCancel.addEventListener("click", cancelSoloLeave);
+    els.leaveGameConfirm.addEventListener("click", confirmSoloLeave);
+    els.leaveGameDialog.addEventListener("cancel", event => { event.preventDefault(); cancelSoloLeave(); });
+    els.leaveGameDialog.addEventListener("close", () => { if (pendingLeave && !pendingLeave.online) pendingLeave = null; });
     els.resultDialog.addEventListener("cancel", event => {
       event.preventDefault();
       exitResult();
@@ -1477,6 +1594,7 @@
     window.addEventListener("pageshow", () => {
       if (mode === "daily" && game.date !== Core.dateKey()) setMode("daily");
     });
+    window.addEventListener("popstate", handleBrowserBack);
   }
 
   function init() {
@@ -1509,6 +1627,23 @@
         return consumed;
       }
     };
+    window.SixthSenseDialogs = { showHint: showHintDialog };
+    window.SixthSenseCelebration = celebrate;
+    window.SixthSenseNavigation = {
+      onlineEntered: () => pushScreenState("online"),
+      onlineLeaveCancelled: () => { if (pendingLeave?.online) pendingLeave = null; },
+      onlineLeft: () => {
+        const wasHistoryBack = Boolean(pendingLeave?.online && pendingLeave.fromHistory);
+        pendingLeave = null;
+        if (wasHistoryBack) {
+          allowNextPop = true;
+          history.back();
+        } else pushScreenState("home");
+      }
+    };
+    history.replaceState({ sixthSense: true, screen: "home", root: true }, "", location.href);
+    history.pushState({ sixthSense: true, screen: "home" }, "", location.href);
+    historyReady = true;
     applySettings();
     bindEvents();
     setMode("daily");

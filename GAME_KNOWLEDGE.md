@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-08-27
+Last updated: 2026-08-31
 
-Last verified: 2026-08-27
+Last verified: 2026-08-31
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -55,8 +55,8 @@ The home screen exposes eight modes:
 
 | Mode | Current behavior |
 | --- | --- |
-| Daily | One deterministic UTC puzzle per day. Daily completion updates played, win rate, guess distribution, and daily streak. Every seventh consecutive Daily win adds a visible 30-coin streak reward. |
-| Adventure | A persistent 10,187-level solo journey through every answer exactly once. Each device receives a seeded randomized order inside each tier: all 4,309 Normal levels first, then 1,995 Hard, then 3,883 Extreme. Those totals and difficulty names remain off the newcomer-facing map. The dedicated map loads only the current zone and uses a generated endless ladder built directly into the scene. Every image window carries exactly eight consecutive overlaid level markers: normally three previous, the current level, and four upcoming; the opening window is levels 1–8. After either a solve or a paid Skip, the app returns automatically to the map, advances exactly one rung, and animates the selected animal to its new position. |
+| Daily | One deterministic UTC puzzle per day. Daily completion updates played, win rate, guess distribution, and daily streak. Every seventh consecutive Daily win adds a visible 300-coin streak reward. A finished Daily always opens its saved completion card when re-entered, and OK returns home. |
+| Adventure | A persistent 10,187-level solo journey through every answer exactly once. Each device receives a seeded randomized order inside each tier: all 4,309 Normal levels first, then 1,995 Hard, then 3,883 Extreme. Those totals and difficulty names remain off the newcomer-facing map. The dedicated map loads only the current zone and uses a generated endless ladder built directly into the scene. Every image window carries exactly eight consecutive overlaid level markers: normally three previous, the current level, and four upcoming; the opening window is levels 1–8. After either a solve or a paid Skip, the app advances exactly one rung, shows the shared result card, and returns to the map with the selected animal’s upward movement after OK. |
 | Practice | Unlimited randomly selected puzzles. A Skip starts a fresh Practice puzzle. |
 | Time Tackle | A Practice-style puzzle with a ten-minute deadline. Its internal key and storage key remain `sprint` for save compatibility. A zero timer ends the puzzle as a loss. |
 | Insight | Starts with the clue unlocked and one deterministic answer position revealed. |
@@ -68,48 +68,51 @@ The app opens on the home screen. Game-adjacent marketing, mode selection, and s
 
 ## Coins, rewards, and lifelines
 
-Starting wallet: 20 coins. Solving rewards fewer coins as more attempts are used:
+Starting wallet: 200 coins. Solving rewards fewer coins as more attempts are used:
 
 | Attempts | Coins earned |
 | ---: | ---: |
-| 1 | 14 |
-| 2 | 12 |
-| 3 | 10 |
-| 4 | 8 |
-| 5 | 6 |
-| 6 | 4 |
-| 7 | 2 |
+| 1 | 140 |
+| 2 | 120 |
+| 3 | 100 |
+| 4 | 80 |
+| 5 | 60 |
+| 6 | 40 |
+| 7 | 20 |
+
+Each successful puzzle also earns visible mastery points from 700 for a first-try solve down to 100 on the seventh try. Puzzle points and cumulative `totalPoints` are distinct from spendable coins.
 
 Lifeline prices and behavior:
 
 | Lifeline | Cost | Current behavior |
 | --- | ---: | --- |
-| Sense | 3 | First tap with no stock purchases one token; the next tap consumes it and unlocks the puzzle clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered bubble for five seconds. |
-| Peek | 5 | Can be stocked, consumed, purchased again, and reused. Every use reveals a new unrevealed answer position until no useful positions remain. |
-| Clear | 4 | Can be stocked, consumed, purchased again, and reused. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
-| Skip | 6 | Can be stocked, consumed, purchased again, and reused. Solo use asks for confirmation. Daily counts as a loss; Streak counts as a loss and resets the run; Practice, Time Tackle, and Insight begin a fresh puzzle. Adventure reveals the current answer, advances one rung, and returns to the map. Race advances only that player without counting a solve; VS forfeits the point and advances both players. |
+| Sense | 30 | If stock is zero, one tap buys and consumes the token immediately and unlocks the clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered confirmable popup. |
+| Peek | 50 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a new unrevealed answer position until no useful positions remain. |
+| Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
+| Skip | 60 | Can be stocked, consumed, purchased again, and reused. Solo use asks for confirmation before charging; confirming buys and uses in one action when stock is zero. Daily counts as a loss; Streak counts as a loss and resets the run; Practice, Time Tackle, and Insight begin a fresh puzzle. Adventure reveals the current answer, advances one rung, and presents its completion card before the map. Race advances only that player without counting a solve; VS forfeits the point and advances both players. |
 
-Inventory and coins persist in `localStorage`. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Buying and using are deliberately separate taps so a purchase is not consumed accidentally. Multiplayer Sense/Peek/Clear effects are resolved by the authoritative API so the client receives only the purchased clue result, never the answer.
+Inventory, coins, points, and economy version persist in `localStorage`. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Existing pre-scale wallets migrate once by multiplying saved coins by 10. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
 ## Current experience and visual system
 
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
-- Home: generated observatory hero art, a seven-day streak progress rail with a 30-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS launchers, and the compact four-mode solo launcher. Play Together now appears above Game Modes. The two redundant section subtitles were removed, and Race/VS use newly generated independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
+- Home: generated observatory hero art, a seven-day streak progress rail with a 300-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS launchers, and the compact four-mode solo launcher. Play Together now appears above Game Modes. The two redundant section subtitles were removed, and Race/VS use newly generated independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
 - Adventure: three original generated portrait environments—Sky Garden, Ember Canopy, and Cosmic Prism—each contain a monumental endless golden ladder as part of the raster artwork. The old winding-road scenes are no longer referenced, and no CSS rails or rung elements duplicate the illustrated ladder. Only the active zone asset is loaded at runtime; exactly eight semantic level markers align to eight evenly spaced painted-rung positions. A one-level win animates the animal upward from the completed rung; reduced-motion players receive the settled state immediately. It is original genre-inspired progression presentation and does not use Candy Crush art, characters, candy motifs, branded copy, or copied level UI.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, a full-width color-state keyboard, and an evenly spaced bottom lifeline dock. The three keyboard rows contain 27 controls—26 letters plus Delete—with a proportionally centered final row; the removed Enter key is unnecessary because the sixth letter submits automatically.
-- Successful solo completion outside Adventure opens a dedicated victory sheet instead of the generic Statistics modal. The sheet leads with a generated signal crest and animated six-tile answer, then shows attempt-specific mastery copy, solve coins plus any seven-day bonus, one nearby streak/collection milestone, Share, and a single prominent Return home or Next word action. Losses use the same structure with calmer recovery copy and no celebration. Adventure retains its more meaningful direct map return.
+- Every finished solo puzzle, including Adventure, opens the dedicated completion sheet instead of the generic Statistics modal. The sheet leads with a generated signal crest and animated six-tile answer, then shows attempt-specific mastery copy, solve coins, puzzle points, any seven-day bonus, and one prominent green OK action. Losses use the same structure with calmer recovery copy and no celebration. Daily and all non-Adventure modes return home after OK; Adventure returns to its map and animates the advanced token. Re-entering an already finished Daily reliably restores the same card.
 - The selected animal avatar appears as a clean circular header icon with no square pedestal, so identity is visible on home, solo, and online screens. It is also the entry point to a personal profile sheet showing unique words solved, total solves, best attempt count, fastest word/time, best streak, general Adventure status, and coins. Beside it, the chosen generated wordmark uses two compact rows of glossy sculpted blocks spelling `SIXTH` and `SENSE`.
-- Identity Studio contains nine free generated animals plus nine generated premium animals—red panda, capybara, raccoon, snow leopard, phoenix, dragon, unicorn, otter, and chameleon—unlockable for 45–65 coins. Four generated premium avatar frames—Aurora, Sunburst, Prism, and Champion—cost 30–45 coins. Purchases persist locally, equip immediately on the header/profile/Adventure token, and synchronize into an active room. Eight free highlight colors and the editable username remain. The top-left profile now links directly to these controls.
-- Online play has a persistent red Back control with an arrow instead of the old house art. Activating it opens a mode-aware confirmation with “Stay in game” as the safe choice and explains that leaving clears this device’s saved seat while the room remains active for the other player. The header brand routes through the same confirmation so it cannot bypass the safety step. Race and VS retain the same four coin-powered lifelines as solo play. Race uses a shared thin green course with moving avatar tokens and a checkered finish. VS keeps both names and point totals above the board, shows finite point-progress bars, and renders each opponent attempt as six color/symbol-state pips without exposing letters. A synchronized centered transition announces the point winner and new word on both clients whenever the authoritative round number advances.
+- Identity Studio contains nine free generated animals plus nine generated premium animals—red panda, capybara, raccoon, snow leopard, phoenix, dragon, unicorn, otter, and chameleon—unlockable for 2,250–3,250 coins. Four generated premium avatar frames—Aurora, Sunburst, Prism, and Champion—cost 1,500–2,250 coins. Purchases persist locally, equip immediately on the header/profile/Adventure token, and synchronize into an active room. Eight free highlight colors and the editable username remain. The top-left profile now links directly to these controls.
+- Online play has a persistent red Back control with an arrow instead of the old house art. Activating it or using mobile browser Back opens a mode-aware confirmation with “Stay in game” as the safe choice and explains that leaving clears this device’s saved seat while the room remains active for the other player. The header brand routes through the same confirmation so it cannot bypass the safety step. Race and VS retain the same four coin-powered, one-tap lifelines as solo play and show a match completion card with earned match points. Race uses a shared thin green course with moving avatar tokens and a checkered finish. VS keeps both names and point totals above the board, shows finite point-progress bars, and renders each opponent attempt as six color/symbol-state pips without exposing letters. A synchronized centered transition announces the point winner and new word on both clients whenever the authoritative round number advances.
 - Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons. Visible icon art is intentionally compact inside touch targets that remain at least 44px on phones.
 - The generated house control has an optical-centering correction wherever it appears, compensating for asymmetrical transparent weight without shrinking or shifting its 44px-or-larger touch target.
+- Mobile browser Back is mapped onto the in-app screen stack. It closes ordinary dialogs first, returns from a map or finished flow to the prior app surface, and never abandons an active solo puzzle or online room without a confirmation popup.
 - The Daily action, mode cards, modal-title art, and decorative streak/lifeline imagery use a compact scale so controls support the game rather than dominating it.
 - The game screen is locked to one dynamic viewport and must not create page-level horizontal or vertical scrolling, including during screen-entry animation. Its footer no longer exposes an 8px maroon background gap, and phone layouts preserve the cost chip below every lifeline.
-- Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, staged result-word tiles, a full-screen solve burst, and a lighter in-sheet confetti cascade. The completion flow also uses a short optional vibration pattern where supported.
+- Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, combined lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, staged result-word tiles, a full-screen solve burst, and a lighter in-sheet confetti cascade. The completion flow also uses a short optional vibration pattern where supported.
 - All optional motion collapses under `prefers-reduced-motion`.
 - Audio uses an original procedural Web Audio system with two independent persistent controls: Music runs a low-volume 32-step “aurora claybeat” of soft pads, bass pulses, and pentatonic plucks; Sound effects covers letters, deletion, the three tile states, invalid actions, coins, each lifeline, room actions, wins, and losses. Victory now layers a bass lift, bright chord, stereo sparkle run, and soft noise accents for a more substantial finish. It works without downloaded audio files and begins only after the first user gesture, as required by mobile browser autoplay rules.
 - Dark and high-contrast modes are available. Dark mode preserves four visually distinct keyboard treatments: untested purple, Aligned green, Echoing orange, and Quiet charcoal, with the `●`, `◆`, and `×` markers retained.
-- The UI supplies visible keyboard color states, color-independent symbols, semantic buttons, ARIA labels, focus styles, first-visit help, and a skip-to-content link.
+- The UI supplies visible keyboard color states, color-independent symbols, semantic buttons, ARIA labels, focus styles, first-visit help, and a skip-to-content link. Sense uses a centered popup with a purple outline, black text, a 60%-alpha white surface, and a green 44px-or-larger OK control; the same dialog is reused in multiplayer.
 - The Settings sheet remains touch/wheel scrollable but hides its visual scrollbar for a cleaner popup edge.
 
 ## Intentional removals and simplifications
@@ -133,8 +136,8 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `index.html` | Semantic home/game screens, dedicated result sheet, modal content, settings, stats, icon dock, and script loading order. |
 | `styles.css` | Responsive claymorphic presentation, phone viewport fitting, dark/high-contrast themes, keyboard states, modal styling, and all motion. |
 | `game-core.js` | Environment-neutral rules: constants, answer/guess loading, repeated-letter scoring, hard-mode validation, daily/practice selection, deterministic seeded Adventure shuffling/progress, and coin rewards. It exports to both browser globals and CommonJS tests. |
-| `app.js` | Browser state, rendering, input, modes, Adventure map/progress, persistence, inventory/economy, streak rewards, cosmetic unlocks, modals, animations, the procedural soundtrack/effects engine, sharing, and statistics. It exposes `window.SixthSenseAudio` and a narrow `window.SixthSenseEconomy` interface so multiplayer shares the same sound and wallet state. |
-| `multiplayer.js` | Room create/join/leave flows, resume-token session state, polling/reconnect, online board/keyboard/lifeline rendering, the shared Race course, VS series progress, attempt patterns, and live identity synchronization. |
+| `app.js` | Browser state, rendering, input, modes, Adventure map/progress, persistence, inventory/economy migration, streak/point rewards, cosmetic unlocks, modal and browser-history navigation, animations, the procedural soundtrack/effects engine, sharing, and statistics. It exposes narrow audio, economy, dialog, celebration, and navigation interfaces so multiplayer shares the same services. |
+| `multiplayer.js` | Room create/join/leave flows, resume-token session state, polling/reconnect, online board/keyboard/one-tap lifeline rendering, shared hint and match-result popups, the shared Race course, VS series progress, attempt patterns, and live identity synchronization. |
 | `api/multiplayer.js` | Vercel serverless authority for codes, seats, room lifecycle, answer selection, guess validation/scoring, lifeline effects, identity updates, CAS revisions, idempotency, results, and redacted snapshots. It creates and migrates its Postgres tables idempotently after a database is connected. |
 | `answer-bank.js` | 10,187 answer objects with a six-letter `word`, `clue`, and `tier`. Loaded before `game-core.js` in the browser and required by the server. |
 | `word-bank.js` | Expanded accepted-guess vocabulary. Loaded before `game-core.js` in the browser. |
@@ -193,9 +196,9 @@ Current `localStorage` keys:
 - `sixth-sense.visited.v1`
 - `sixth-sense.online.identity.v1`
 
-Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, solve/streak reward and stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed when relevant. The current game schema uses `version: 3`.
+Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, solve/streak coin reward, puzzle points, reward/stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed when relevant. The current game schema uses `version: 3`.
 
-Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. New fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
+Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. The economy-v2 migration multiplies an explicitly saved legacy coin balance once by 10; all other new fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
 
 Online room rules and security:
 
@@ -259,14 +262,14 @@ $env:CHROME_BIN='C:\Program Files\Google\Chrome\Application\chrome.exe'
 node test-browser.js
 ```
 
-Current verified result on 2026-08-27:
+Current verified result on 2026-08-31:
 
 - JavaScript syntax: passed.
 - Core rules/data: passed — 10,187 answers across player-facing Normal 4,309 / Hard 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — dedicated phone victory flow with generated art, animated answer, exact attempt/coin totals, separate Statistics, full-screen and in-sheet confetti, layered completion audio scheduling, seven-day bonus, one-tap Practice replay, result escape, and reduced-motion handling; plus automatic sixth-letter submission in solo and multiplayer, 27-key/no-Enter assertions, full-width Daily keyboard geometry, 390×844 and 360×800 no-scroll puzzle HUD, solve/Skip Adventure auto-return and one-rung movement, Time Tackle, cosmetics/profile navigation, Settings scroll, red multiplayer Back styling, leave/cancel confirmation paths, unchanged-poll DOM preservation across multiple 900ms cycles, mobile scrolling backgrounds, multiplayer lifelines/Race/VS synchronization, dark-theme feedback, desktop layout, and overflow checks.
+- Browser QA: passed — phone-sized translucent hint and leave dialogs with explicit green acknowledgement, one-tap buy-and-use lifelines, free repeated Sense access, scaled prices and rewards, mastery points, celebratory result cards, completed-Daily recovery, Adventure acknowledgement before map progression, and native browser Back interception with active-game confirmation. Existing automatic sixth-letter submission, 27-key keyboard, responsive layout, cosmetics/profile navigation, dark-theme feedback, multiplayer lifelines/Race/VS synchronization, audio/confetti, and overflow checks continue to pass.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
-- Vercel production: Ready and HTTP 200 at `https://sixth-sense-game.vercel.app/`; runtime `20260827.18`, automatic sixth-letter submission, the full-width 27-key keyboard, the red confirmed Back flow, stable multiplayer polling, core CSS, JavaScript, answer data, manifest, victory artwork, and the migrated serverless multiplayer API are live.
+- Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260831.1` contains the unified completion, popup, Back-navigation, one-tap lifeline, points, and scaled-economy release described above.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
 - Multiplayer production: activated through the Vercel Neon integration on its free plan with `DATABASE_URL` connected to Production, Preview, and Development. The latest public-URL run used automatic six-letter submission and passed create/join/start with two isolated clients, refresh rejoin, 1,804ms opponent-attempt visibility, synchronized VS advancement, and host input enabled immediately after Start. Earlier migrated checks also passed live Sense state with no answer field and premium chameleon/Champion identity synchronization.
 - The bundled broad project validator now reports three marker gaps: polling rather than WebSocket/SSE, its expected literal reconnect+snapshot marker is absent even though refresh/reopen seat restoration is implemented and production-tested, and there is no Force End/Play Again room lifecycle. The explicit static build now passes.
@@ -306,6 +309,15 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-31 — Completion cards, native-feeling Back, one-tap help, and economy scale
+
+- Unified completion handling across every solo mode. Daily, Practice, Time Tackle, Insight, Streak, and Adventure now show the celebratory result sheet with the six-letter answer, attempts, earned coins, and new 700-to-100 puzzle points. The focused sheet removes the old progress/share clutter and uses one green OK action; Daily and regular solo modes return home, while Adventure returns to the map and performs its rung movement after acknowledgment. Reopening a finished Daily restores its card instead of leaving the player on an inert board.
+- Added a match-completion card to Race and VS with victory/recovery copy and match points. Existing synchronized round transitions remain nonblocking during live play.
+- Replaced the timed Sense toast with a real centered dialog: purple outline, black clue text, 60%-alpha white surface, and green OK. Sense remains freely reopenable after its first use, including in multiplayer.
+- Changed all zero-stock lifelines to buy and use in one tap. Skip still confirms first and only charges on confirmation. Scaled lifeline prices to 30/50/40/60, solve coins to 140–20, and the seven-day reward to 300. Scaled premium cosmetics by 50× to 1,500–3,250 coins and added a one-time economy-v2 migration that multiplies explicit legacy balances by 10.
+- Added History API screen states so phone browser Back closes dialogs or navigates within the app rather than abandoning it. Active solo puzzles and online rooms always intercept Back with a confirmation; cancelling preserves the exact game surface.
+- Extended core and installed-Chrome Playwright coverage for points, scaled economics, one-tap lifelines, popup visual tokens, completed-Daily recovery, Adventure’s acknowledged map return, mobile browser Back confirmation/cancellation, premium pricing, multiplayer Sense, and phone overflow. Versioned the static runtime as `20260831.1`.
 
 ### 2026-08-27 — Automatic six-letter submission and full-width puzzle keyboard
 

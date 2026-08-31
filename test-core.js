@@ -85,10 +85,12 @@ assert.deepEqual(Core.adventureProgress(6304), { level: 6304, total: 10187, tier
 assert.equal(Core.adventureProgress(10187).complete, true);
 assert.equal(Core.adventureAnswer(4309, 123456).tier, "medium");
 assert.equal(Core.dateKey(new Date("2026-08-26T12:00:00Z")), "2026-08-26");
-assert.equal(Core.STARTING_COINS, 20);
+assert.equal(Core.STARTING_COINS, 200);
 assert.equal(Core.MAX_GUESSES, 7);
-assert.deepEqual(Core.LIFELINE_COSTS, { sense: 3, peek: 5, clear: 4, skip: 6 });
-assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.rewardForAttempts), [14, 12, 10, 8, 6, 4, 2]);
-assert.equal(Core.rewardForAttempts(0), 2, "invalid attempt counts should fall back safely");
+assert.deepEqual(Core.LIFELINE_COSTS, { sense: 30, peek: 50, clear: 40, skip: 60 });
+assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.rewardForAttempts), [140, 120, 100, 80, 60, 40, 20]);
+assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.pointsForAttempts), [700, 600, 500, 400, 300, 200, 100]);
+assert.equal(Core.rewardForAttempts(0), 20, "invalid attempt counts should fall back safely");
+assert.equal(Core.pointsForAttempts(0), 100, "invalid point attempt counts should fall back safely");
 
 console.log(`Sixth Sense core: ${Core.ANSWERS.length} answers, ${Core.WORDS.size} accepted words — all checks passed.`);

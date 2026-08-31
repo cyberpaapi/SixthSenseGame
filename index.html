@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260827.18">
+  <link rel="stylesheet" href="styles.css?v=20260831.1">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -27,7 +27,7 @@
       </a>
     </div>
     <nav class="header-actions" aria-label="Game controls">
-      <div class="coin-wallet header-wallet" id="coin-wallet" aria-label="20 coins"><span class="coin-symbol" aria-hidden="true"></span><strong id="coin-count">20</strong></div>
+      <div class="coin-wallet header-wallet" id="coin-wallet" aria-label="200 coins"><span class="coin-symbol" aria-hidden="true"></span><strong id="coin-count">200</strong></div>
       <button class="icon-button" type="button" data-modal-open="help-modal" aria-label="How to play">
         <img src="assets/control-help.png" width="256" height="256" alt="" aria-hidden="true">
       </button>
@@ -51,8 +51,8 @@
         <span class="streak-fill" id="streak-progress-fill"></span>
         <span class="streak-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       </div>
-      <div class="streak-reward" id="streak-reward-preview" aria-label="Seven-day reward: 30 coins">
-        <img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true"><span><small>Day 7 reward</small><strong>+30</strong></span>
+      <div class="streak-reward" id="streak-reward-preview" aria-label="Seven-day reward: 300 coins">
+        <img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true"><span><small>Day 7 reward</small><strong>+300</strong></span>
       </div>
     </section>
 
@@ -133,12 +133,12 @@
       <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
 
       <section class="lifeline-dock" aria-label="Lifelines">
-        <p class="sr-only" id="clue-copy" aria-live="polite">Sense unlocks once. Peek, Clear, and Skip can be bought and used repeatedly.</p>
+        <p class="sr-only" id="clue-copy" aria-live="polite">Tap a lifeline to use it; if needed, its price is charged in the same tap.</p>
         <div class="lifeline-actions">
-          <div class="lifeline-item" data-lifeline="sense"><button class="lifeline-button" id="clue-button" type="button" aria-label="Sense: buy for 3 coins" title="Sense — buy for 3 coins"><img src="assets/control-sense.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>3</b></span></div>
-          <div class="lifeline-item" data-lifeline="peek"><button class="lifeline-button" id="peek-button" type="button" aria-label="Peek: buy for 5 coins" title="Peek — buy for 5 coins"><img src="assets/control-peek.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>5</b></span></div>
-          <div class="lifeline-item" data-lifeline="clear"><button class="lifeline-button" id="clear-button" type="button" aria-label="Clear: buy for 4 coins" title="Clear — buy for 4 coins"><img src="assets/control-clear.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>4</b></span></div>
-          <div class="lifeline-item" data-lifeline="skip"><button class="lifeline-button" id="skip-puzzle-button" type="button" aria-label="Skip: buy for 6 coins" title="Skip — buy for 6 coins"><img src="assets/control-skip.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>6</b></span></div>
+          <div class="lifeline-item" data-lifeline="sense"><button class="lifeline-button" id="clue-button" type="button" aria-label="Sense: buy and use for 30 coins" title="Sense — 30 coins"><img src="assets/control-sense.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>30</b></span></div>
+          <div class="lifeline-item" data-lifeline="peek"><button class="lifeline-button" id="peek-button" type="button" aria-label="Peek: buy and use for 50 coins" title="Peek — 50 coins"><img src="assets/control-peek.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>50</b></span></div>
+          <div class="lifeline-item" data-lifeline="clear"><button class="lifeline-button" id="clear-button" type="button" aria-label="Clear: buy and use for 40 coins" title="Clear — 40 coins"><img src="assets/control-clear.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>40</b></span></div>
+          <div class="lifeline-item" data-lifeline="skip"><button class="lifeline-button" id="skip-puzzle-button" type="button" aria-label="Skip: buy and use for 60 coins" title="Skip — 60 coins"><img src="assets/control-skip.png" width="256" height="256" alt="" aria-hidden="true"><span class="lifeline-stock" aria-hidden="true" hidden><b>0</b></span></button><span class="lifeline-price" aria-hidden="true"><i></i><b>60</b></span></div>
         </div>
       </section>
     </section>
@@ -164,10 +164,10 @@
           <div class="keyboard online-keyboard" id="online-keyboard" aria-label="Online on-screen keyboard"></div>
           <section class="lifeline-dock online-lifeline-dock" aria-label="Multiplayer lifelines">
             <div class="lifeline-actions">
-              <div class="lifeline-item" data-online-lifeline="sense"><button class="lifeline-button" type="button" aria-label="Sense lifeline"><img src="assets/control-sense.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>3</b></span></div>
-              <div class="lifeline-item" data-online-lifeline="peek"><button class="lifeline-button" type="button" aria-label="Peek lifeline"><img src="assets/control-peek.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>5</b></span></div>
-              <div class="lifeline-item" data-online-lifeline="clear"><button class="lifeline-button" type="button" aria-label="Clear lifeline"><img src="assets/control-clear.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>4</b></span></div>
-              <div class="lifeline-item" data-online-lifeline="skip"><button class="lifeline-button" type="button" aria-label="Skip lifeline"><img src="assets/control-skip.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>6</b></span></div>
+              <div class="lifeline-item" data-online-lifeline="sense"><button class="lifeline-button" type="button" aria-label="Sense lifeline"><img src="assets/control-sense.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>30</b></span></div>
+              <div class="lifeline-item" data-online-lifeline="peek"><button class="lifeline-button" type="button" aria-label="Peek lifeline"><img src="assets/control-peek.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>50</b></span></div>
+              <div class="lifeline-item" data-online-lifeline="clear"><button class="lifeline-button" type="button" aria-label="Clear lifeline"><img src="assets/control-clear.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>40</b></span></div>
+              <div class="lifeline-item" data-online-lifeline="skip"><button class="lifeline-button" type="button" aria-label="Skip lifeline"><img src="assets/control-skip.png" width="256" height="256" alt=""><span class="lifeline-stock" hidden><b>0</b></span></button><span class="lifeline-price"><i></i><b>60</b></span></div>
             </div>
           </section>
           <button class="primary-button online-start" id="online-start" type="button" hidden>Start match</button>
@@ -213,14 +213,23 @@
       <section class="lifeline-guide" aria-labelledby="lifeline-guide-title">
         <div class="guide-heading"><span class="coin-symbol" aria-hidden="true"></span><h3 id="lifeline-guide-title">Lifelines</h3></div>
         <div class="lifeline-guide-grid">
-          <div><img src="assets/control-sense.png" width="256" height="256" alt=""><span><strong>Sense <small>3 coins</small></strong><p>Shows the word’s clue. Tap it again anytime after buying it.</p></span></div>
-          <div><img src="assets/control-peek.png" width="256" height="256" alt=""><span><strong>Peek <small>5 coins</small></strong><p>Reveals one letter position.</p></span></div>
-          <div><img src="assets/control-clear.png" width="256" height="256" alt=""><span><strong>Clear <small>4 coins</small></strong><p>Removes three impossible letters.</p></span></div>
-          <div><img src="assets/control-skip.png" width="256" height="256" alt=""><span><strong>Skip <small>6 coins</small></strong><p>Leaves the puzzle.</p></span></div>
+          <div><img src="assets/control-sense.png" width="256" height="256" alt=""><span><strong>Sense <small>30 coins</small></strong><p>Shows the word’s clue and can be reopened freely.</p></span></div>
+          <div><img src="assets/control-peek.png" width="256" height="256" alt=""><span><strong>Peek <small>50 coins</small></strong><p>Reveals one letter position.</p></span></div>
+          <div><img src="assets/control-clear.png" width="256" height="256" alt=""><span><strong>Clear <small>40 coins</small></strong><p>Removes three impossible letters.</p></span></div>
+          <div><img src="assets/control-skip.png" width="256" height="256" alt=""><span><strong>Skip <small>60 coins</small></strong><p>Leaves the puzzle.</p></span></div>
         </div>
-        <p class="guide-foot">Tap once to buy: its price disappears and an available count appears. Tap again to use it. Sense unlocks once and can be reopened freely; Peek, Clear, and Skip may be bought and used repeatedly whenever they can still help. Unused purchases stay in your inventory.</p>
+        <p class="guide-foot">Tap once to use. If you have no stock, the same tap buys and uses the lifeline immediately. Sense unlocks once and can then be reopened freely; Peek, Clear, and Skip may be used repeatedly whenever they can still help.</p>
       </section>
       <button class="primary-button modal-got-it" type="button">I’ve got a feeling</button>
+    </div>
+  </dialog>
+
+  <dialog class="modal hint-modal" id="hint-modal" aria-labelledby="hint-title" aria-describedby="hint-dialog-copy">
+    <div class="modal-sheet popup-sheet">
+      <p class="eyebrow">Trust your sense</p>
+      <h2 id="hint-title">Your clue</h2>
+      <p class="hint-dialog-copy" id="hint-dialog-copy"></p>
+      <button class="popup-ok" id="hint-ok-button" type="button">OK</button>
     </div>
   </dialog>
 
@@ -238,31 +247,26 @@
       <h2 id="result-title">Signal found</h2>
       <p class="result-summary" id="result-summary">A sharp piece of deduction.</p>
       <div class="result-word" id="result-word" aria-label="Solved word"></div>
-      <div class="result-rewards" aria-label="Puzzle rewards">
+      <div class="result-rewards" aria-label="Puzzle result">
         <div class="result-metric">
           <span class="result-metric-icon result-attempt-icon" aria-hidden="true">7</span>
           <span><small>Performance</small><strong id="result-attempts">Solved in 3</strong></span>
         </div>
         <div class="result-metric result-coin-metric">
           <span class="coin-symbol" aria-hidden="true"></span>
-          <span><small>Earned</small><strong id="result-coins">+10 coins</strong></span>
+          <span><small>Coins</small><strong id="result-coins">+100 coins</strong></span>
+        </div>
+        <div class="result-metric result-point-metric">
+          <span class="result-point-icon" aria-hidden="true">★</span>
+          <span><small>Points</small><strong id="result-points">+500 points</strong></span>
         </div>
       </div>
       <div class="result-streak-reward" id="result-streak-reward" hidden>
         <img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true">
-        <span><small>Seven-day bonus</small><strong>+30 coins</strong></span>
-      </div>
-      <div class="result-progress">
-        <div class="result-progress-copy"><span id="result-progress-label">Keep the signal alive</span><strong id="result-progress-value">1 day</strong></div>
-        <div class="result-progress-track" id="result-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="result-progress-fill"></i></div>
-        <small id="result-progress-next">Six days to the next streak reward</small>
+        <span><small>Seven-day bonus</small><strong>+300 coins</strong></span>
       </div>
       <div class="result-actions">
-        <button class="result-primary" id="result-primary" type="button">Next word</button>
-        <button class="result-share" id="result-share" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"></path></svg>
-          Share
-        </button>
+        <button class="result-primary" id="result-primary" type="button">OK</button>
       </div>
     </div>
   </dialog>
@@ -281,8 +285,8 @@
         <div><strong id="stat-streak">0</strong><span>Streak</span></div>
         <div><strong id="stat-max-streak">0</strong><span>Best</span></div>
       </div>
-      <div class="wallet-summary"><span class="coin-symbol" aria-hidden="true"></span><span>Your coins</span><strong id="stat-coins">20</strong></div>
-      <div class="daily-reward-earned" id="daily-reward-earned" hidden><img src="assets/decor-champion.webp" width="512" height="512" alt=""><span><small>Seven-day streak reward</small><strong>+30 coins</strong></span></div>
+      <div class="wallet-summary"><span class="coin-symbol" aria-hidden="true"></span><span>Your coins</span><strong id="stat-coins">200</strong></div>
+      <div class="daily-reward-earned" id="daily-reward-earned" hidden><img src="assets/decor-champion.webp" width="512" height="512" alt=""><span><small>Seven-day streak reward</small><strong>+300 coins</strong></span></div>
       <h3>Guess rhythm</h3>
       <div class="distribution" id="distribution" aria-label="Guess distribution"></div>
       <div class="stats-actions">
@@ -315,7 +319,7 @@
         <div><strong id="profile-best-attempts">—</strong><span>Best solve</span></div>
         <div><strong id="profile-best-streak">0</strong><span>Best streak</span></div>
         <div class="profile-fastest-stat"><strong id="profile-fastest-word">—</strong><span>Fastest word</span><small id="profile-fastest-time">No timed solve yet</small></div>
-        <div><strong id="profile-coins">20</strong><span>Coins</span></div>
+        <div><strong id="profile-coins">200</strong><span>Coins</span></div>
       </div>
     </div>
   </dialog>
@@ -355,15 +359,15 @@
         </div>
         <div class="premium-shop-heading"><div><p class="eyebrow">Exclusive collection</p><h3>Unlock premium avatars</h3></div><span><i class="coin-symbol"></i> Tap to unlock</span></div>
         <div class="avatar-choice-grid premium-avatar-grid" role="group" aria-label="Premium animal avatars">
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="red-panda" data-unlock-cost="45" aria-label="Unlock red panda avatar for 45 coins" aria-pressed="false"><span class="avatar-art avatar-red-panda"></span><small><i class="coin-symbol"></i>45</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="capybara" data-unlock-cost="45" aria-label="Unlock capybara avatar for 45 coins" aria-pressed="false"><span class="avatar-art avatar-capybara"></span><small><i class="coin-symbol"></i>45</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="raccoon" data-unlock-cost="45" aria-label="Unlock raccoon avatar for 45 coins" aria-pressed="false"><span class="avatar-art avatar-raccoon"></span><small><i class="coin-symbol"></i>45</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="snow-leopard" data-unlock-cost="55" aria-label="Unlock snow leopard avatar for 55 coins" aria-pressed="false"><span class="avatar-art avatar-snow-leopard"></span><small><i class="coin-symbol"></i>55</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="phoenix" data-unlock-cost="65" aria-label="Unlock phoenix avatar for 65 coins" aria-pressed="false"><span class="avatar-art avatar-phoenix"></span><small><i class="coin-symbol"></i>65</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="dragon" data-unlock-cost="65" aria-label="Unlock dragon avatar for 65 coins" aria-pressed="false"><span class="avatar-art avatar-dragon"></span><small><i class="coin-symbol"></i>65</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="unicorn" data-unlock-cost="65" aria-label="Unlock unicorn avatar for 65 coins" aria-pressed="false"><span class="avatar-art avatar-unicorn"></span><small><i class="coin-symbol"></i>65</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="otter" data-unlock-cost="55" aria-label="Unlock otter avatar for 55 coins" aria-pressed="false"><span class="avatar-art avatar-otter"></span><small><i class="coin-symbol"></i>55</small></button>
-          <button class="avatar-choice premium-choice" type="button" data-avatar-option="chameleon" data-unlock-cost="55" aria-label="Unlock chameleon avatar for 55 coins" aria-pressed="false"><span class="avatar-art avatar-chameleon"></span><small><i class="coin-symbol"></i>55</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="red-panda" data-unlock-cost="2250" aria-label="Unlock red panda avatar for 2,250 coins" aria-pressed="false"><span class="avatar-art avatar-red-panda"></span><small><i class="coin-symbol"></i>2,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="capybara" data-unlock-cost="2250" aria-label="Unlock capybara avatar for 2,250 coins" aria-pressed="false"><span class="avatar-art avatar-capybara"></span><small><i class="coin-symbol"></i>2,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="raccoon" data-unlock-cost="2250" aria-label="Unlock raccoon avatar for 2,250 coins" aria-pressed="false"><span class="avatar-art avatar-raccoon"></span><small><i class="coin-symbol"></i>2,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="snow-leopard" data-unlock-cost="2750" aria-label="Unlock snow leopard avatar for 2,750 coins" aria-pressed="false"><span class="avatar-art avatar-snow-leopard"></span><small><i class="coin-symbol"></i>2,750</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="phoenix" data-unlock-cost="3250" aria-label="Unlock phoenix avatar for 3,250 coins" aria-pressed="false"><span class="avatar-art avatar-phoenix"></span><small><i class="coin-symbol"></i>3,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="dragon" data-unlock-cost="3250" aria-label="Unlock dragon avatar for 3,250 coins" aria-pressed="false"><span class="avatar-art avatar-dragon"></span><small><i class="coin-symbol"></i>3,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="unicorn" data-unlock-cost="3250" aria-label="Unlock unicorn avatar for 3,250 coins" aria-pressed="false"><span class="avatar-art avatar-unicorn"></span><small><i class="coin-symbol"></i>3,250</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="otter" data-unlock-cost="2750" aria-label="Unlock otter avatar for 2,750 coins" aria-pressed="false"><span class="avatar-art avatar-otter"></span><small><i class="coin-symbol"></i>2,750</small></button>
+          <button class="avatar-choice premium-choice" type="button" data-avatar-option="chameleon" data-unlock-cost="2750" aria-label="Unlock chameleon avatar for 2,750 coins" aria-pressed="false"><span class="avatar-art avatar-chameleon"></span><small><i class="coin-symbol"></i>2,750</small></button>
         </div>
         <fieldset class="accent-picker"><legend>Highlight color</legend><div class="accent-choice-row">
           <button type="button" data-accent-option="coral" style="--swatch:#ff4f83" aria-label="Coral highlight" aria-pressed="true"></button>
@@ -377,10 +381,10 @@
         </div></fieldset>
         <fieldset class="decoration-picker"><legend>Exclusive avatar highlights</legend><div class="decoration-choice-row">
           <button type="button" data-decoration-option="none" aria-label="No avatar decoration" aria-pressed="true"><span class="avatar-art avatar-fox"></span><small>None</small></button>
-          <button type="button" data-decoration-option="aurora" data-unlock-cost="30" aria-label="Unlock Aurora highlight for 30 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="aurora"></span><small><i class="coin-symbol"></i>30</small></button>
-          <button type="button" data-decoration-option="sunburst" data-unlock-cost="35" aria-label="Unlock Sunburst highlight for 35 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="sunburst"></span><small><i class="coin-symbol"></i>35</small></button>
-          <button type="button" data-decoration-option="prism" data-unlock-cost="40" aria-label="Unlock Prism highlight for 40 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="prism"></span><small><i class="coin-symbol"></i>40</small></button>
-          <button type="button" data-decoration-option="champion" data-unlock-cost="45" aria-label="Unlock Champion highlight for 45 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="champion"></span><small><i class="coin-symbol"></i>45</small></button>
+          <button type="button" data-decoration-option="aurora" data-unlock-cost="1500" aria-label="Unlock Aurora highlight for 1,500 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="aurora"></span><small><i class="coin-symbol"></i>1,500</small></button>
+          <button type="button" data-decoration-option="sunburst" data-unlock-cost="1750" aria-label="Unlock Sunburst highlight for 1,750 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="sunburst"></span><small><i class="coin-symbol"></i>1,750</small></button>
+          <button type="button" data-decoration-option="prism" data-unlock-cost="2000" aria-label="Unlock Prism highlight for 2,000 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="prism"></span><small><i class="coin-symbol"></i>2,000</small></button>
+          <button type="button" data-decoration-option="champion" data-unlock-cost="2250" aria-label="Unlock Champion highlight for 2,250 coins" aria-pressed="false"><span class="avatar-art avatar-fox" data-decoration="champion"></span><small><i class="coin-symbol"></i>2,250</small></button>
         </div></fieldset>
       </section>
       <p class="settings-foot">Sixth Sense stores puzzle progress only on this device.</p>
@@ -414,6 +418,17 @@
     </div>
   </dialog>
 
+  <dialog class="modal confirm-modal leave-game-modal" id="leave-game-modal" aria-labelledby="leave-game-title">
+    <div class="modal-sheet popup-sheet">
+      <div class="modal-head">
+        <div><p class="eyebrow">Puzzle in progress</p><h2 id="leave-game-title">Leave this game?</h2></div>
+        <button class="icon-button modal-close" type="button" aria-label="Close leave confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <p id="leave-game-copy">Your current guesses are saved, and you can return to this puzzle later.</p>
+      <div class="confirm-actions"><button class="secondary-button" id="leave-game-cancel" type="button">Keep playing</button><button class="destructive-button" id="leave-game-confirm" type="button">Leave game</button></div>
+    </div>
+  </dialog>
+
   <dialog class="modal confirm-modal online-leave-modal" id="online-leave-modal" aria-labelledby="online-leave-title">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -425,11 +440,22 @@
     </div>
   </dialog>
 
+  <dialog class="modal online-result-modal" id="online-result-modal" aria-labelledby="online-result-title" aria-describedby="online-result-copy">
+    <div class="modal-sheet popup-sheet">
+      <div class="online-result-crest" aria-hidden="true"><img src="assets/result-signal-crest-v1.webp" width="640" height="640" alt=""></div>
+      <p class="eyebrow" id="online-result-kicker">Match complete</p>
+      <h2 id="online-result-title">Victory!</h2>
+      <p id="online-result-copy">You carried the strongest signal.</p>
+      <div class="online-result-points"><span aria-hidden="true">★</span><small>Match points</small><strong id="online-result-points">+300</strong></div>
+      <button class="popup-ok" id="online-result-ok" type="button">OK</button>
+    </div>
+  </dialog>
+
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260827.18"></script>
-  <script src="word-bank.js?v=20260827.18"></script>
-  <script src="game-core.js?v=20260827.18"></script>
-  <script src="app.js?v=20260827.18"></script>
-  <script src="multiplayer.js?v=20260827.18"></script>
+  <script src="answer-bank.js?v=20260831.1"></script>
+  <script src="word-bank.js?v=20260831.1"></script>
+  <script src="game-core.js?v=20260831.1"></script>
+  <script src="app.js?v=20260831.1"></script>
+  <script src="multiplayer.js?v=20260831.1"></script>
 </body>
 </html>

@@ -29,21 +29,22 @@ Then open `http://localhost:4173`.
 - A compact bottom icon dock for coin-powered Sense, Peek, Clear, and Skip lifelines
 - Price-under-icon and top-right inventory badges that never show redundant zeroes
 - A fixed one-viewport play layout with no page-level game-screen scrolling
-- Persistent coin wallet with attempt-based solve rewards (14 coins down to 2)
-- A visible 30-coin reward every seven consecutive Daily wins
+- Persistent coin wallet with attempt-based solve rewards (140 coins down to 20) and a one-time migration that preserves existing players’ purchasing power
+- A visible 300-coin reward every seven consecutive Daily wins
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
-- Peek, Clear, and Skip can be stocked, used, repurchased, and used again; each Peek and Clear finds fresh information
-- Sense clues appear in a centered five-second bubble and can be reopened anytime
+- Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information
+- Sense clues appear in a centered confirmable popup and can be reopened anytime without another charge
 - Purposeful purchase, use, reveal, removal, wallet, and screen-entry motion with reduced-motion support
 - Optional hard mode
 - Dark and high-contrast themes
 - An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
-- A dedicated victory flow with performance copy, solved-word reveal, earned coins, nearby progression, layered confetti, a richer completion chord, result sharing, and one-tap replay
+- A dedicated victory flow across every solo mode with performance copy, solved-word reveal, puzzle points, earned coins, layered confetti, a richer completion chord, and a clear green OK action; completed Daily saves reliably reopen the card
 - Statistics remain a separate, player-opened screen instead of interrupting every successful solve
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
-- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with a red confirmed Back action, shared lifelines, stable polling without repeated full-board repaints, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
+- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with a red confirmed Back action, match result cards, shared one-tap lifelines, stable polling without repeated full-board repaints, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
+- Mobile browser Back follows the in-app screen stack and asks before leaving an active solo or multiplayer game
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 
 ## Verify

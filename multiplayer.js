@@ -51,6 +51,12 @@
     leaveCopy: document.querySelector("#online-leave-copy"),
     leaveCancel: document.querySelector("#online-leave-cancel"),
     leaveConfirm: document.querySelector("#online-leave-confirm"),
+    resultDialog: document.querySelector("#online-result-modal"),
+    resultKicker: document.querySelector("#online-result-kicker"),
+    resultTitle: document.querySelector("#online-result-title"),
+    resultCopy: document.querySelector("#online-result-copy"),
+    resultPoints: document.querySelector("#online-result-points"),
+    resultOk: document.querySelector("#online-result-ok"),
     lifelines: [...document.querySelectorAll("[data-online-lifeline]")]
   };
 
@@ -65,7 +71,8 @@
     renderedSnapshotSignature: "",
     pollTimer: null,
     transitionTimer: null,
-    busy: false
+    busy: false,
+    finishedResultShown: false
   };
 
   function readJson(key, fallback) {
@@ -190,6 +197,7 @@
     state.current = "";
     state.activeRound = result.snapshot.room.mode === "vs" ? Number(result.snapshot.room.currentRound) || 0 : result.snapshot.me.currentWordIndex;
     state.snapshot = result.snapshot;
+    state.finishedResultShown = false;
     state.renderedSnapshotSignature = "";
     localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ roomCode: state.roomCode, token: state.token, playerId: state.playerId }));
     if (els.lobby.open) els.lobby.close();
@@ -197,6 +205,7 @@
     els.solo.hidden = true;
     els.screen.hidden = false;
     document.body.dataset.screen = "online";
+    window.SixthSenseNavigation?.onlineEntered();
     window.scrollTo({ top: 0, behavior: "smooth" });
     renderSnapshot();
     playAudio("success");
@@ -216,6 +225,7 @@
     els.home.hidden = false;
     els.solo.hidden = true;
     document.body.dataset.screen = "home";
+    window.SixthSenseNavigation?.onlineLeft();
     window.scrollTo({ top: 0, behavior: "smooth" });
     playAudio("open");
   }
@@ -292,7 +302,28 @@
     renderLifelines();
     renderProgress();
     if (roundAdvanced) showRoundTransition();
+    if (room.status === "finished" && !state.finishedResultShown) showMatchResult();
     return true;
+  }
+
+  function showMatchResult() {
+    const snapshot = state.snapshot;
+    const winner = snapshot.players.find(player => player.id === snapshot.room.winnerPlayerId);
+    const me = snapshot.me;
+    const won = winner?.id === me.id;
+    const progress = snapshot.room.mode === "vs" ? Number(me.score) || 0 : Math.min(Number(me.currentWordIndex) || 0, snapshot.room.wordCount);
+    const points = progress * 100;
+    state.finishedResultShown = true;
+    els.resultKicker.textContent = won ? "Match complete" : "Final signal";
+    els.resultTitle.textContent = won ? "Victory!" : "Match complete";
+    els.resultCopy.textContent = won ? "You carried the strongest signal to the finish." : winner ? `${winner.name} reached the finish first. Your progress still earned points.` : "The room has completed.";
+    els.resultPoints.textContent = `+${points.toLocaleString()}`;
+    if (!els.resultDialog.open) els.resultDialog.showModal();
+    if (won) {
+      window.SixthSenseCelebration?.();
+      playAudio("win");
+    }
+    setTimeout(() => els.resultOk.focus({ preventScroll: true }), 60);
   }
 
   function renderVersusNames() {
@@ -468,7 +499,10 @@
 
   function showLifelineEffect(effect) {
     if (!effect) return;
-    if (effect.kind === "sense") els.status.textContent = effect.clue;
+    if (effect.kind === "sense") {
+      els.status.textContent = "Sense unlocked — tap again anytime to reopen it.";
+      window.SixthSenseDialogs?.showHint(effect.clue);
+    }
     else if (effect.kind === "peek") els.status.textContent = `Peek: position ${Number(effect.position) + 1} is ${String(effect.letter).toUpperCase()}.`;
     else if (effect.kind === "clear") els.status.textContent = `Clear removed ${effect.letters.map(letter => letter.toUpperCase()).join(", ")}.`;
     else els.status.textContent = "Skip used — moving on.";
@@ -487,13 +521,11 @@
     if (!economy) return;
     const wallet = economy.state();
     if ((Number(wallet.inventory?.[kind]) || 0) < 1) {
-      if (economy.purchase(kind)) {
-        item.classList.remove("is-purchased");
-        void item.offsetWidth;
-        item.classList.add("is-purchased");
-        renderLifelines();
-      }
-      return;
+      if (!economy.purchase(kind)) return;
+      item.classList.remove("is-purchased");
+      void item.offsetWidth;
+      item.classList.add("is-purchased");
+      renderLifelines();
     }
     state.busy = true;
     renderKeyboard();
@@ -618,8 +650,10 @@
   els.joinCode.addEventListener("input", () => { els.joinCode.value = els.joinCode.value.replace(/[^a-z0-9]/gi, "").toUpperCase(); });
   els.start.addEventListener("click", startMatch);
   els.leave.addEventListener("click", requestLeave);
-  els.leaveCancel.addEventListener("click", () => els.leaveDialog.close());
+  els.leaveCancel.addEventListener("click", () => { els.leaveDialog.close(); window.SixthSenseNavigation?.onlineLeaveCancelled(); });
   els.leaveConfirm.addEventListener("click", () => { els.leaveDialog.close(); leaveRoom(); });
+  els.leaveDialog.addEventListener("cancel", () => window.SixthSenseNavigation?.onlineLeaveCancelled());
+  els.resultOk.addEventListener("click", () => { els.resultDialog.close(); leaveRoom(); });
   els.lifelines.forEach(item => item.querySelector("button").addEventListener("click", () => useLifeline(item)));
   document.addEventListener("sixth-sense-economy-change", renderLifelines);
   document.addEventListener("sixth-sense-identity-change", async event => {
