@@ -86,7 +86,37 @@ async function submitWord(page, word) {
     assert.match(await hostPage.locator("#online-round-title").textContent(), /New word|Match complete/);
     assert.match(await guestPage.locator("#online-round-score").textContent(), new RegExp(`${guestName} 1`));
 
-    console.log(`Production multiplayer QA passed: room ${roomCode}, two isolated clients, refresh rejoin, live attempt visibility (${observerLatencyMs}ms), and synchronized round transition (${Date.now() - startedAt}ms total).`);
+    for (const page of [hostPage, guestPage]) {
+      await page.click("#online-leave");
+      await page.click("#online-leave-confirm");
+      await page.waitForSelector("#home-screen:not([hidden])", { timeout: 5000 });
+    }
+
+    await hostPage.click('[data-open-online="coop"]');
+    await hostPage.click("#online-create-room");
+    await hostPage.waitForSelector("#online-screen:not([hidden])", { timeout: 15000 });
+    const coopCode = (await hostPage.locator("#online-room-code").textContent()).trim();
+    await guestPage.click('[data-open-online="coop"]');
+    await guestPage.fill("#online-join-code", coopCode);
+    await guestPage.click("#online-join-room");
+    await guestPage.waitForSelector("#online-screen:not([hidden])", { timeout: 15000 });
+    await hostPage.waitForSelector("#online-start:not([hidden])", { timeout: 5000 });
+    await hostPage.click("#online-start");
+    await Promise.all([
+      hostPage.waitForFunction(() => !document.querySelector('[data-online-lifeline="skip"] button')?.disabled, null, { timeout: 10000 }),
+      guestPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 1"), null, { timeout: 10000 })
+    ]);
+    await hostPage.click('[data-online-lifeline="skip"] button');
+    await hostPage.waitForSelector("#online-skip-result-modal[open]", { timeout: 10000 });
+    assert.equal(await hostPage.locator("#online-skip-revealed-word span").count(), 6, "Co-op Skip must reveal all six answer letters");
+    assert.match(await guestPage.locator("#online-live-status").textContent(), /Shared word 1/, "Co-op must not advance before the skipper acknowledges the answer");
+    await hostPage.click("#online-skip-result-ok");
+    await Promise.all([
+      hostPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 2"), null, { timeout: 10000 }),
+      guestPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 2"), null, { timeout: 10000 })
+    ]);
+
+    console.log(`Production multiplayer QA passed: VS room ${roomCode}, Co-op room ${coopCode}, two isolated clients, refresh rejoin, live attempt visibility (${observerLatencyMs}ms), synchronized VS transition, and acknowledged shared Co-op advancement (${Date.now() - startedAt}ms total).`);
   } finally {
     await hostContext.close();
     await guestContext.close();
