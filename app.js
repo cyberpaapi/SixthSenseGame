@@ -730,11 +730,7 @@
         button.title = `${names[kind]} — buy and use for ${Core.LIFELINE_COSTS[kind]} coins`;
       }
     });
-    const notes = [];
-    if (game.clueUsed) notes.push(`Sense: ${game.clue}`);
-    if (game.peekedPositions.length) notes.push(`Peek: ${game.peekedPositions.map(position => `position ${position + 1} is ${game.answer[position].toUpperCase()}`).join("; ")}.`);
-    if (game.eliminatedLetters.length) notes.push(`Cleared: ${game.eliminatedLetters.map(letter => letter.toUpperCase()).join(", ")}.`);
-    els.clueCopy.textContent = notes.length ? notes.join(" ") : "Tap a lifeline to use it; if needed, its price is charged in the same tap.";
+    els.clueCopy.textContent = "Tap a lifeline to use it; if needed, its price is charged in the same tap.";
   }
 
   function renderEconomy() {
@@ -1008,18 +1004,11 @@
 
   function announce(message, options = {}) {
     const duration = Number(options.duration) || 2600;
-    const isHint = Boolean(options.hint);
     clearTimeout(toastTimer);
-    els.toast.classList.remove("is-hint");
-    if (isHint) {
-      void els.toast.offsetWidth;
-      els.toast.classList.add("is-hint");
-    }
     els.toast.hidden = false;
     els.toast.textContent = message;
     toastTimer = setTimeout(() => {
       els.toast.hidden = true;
-      els.toast.classList.remove("is-hint");
     }, duration);
   }
 

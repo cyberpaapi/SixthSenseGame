@@ -122,12 +122,17 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "game screen must not scroll vertically");
     await page.screenshot({ path: path.join(evidenceDir, "mobile-inventory-390x844.png"), fullPage: true });
 
+    const lifelineLayoutBeforeHint = await page.evaluate(() => {
+      const dock = document.querySelector("#game-screen .lifeline-dock").getBoundingClientRect();
+      const prices = [...document.querySelectorAll("#game-screen .lifeline-price:not([hidden])")].map(element => element.getBoundingClientRect());
+      return { dockTop: dock.top, dockBottom: dock.bottom, priceBottom: Math.max(...prices.map(rect => rect.bottom)), viewportHeight: innerHeight };
+    });
     await page.click("#clue-button");
     assert.equal(await page.locator("#coin-count").textContent(), "220");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').isVisible(), true);
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').textContent(), "1");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-price').isHidden(), true);
-    assert.match(await page.locator("#clue-copy").textContent(), /Sense:/);
+    assert.doesNotMatch(await page.locator("#clue-copy").textContent(), /Sense:/, "Sense must not duplicate its clue in a layout-changing inline message");
     assert.equal(await page.locator("#hint-modal").isVisible(), true);
     assert.equal(await page.locator("#hint-ok-button").textContent(), "OK");
     const hintStyle = await page.locator("#hint-modal .popup-sheet").evaluate(el => ({ border: getComputedStyle(el).borderColor, background: getComputedStyle(el).backgroundColor, text: getComputedStyle(document.querySelector("#hint-dialog-copy")).color }));
@@ -141,6 +146,15 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     });
     assert(Math.abs(hintCenter.x - hintCenter.viewportX) <= 2, "Sense hint should be horizontally centered");
     assert(Math.abs(hintCenter.y - hintCenter.viewportY) <= 2, "Sense hint should be vertically centered");
+    const lifelineLayoutDuringHint = await page.evaluate(() => {
+      const dock = document.querySelector("#game-screen .lifeline-dock").getBoundingClientRect();
+      const prices = [...document.querySelectorAll("#game-screen .lifeline-price:not([hidden])")].map(element => element.getBoundingClientRect());
+      return { dockTop: dock.top, dockBottom: dock.bottom, priceBottom: Math.max(...prices.map(rect => rect.bottom)), viewportHeight: innerHeight };
+    });
+    assert(Math.abs(lifelineLayoutDuringHint.dockTop - lifelineLayoutBeforeHint.dockTop) <= 1, "Sense popup must not move the lifeline dock");
+    assert(Math.abs(lifelineLayoutDuringHint.dockBottom - lifelineLayoutBeforeHint.dockBottom) <= 1, "Sense popup must not resize the lifeline dock");
+    assert(lifelineLayoutDuringHint.priceBottom <= lifelineLayoutDuringHint.viewportHeight, "remaining lifeline prices must stay inside the phone viewport while Sense is open");
+    assert.equal(await page.locator("#game-screen .lifeline-price:visible").count(), 3, "only the unlocked Sense price should disappear");
     const firstHint = await page.locator("#hint-dialog-copy").textContent();
     await page.click("#hint-ok-button");
     await page.click("#clue-button");
