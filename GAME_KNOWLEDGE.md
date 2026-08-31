@@ -43,7 +43,7 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 - Accepted input: physical keyboard, onscreen keyboard, touch, optional physical Enter, and Backspace/Delete. Entering the sixth letter submits the row immediately in solo, Race, and VS; there is no onscreen Enter key.
 - A guess must contain exactly six letters and exist in the accepted-guess dictionary.
 - Scoring handles repeated letters correctly: exact positions are allocated first, then remaining answer-letter counts are used for misplaced matches.
-- The player wins by submitting the answer within seven guesses.
+- The player wins by submitting the answer within seven standard guesses. If all seven are used, a modal offers one paid 80-coin Last Chance for an eighth and final row; its rewarded-ad alternative is reserved but disabled until an ad system exists.
 - A loss reveals the answer.
 - Hard mode requires all previously revealed exact positions and minimum known letter counts to be reused.
 - The Daily puzzle is deterministic from the UTC date. The puzzle number counts from 2026-01-01.
@@ -51,18 +51,19 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 
 ## Modes
 
-The home screen exposes eight modes:
+The home screen exposes nine modes:
 
 | Mode | Current behavior |
 | --- | --- |
 | Daily | One deterministic UTC puzzle per day. Daily completion updates played, win rate, guess distribution, and daily streak. Every seventh consecutive Daily win adds a visible 300-coin streak reward. A finished Daily always opens its saved completion card when re-entered, and OK returns home. |
-| Adventure | A persistent 10,187-level solo journey through every answer exactly once. Each device receives a seeded randomized order inside each tier: all 4,309 Normal levels first, then 1,995 Hard, then 3,883 Extreme. Those totals and difficulty names remain off the newcomer-facing map. The dedicated map loads only the current zone and uses a generated endless ladder built directly into the scene. Every image window carries exactly eight consecutive overlaid level markers: normally three previous, the current level, and four upcoming; the opening window is levels 1–8. After either a solve or a paid Skip, the app advances exactly one rung, shows the shared result card, and returns to the map with the selected animal’s upward movement after OK. |
+| Adventure | A persistent 10,187-level solo journey through every answer exactly once. Each device receives a seeded randomized order inside each tier: all 4,058 Normal levels first, then 2,246 Hard, then 3,883 Extreme. Those totals and difficulty names remain off the newcomer-facing map. The dedicated map loads one eight-level zone page at a time over a generated endless ladder. Completed levels remain selectable for replay, while horizontal swipes/arrows reveal later pages under a translucent chain lock until reached. After either a solve or paid Skip on the current level, the app advances exactly one rung, shows the shared result card, and returns to the map after OK. |
 | Practice | Unlimited randomly selected puzzles. A Skip starts a fresh Practice puzzle. |
 | Time Tackle | A Practice-style puzzle with a ten-minute deadline. Its internal key and storage key remain `sprint` for save compatibility. A zero timer ends the puzzle as a loss. |
 | Insight | Starts with the clue unlocked and one deterministic answer position revealed. |
 | Streak | Consecutive wins grow a separate mode streak; a loss or Skip resets that run. |
 | Race | A room-code match for 2–8 players. The host chooses Normal, Hard, or Extreme and a 3-word Sprint, 5-word Normal, or 10-word Marathon. Everyone receives the same ordered words; the first player to solve the full route wins. A shared thin green course places each avatar at live proportional progress and ends at a black-and-white checkered finish. |
-| VS | A two-player point duel with host-selected 3-round Quick, 5-round Classic, 9-round Epic, or Endless play. Both players receive the same word each round and see each other's name, score, and feedback patterns in real time, but never the opponent's letters. The first correct guess wins one point and advances both screens to the next shared word. Exhausting seven attempts or using Skip forfeits that round and gives the opponent its point. Finite matches end after the selected number of rounds; Endless continues until either player confirms the red Back action. |
+| VS | A two-player point duel with host-selected 3-round Quick, 5-round Classic, 9-round Epic, or Endless play. Both players receive the same word each round and see each other's name, score, and feedback patterns in real time, but never the opponent's letters. The first correct guess wins one point, earns 60% of the equivalent solo coin reward, and advances both screens. Skip is unavailable. After seven misses, Last Chance can unlock an eighth attempt; declining or missing it awards the opponent the point. |
+| Co-op | A 2–4-player shared-word journey with 3, 5, or 10 words. Everyone receives the same route and the first teammate to solve a word advances the entire room. Teammates retain private boards and authoritative lifelines while progress and transitions are shared. |
 
 The app opens on the home screen. Game-adjacent marketing, mode selection, and streak progress live outside the focused puzzle screen.
 
@@ -80,6 +81,8 @@ Starting wallet: 200 coins. Solving rewards fewer coins as more attempts are use
 | 6 | 40 |
 | 7 | 20 |
 
+VS solve rewards are exactly 60% of the matching solo reward: 84, 72, 60, 48, 36, 24, or 12 coins for attempts one through seven. Skip never awards coins.
+
 Each successful puzzle also earns visible mastery points from 700 for a first-try solve down to 100 on the seventh try. Puzzle points and cumulative `totalPoints` are distinct from spendable coins.
 
 Lifeline prices and behavior:
@@ -89,23 +92,23 @@ Lifeline prices and behavior:
 | Sense | 30 | If stock is zero, one tap buys and consumes the token immediately and unlocks the clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered confirmable popup. |
 | Peek | 50 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a new unrevealed answer position until no useful positions remain. |
 | Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
-| Skip | 60 | Can be stocked, consumed, purchased again, and reused. Solo use asks for confirmation before charging; confirming buys and uses in one action when stock is zero. Daily counts as a loss; Streak counts as a loss and resets the run; Practice, Time Tackle, and Insight begin a fresh puzzle. Adventure reveals the current answer, advances one rung, and presents its completion card before the map. Race advances only that player without counting a solve; VS forfeits the point and advances both players. |
+| Skip | 60 | Can be stocked, consumed, purchased again, and reused outside VS. It reveals the answer in a modal, awards no coins, and changes the word only after green OK. Solo modes route through the shared result card; Adventure advances the current rung; Race advances that player; Co-op advances the shared route. VS does not render or accept Skip. |
 
 Inventory, coins, points, and economy version persist in `localStorage`. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Existing pre-scale wallets migrate once by multiplying saved coins by 10. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
 ## Current experience and visual system
 
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
-- Home: generated observatory hero art, a seven-day streak progress rail with a 300-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS launchers, and the compact four-mode solo launcher. Play Together now appears above Game Modes. The two redundant section subtitles were removed, and Race/VS use newly generated independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
+- Home: generated observatory hero art, a seven-day streak progress rail with a 300-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS/Co-op launchers, and the compact four-mode solo launcher. Play Together appears above Game Modes. Race, VS, and Co-op use original independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
 - Adventure: three original generated portrait environments—Sky Garden, Ember Canopy, and Cosmic Prism—each contain a monumental endless golden ladder as part of the raster artwork. The old winding-road scenes are no longer referenced, and no CSS rails or rung elements duplicate the illustrated ladder. Only the active zone asset is loaded at runtime; exactly eight semantic level markers align to eight evenly spaced painted-rung positions. A one-level win animates the animal upward from the completed rung; reduced-motion players receive the settled state immediately. It is original genre-inspired progression presentation and does not use Candy Crush art, characters, candy motifs, branded copy, or copied level UI.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, coin count at top right, seven-row letter grid, a full-width color-state keyboard, and an evenly spaced bottom lifeline dock. The three keyboard rows contain 27 controls—26 letters plus Delete—with a proportionally centered final row; the removed Enter key is unnecessary because the sixth letter submits automatically.
 - Every finished solo puzzle, including Adventure, opens the dedicated completion sheet instead of the generic Statistics modal. The sheet leads with a generated signal crest and animated six-tile answer, then shows attempt-specific mastery copy, solve coins, puzzle points, any seven-day bonus, and one prominent green OK action. Losses use the same structure with calmer recovery copy and no celebration. Daily and all non-Adventure modes return home after OK; Adventure returns to its map and animates the advanced token. Re-entering an already finished Daily reliably restores the same card.
 - The selected animal avatar appears as a clean circular header icon with no square pedestal, so identity is visible on home, solo, and online screens. It is also the entry point to a personal profile sheet showing unique words solved, total solves, best attempt count, fastest word/time, best streak, general Adventure status, and coins. Beside it, the chosen generated wordmark uses two compact rows of glossy sculpted blocks spelling `SIXTH` and `SENSE`.
 - Identity Studio contains nine free generated animals plus nine generated premium animals—red panda, capybara, raccoon, snow leopard, phoenix, dragon, unicorn, otter, and chameleon—unlockable for 2,250–3,250 coins. Four generated premium avatar frames—Aurora, Sunburst, Prism, and Champion—cost 1,500–2,250 coins. Purchases persist locally, equip immediately on the header/profile/Adventure token, and synchronize into an active room. Eight free highlight colors and the editable username remain. The top-left profile now links directly to these controls.
-- Online play has a persistent red Back control with an arrow instead of the old house art. Activating it or using mobile browser Back opens a mode-aware confirmation with “Stay in game” as the safe choice and explains that leaving clears this device’s saved seat while the room remains active for the other player. The header brand routes through the same confirmation so it cannot bypass the safety step. Race and VS retain the same four coin-powered, one-tap lifelines as solo play and show a match completion card with earned match points. Race uses a shared thin green course with moving avatar tokens and a checkered finish. VS keeps both names and point totals above the board, shows finite point-progress bars, and renders each opponent attempt as six color/symbol-state pips without exposing letters. A synchronized centered transition announces the point winner and new word on both clients whenever the authoritative round number advances.
+- Online play has a persistent red Back control with a mode-aware confirmation. Race and Co-op provide Sense, Peek, Clear, and Skip; VS provides Sense, Peek, and Clear from the first playable frame and after every submission, with Skip hidden and rejected server-side. Sense always uses the centered dialog and never pushes the fixed-height live-status line. Race uses a shared thin green course with moving avatar tokens and a checkered finish. VS keeps names, point totals, and redacted feedback patterns visible and credits idempotent device-local round rewards at 60% of solo. Co-op advances one authoritative shared round when any teammate solves. Skip and Last Chance use blocking acknowledgement dialogs rather than transient layout messages.
 - Controls: generated image assets are used for major home, settings, help, stats, sound, and lifeline actions instead of generic black buttons. Visible icon art is intentionally compact inside touch targets that remain at least 44px on phones.
 - The generated house control has an optical-centering correction wherever it appears, compensating for asymmetrical transparent weight without shrinking or shifting its 44px-or-larger touch target.
-- Mobile browser Back is mapped onto the in-app screen stack. It closes ordinary dialogs first, returns from a map or finished flow to the prior app surface, and never abandons an active solo puzzle or online room without a confirmation popup.
+- Mobile browser Back is mapped onto the in-app screen stack. It closes ordinary dialogs first, returns from a map or finished flow to the prior app surface, and never abandons an active solo puzzle or online room without a confirmation popup. Pinch zoom remains available on navigation/settings surfaces but is suppressed while the active game or online board is onscreen so the playfield behaves like a mobile game.
 - The Daily action, mode cards, modal-title art, and decorative streak/lifeline imagery use a compact scale so controls support the game rather than dominating it.
 - The game screen is locked to one dynamic viewport and must not create page-level horizontal or vertical scrolling, including during screen-entry animation. Its footer no longer exposes an 8px maroon background gap, and phone layouts preserve the cost chip below every lifeline.
 - Purposeful motion includes letter entry pop, row rejection shake, tile reveal, Peek reveal, Clear key removal, combined lifeline purchase/use/unavailable states, wallet spend/denial, screen entry, staged result-word tiles, a full-screen solve burst, and a lighter in-sheet confetti cascade. The completion flow also uses a short optional vibration pattern where supported.
@@ -166,12 +169,12 @@ Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-c
 
 - Answer pool: exactly 10,187 unique, clueable, answer-safe six-letter words.
 - Player-facing difficulty names are Normal, Hard, and Extreme. For backward-compatible data, API, and saved-state stability, their internal keys remain `easy`, `medium`, and `extreme` respectively.
-- Normal (`easy`): exactly 4,309 familiar primary answers. Hard (`medium`): 1,995 less-common answers with remaining Zipf frequency at least 2.0. Extreme: 3,883 final rare, specialist, archaic, or unusual answers.
+- Normal (`easy`): 4,058 eligible answers at Zipf 2.75 or higher. Hard (`medium`): 2,246 remaining answers at Zipf 2.0–2.74. Extreme: 3,883 final rare, specialist, archaic, or unusual answers.
 - Accepted guesses: exactly 15,232 unique six-letter words from the proper-name-safe ENABLE word-game lexicon, including every answer.
 - `raffle` and `rattle` are both accepted guesses and possible puzzle answers.
 - Every answer has a Sense clue.
 - The accepted vocabulary includes legitimate uncommon, technical, archaic, and inflected word-game entries, while excluding ordinary names, places, trademarks, malformed inflections, abbreviations, and corpus noise.
-- All clueable eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion are answers. The Easy tier is frequency-ranked to exactly 4,309 with explicit familiar-word rescues. Medium uses the remaining Zipf ≥2.0 words; Extreme contains the remainder.
+- All clueable eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion are answers. Normal is determined only by the Zipf ≥2.75 threshold, without fixed-count padding or manual rescues. Hard uses the remaining Zipf ≥2.0 words; Extreme contains the remainder. Reviewed clue overrides may correct a misleading WordNet sense; `armory` has a specific weapons-storage clue.
 - The 2026-08-27 full audit retained 14,850 old guesses, removed 17,218 unsupported entries, added 382 valid omissions, retained 4,782 old answers, and replaced 218 answers.
 - Sense clues may not contain their own answer, broken placeholder/example text, proper-name definitions, or offensive senses. The audit preserved 4,633 clean existing clues, repaired 149 retained clues, and generated clues for 218 new answers.
 - `coates` is excluded from both banks because it entered as a surname/malformed inflection with the clue for `coat`.
@@ -195,23 +198,25 @@ Current `localStorage` keys:
 - `sixth-sense.settings.v1`
 - `sixth-sense.visited.v1`
 - `sixth-sense.online.identity.v1`
+- `sixth-sense.active-room.v1`
+- `sixth-sense.online-rewards.v1`
 
-Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, solve/streak coin reward, puzzle points, reward/stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed when relevant. The current game schema uses `version: 3`.
+Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, Last-Chance purchase state, solve/streak coin reward, puzzle points, reward/stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed/replay state when relevant. The current game schema uses `version: 3`.
 
 Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. The economy-v2 migration multiplies an explicitly saved legacy coin balance once by 10; all other new fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
 
 Online room rules and security:
 
 - Codes are generated by the server and omit visually ambiguous characters.
-- Race capacity is 8; VS capacity is 2. A match needs at least 2 players and only the host can start.
+- Race capacity is 8, VS capacity is 2, and Co-op capacity is 4. A match needs at least 2 players and only the host can start.
 - Usernames persist per device and are case-insensitively unique within an online room. Global username reservation is not claimed because the game has no account system.
 - All players receive the same server-selected sequence from the room's explicit difficulty tier. Personal solo unlock state is irrelevant.
 - The API validates accepted guesses and scores them server-side. Snapshots never include answer words. Opponents receive score patterns only; the current player receives their own submitted letters and scores.
-- Multiplayer lifelines are authoritative: the API stores private per-player clue/Peek/Clear state, returns only the purchased effect to that seat, clears assistance on round/word advancement, and treats a VS Skip as a server-resolved forfeit. Wallet ownership remains device-local until account-backed monetization exists.
+- Multiplayer lifelines are authoritative: the API stores private per-player clue/Peek/Clear/Skip/Last-Chance state, returns only the purchased effect to that seat, and clears assistance on round/word advancement. VS Skip is rejected. Race/Co-op Skip stores a private revealed-answer decision and advances only after authenticated OK. Wallet ownership remains device-local until account-backed monetization exists.
 - Avatar, accent, decoration, and username updates are accepted from an authenticated room seat and broadcast through subsequent snapshots; duplicate room usernames remain rejected.
 - Mutations use player/room revisions for compare-and-set protection plus UUID action IDs for retry idempotency.
 - The client uses 900ms bounded polling, persists one opaque active-room seat credential in site-scoped local storage, automatically restores that seat after refresh/reopen, catches up immediately after foreground/online recovery, and renders temporary connection errors without destroying room state. It signatures each redacted snapshot and skips DOM work when a poll is unchanged, preventing the board, keyboard, lifelines, player track, scroll position, and avatar tokens from repainting every 900ms. Phone layouts also use scrolling rather than fixed background attachment to avoid mobile compositor flicker at the page boundary.
-- Race players who exhaust seven attempts restart that same word with a recorded failed batch. They do not advance until solving it. In VS, seven misses forfeit only the current point; both players then advance to the next word.
+- Every active mode pauses after seven misses and offers an 80-coin eighth attempt. In VS, declining Last Chance or missing the eighth attempt awards the opponent the point. Race and Co-op retain their existing failed-batch/team-continuation behavior after the extra attempt is resolved.
 
 When changing stored shapes, add a safe migration or backward-compatible defaults. Never assume old players have every new field.
 
@@ -219,11 +224,11 @@ When changing stored shapes, add a safe migration or backward-compatible default
 
 - Preserve six-letter answers and seven chances unless the user explicitly changes the product.
 - Preserve correct duplicate-letter scoring.
-- Keep Easy at exactly 4,309 and preserve all clueable answer-safe words in the complete tiered answer bank unless an explicit product decision changes the target.
+- Keep Normal threshold-based at Zipf 2.75 (currently 4,058 words), Hard at Zipf 2.0–2.74 (currently 2,246), and preserve all clueable answer-safe words in the complete tiered answer bank unless an explicit product decision changes the threshold.
 - Do not narrow accepted guesses in a way that rejects common words such as `raffle` or `rattle`.
 - Keep the puzzle screen within 360×800 and 390×844 portrait viewports without page scrolling or horizontal overflow. Also keep 430×932 and representative desktop/landscape layouts usable.
 - Keep the Adventure map within the same phone viewport without page-level scrolling; virtualize its route rather than creating thousands of level controls.
-- Keep touch targets practical, keyboard navigation functional, browser zoom enabled, and focus visible.
+- Keep touch targets practical, keyboard navigation functional, navigation/settings zoom available, active-play pinch suppression scoped, and focus visible.
 - Never make color the only carrier of tile meaning.
 - Preserve reduced-motion behavior when adding animations.
 - Never make animation timing decide game legality or permanently block input.
@@ -265,9 +270,9 @@ node test-browser.js
 Current verified result on 2026-08-31:
 
 - JavaScript syntax: passed.
-- Core rules/data: passed — 10,187 answers across player-facing Normal 4,309 / Hard 1,995 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; progression and named familiar-word regressions pass.
+- Core rules/data: passed — 10,187 answers across player-facing Normal 4,058 / Hard 2,246 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; frequency threshold, `genial`, familiar-word, and `armory` clue regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — phone-sized translucent hint and leave dialogs with explicit green acknowledgement, one-tap buy-and-use lifelines, free repeated Sense access, scaled prices and rewards, mastery points, celebratory result cards, completed-Daily recovery, Adventure acknowledgement before map progression, and native browser Back interception with active-game confirmation. Existing automatic sixth-letter submission, 27-key keyboard, responsive layout, cosmetics/profile navigation, dark-theme feedback, multiplayer lifelines/Race/VS synchronization, audio/confetti, and overflow checks continue to pass.
+- Browser QA: passed — phone playthrough, Adventure paging/replay surfaces, centered hints, one-tap lifelines, paid eighth-row Last Chance and eighth-attempt victory, VS lifeline availability before and after submission, hidden VS Skip, Co-op launcher/lengths, automatic sixth-letter submission, result flows, dark-theme feedback, audio/confetti, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
 - Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260831.1` contains the unified completion, popup, Back-navigation, one-tap lifeline, points, and scaled-economy release described above.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
@@ -302,6 +307,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Production multiplayer uses 900ms bounded polling rather than WebSockets/SSE. It is playable and production-tested, but is not yet a push-realtime architecture.
 - Online rooms expire after 24 hours and currently have no Force End or Play Again command. Players can leave and create a new room instead.
 - Planned monetization is intentionally not active: the first three multiplayer match starts per player should be free, after which starting another match should require coins or an optional rewarded ad. This needs account/server-authoritative entitlement counters, ad-provider integration, consent/privacy handling, and abuse protection before implementation; do not enforce it from local storage.
+- The Last Chance dialog visibly reserves a rewarded-ad alternative, but that control is disabled. Only the 80-coin path is implemented until the same ad-provider, consent, and server-entitlement work is complete.
 - Premium cosmetic ownership and the coin wallet are currently device-local. Before real-money monetization, both must move to authenticated server-side ownership and purchase validation.
 - The dictionary is deliberately broad but is not a promise to contain every historical, regional, inflected, or specialist six-letter form.
 - Generated raster assets make the repository larger than a code-only static game; preserve optimized WebP versions where they exist.
@@ -309,6 +315,15 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-31 — Frequency tiers, multiplayer lifeline repair, Co-op, and Last Chance
+
+- Replaced the fixed 4,309-word primary quota and manual rescues with a Zipf 2.75 Normal threshold. The unchanged 10,187-answer base now divides into Normal 4,058, Hard 2,246, and Extreme 3,883; `genial` moves to Hard while familiar examples including `brooch`, `napkin`, `pewter`, `tarmac`, `walrus`, `raffle`, and `rattle` remain Normal. Added a reviewed `armory` clue override to remove the arbitrary “collection of resources” sense.
+- Virtualized Adventure into swipeable eight-level pages. Completed rungs are replayable without rewards or progression; future pages can be previewed through a translucent chain lock but cannot be played, and the current mixed-boundary page keeps its active-zone artwork.
+- Fixed the VS lifeline dead-state by explicitly restoring the dock after every guess submission, including when unchanged-snapshot suppression skips a full repaint. Sense/Peek/Clear now work before the first attempt and throughout VS; Sense stays in the centered popup, and Skip is hidden and server-rejected.
+- Added server-authoritative 2–4-player Co-op with shared 3/5/10-word routes, original generated team artwork, private boards/lifelines, and synchronized advancement when any teammate solves. Race already used one server-selected route for all seats and continues to do so.
+- Added an 80-coin Last Chance decision after seven misses in solo, Race, VS, and Co-op, with a compact eighth row after purchase. The ad alternative is present but disabled for future monetization work. Race/Co-op Skip now reveals the answer and waits for green OK before authoritative progression; VS has no Skip. VS correct solves award device-local coins at exactly 60% of solo rates with per-room/round idempotency.
+- Scoped pinch suppression to active solo/online play while preserving zoom on home, settings, and other navigation surfaces. Added server/helper and installed-Chrome regressions for the new tier boundaries, clue, VS lifeline availability before/after guesses, hidden VS Skip, Co-op launcher/lengths, and phone overflow. Versioned the static runtime as `20260831.2`.
 
 ### 2026-08-31 — Completion cards, native-feeling Back, one-tap help, and economy scale
 

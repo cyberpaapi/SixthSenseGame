@@ -3,7 +3,7 @@
 const assert = require("node:assert");
 const handler = require("./api/multiplayer.js");
 const Core = require("./game-core.js");
-const { cleanPlayer, roomCode, token, tokenHash, normalizeGameLength, resolveVsRound, chooseAnswers } = handler._test;
+const { cleanPlayer, roomCode, token, tokenHash, normalizeGameLength, resolveVsRound, chooseAnswers, isSharedRoundMode } = handler._test;
 
 for (let index = 0; index < 100; index += 1) {
   assert.match(roomCode(), /^[A-HJ-NP-Z2-9]{6}$/, "room codes must be six unambiguous characters");
@@ -20,11 +20,15 @@ assert.deepEqual(cleanPlayer({ name: "Player", avatar: "unknown", accent: "black
 assert.throws(() => cleanPlayer({ name: "   " }), /Choose a player name/);
 
 for (const length of [3, 5, 10]) assert.deepEqual(normalizeGameLength("race", length), { wordCount: length, endless: false }, `${length}-word Race rooms must be accepted`);
+for (const length of [3, 5, 10]) assert.deepEqual(normalizeGameLength("coop", length), { wordCount: length, endless: false }, `${length}-word Co-op rooms must be accepted`);
 for (const length of [3, 5, 9]) assert.deepEqual(normalizeGameLength("vs", length), { wordCount: length, endless: false }, `${length}-round VS rooms must be accepted`);
 assert.deepEqual(normalizeGameLength("race", 9), { wordCount: 3, endless: false }, "Race must keep its 3/5/10 lengths");
 assert.deepEqual(normalizeGameLength("vs", 10), { wordCount: 3, endless: false }, "VS must reject its retired 10-round length");
 assert.deepEqual(normalizeGameLength("vs", "endless"), { wordCount: 9, endless: true }, "VS must support Endless rounds");
 assert.deepEqual(normalizeGameLength("vs", "unexpected"), { wordCount: 3, endless: false }, "invalid lengths should fall back to Quick");
+assert.equal(isSharedRoundMode("vs"), true);
+assert.equal(isSharedRoundMode("coop"), true);
+assert.equal(isSharedRoundMode("race"), false);
 
 const roundOne = resolveVsRound({ currentRound: 0, wordCount: 3, endless: false, players: [{ id: "a", score: 0 }, { id: "b", score: 0 }], roundWinnerId: "a" });
 assert.deepEqual(roundOne, { scores: [{ id: "a", score: 1 }, { id: "b", score: 0 }], nextRound: 1, finished: false, matchWinnerId: null }, "first solve must award exactly one point and advance both players");
@@ -41,4 +45,4 @@ for (const tier of Core.TIER_ORDER) {
   assert(answers.every(word => Core.answersForDifficulty(tier).some(item => item.word === word)), `${tier} rooms must draw only from their selected tier`);
 }
 
-console.log("Sixth Sense multiplayer helpers: codes, identities, VS scoring, lengths, and tier routes — all checks passed.");
+console.log("Sixth Sense multiplayer helpers: codes, identities, VS/Co-op rounds, lengths, and tier routes — all checks passed.");

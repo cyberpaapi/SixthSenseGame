@@ -1,6 +1,6 @@
 # Sixth Sense vocabulary audit
 
-Verified: 2026-08-27
+Verified: 2026-08-31
 
 ## Result
 
@@ -16,7 +16,7 @@ Sixth Sense recognizes **15,232 realistically acceptable six-letter guesses**. *
 | Old answers retained | — | 4,782 |
 | Answers replaced | — | 218 |
 
-The answer tiers are **Easy: 4,309**, **Medium: 1,995**, and **Extreme: 3,883**. `coates` is not accepted and cannot be selected as an answer. `raffle`, `rattle`, `brooch`, `napkin`, `pewter`, `tarmac`, and `walrus` are accepted and are Easy answers.
+The player-facing answer tiers are **Normal: 4,058**, **Hard: 2,246**, and **Extreme: 3,883**. `coates` is not accepted and cannot be selected as an answer. `raffle`, `rattle`, `brooch`, `napkin`, `pewter`, `tarmac`, and `walrus` meet the Normal usage threshold. `genial` is correctly classified as Hard.
 
 ## What “realistically acceptable” means
 
@@ -30,7 +30,7 @@ A puzzle answer must satisfy every guess rule and also:
 2. receive a deterministic familiarity tier using `wordfreq`;
 3. not occur in the answer-only safety exclusion set.
 
-Easy contains exactly the top 4,309 familiar eligible answers, with a small explicit rescue list for ordinary object and animal words whose written-corpus frequency understates everyday familiarity. Medium contains the remaining eligible words with a Zipf score of at least 2.0. Extreme contains the final answer-safe remainder. The audit rejects clues containing the answer itself, broken placeholder text, or proper-name/offensive senses.
+Normal contains every eligible answer with an English `wordfreq` Zipf score of at least 2.75; it is no longer filled to a predetermined quota or altered with manual tier rescues. Hard contains the remaining eligible words with a Zipf score from 2.0 through 2.74. Extreme contains the final answer-safe remainder. The audit rejects clues containing the answer itself, broken placeholder text, or proper-name/offensive senses. Carefully reviewed clue overrides may replace an arbitrary dictionary sense; for example, `armory` now reads “A place where weapons and military equipment are stored.”
 
 Solo non-Daily selection begins with Easy. Solved words are stored locally and excluded from fresh selections. Completing all Easy words silently adds Medium; completing Medium silently adds Extreme. Daily remains a shared deterministic Easy puzzle. Multiplayer difficulty selects exactly one tier and does not depend on a player's solo unlock state.
 

@@ -4,9 +4,8 @@
 The accepted-guess vocabulary is the six-letter subset of ENABLE, a
 public-domain word-game lexicon that excludes ordinary proper names. Answers
 are every accepted word with a usable WordNet definition, minus a small
-answer-only safety list. They are assigned to three deterministic play tiers:
-4,309 familiar words, a less-common middle tier, and the remaining specialist
-or rare words.
+answer-only safety list. They are assigned to three deterministic play tiers
+using English usage-frequency thresholds rather than a fixed-size quota.
 """
 
 from __future__ import annotations
@@ -26,13 +25,17 @@ from wordfreq import zipf_frequency
 
 ENABLE_URL = "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt"
 ENABLE_SHA256 = "3f16130220645692ed49c7134e24a18504c2ca55b3c012f7290e3e77c63b1a89"
-PRIMARY_ANSWER_COUNT = 4_309
-MEDIUM_MIN_ZIPF = 2.0
+NORMAL_MIN_ZIPF = 2.75
+HARD_MIN_ZIPF = 2.0
+EXPECTED_NORMAL_COUNT = 4_058
 WORD_LENGTH = 6
 REQUIRED_ANSWERS = {"raffle", "rattle"}
-REQUIRED_PRIMARY = {
-    "alcove", "brooch", "gopher", "magpie", "napkin", "pewter",
+REQUIRED_NORMAL = {
+    "brooch", "gopher", "magpie", "napkin", "pewter",
     "raffle", "rattle", "tarmac", "walrus",
+}
+CLUE_OVERRIDES = {
+    "armory": "A place where weapons and military equipment are stored.",
 }
 
 # These remain valid guesses but are intentionally not selected as puzzles.
@@ -183,6 +186,8 @@ def ranked_synsets(word: str):
 
 
 def clue_for(word: str) -> str | None:
+    if word in CLUE_OVERRIDES:
+        return CLUE_OVERRIDES[word]
     for synset in ranked_synsets(word):
         definition = re.sub(r"\s+", " ", synset.definition()).strip()
         definition = re.split(r";\s*;", definition, maxsplit=1)[0].rstrip(" ;")
@@ -283,24 +288,23 @@ def main() -> int:
     scored: list[tuple[float, str]] = []
     for word in accepted:
         old_clue = old_clues.get(word)
-        clue = old_clue if reusable_old_clue(old_clue, word) else clue_for(word)
+        clue = CLUE_OVERRIDES.get(word) or (old_clue if reusable_old_clue(old_clue, word) else clue_for(word))
         if clue and word not in ANSWER_ONLY_EXCLUSIONS:
             clue_map[word] = clue
             scored.append((zipf_frequency(word, "en"), word))
     scored.sort(key=lambda item: (-item[0], item[1]))
 
-    primary = [word for _, word in scored[:PRIMARY_ANSWER_COUNT]]
-    for required in sorted(REQUIRED_PRIMARY):
+    primary = [word for frequency, word in scored if frequency >= NORMAL_MIN_ZIPF]
+    for required in sorted(REQUIRED_NORMAL):
         if required not in clue_map:
-            raise RuntimeError(f"Required primary answer is not clueable: {required}")
+            raise RuntimeError(f"Required Normal answer is not clueable: {required}")
         if required not in primary:
-            primary[-1] = required
-    primary = sorted(set(primary), key=lambda word: (-zipf_frequency(word, "en"), word))
-    if len(primary) != PRIMARY_ANSWER_COUNT:
-        raise RuntimeError(f"Expected {PRIMARY_ANSWER_COUNT} unique primary answers, got {len(primary)}")
+            raise RuntimeError(f"Required Normal answer does not meet Zipf {NORMAL_MIN_ZIPF}: {required}")
+    if len(primary) != EXPECTED_NORMAL_COUNT:
+        raise RuntimeError(f"Expected {EXPECTED_NORMAL_COUNT} frequency-qualified Normal answers, got {len(primary)}")
 
     primary_set = set(primary)
-    medium = [word for frequency, word in scored if word not in primary_set and frequency >= MEDIUM_MIN_ZIPF]
+    medium = [word for frequency, word in scored if word not in primary_set and frequency >= HARD_MIN_ZIPF]
     medium_set = set(medium)
     extreme = [word for _, word in scored if word not in primary_set and word not in medium_set]
     selected = primary + medium + extreme
@@ -327,9 +331,9 @@ def main() -> int:
             "length": WORD_LENGTH,
             "guessLexicon": "ENABLE",
             "enableSha256": ENABLE_SHA256,
-            "answers": "All clueable answer-safe words, tiered by wordfreq with 4,309 primary familiar words",
-            "primaryCount": PRIMARY_ANSWER_COUNT,
-            "mediumMinimumZipf": MEDIUM_MIN_ZIPF,
+            "answers": "All clueable answer-safe words tiered by English usage frequency",
+            "normalMinimumZipf": NORMAL_MIN_ZIPF,
+            "hardMinimumZipf": HARD_MIN_ZIPF,
         },
         "before": {"accepted": len(old_accepted), "answers": len(old_answers)},
         "after": {"accepted": len(accepted_set), "answers": len(selected_set)},

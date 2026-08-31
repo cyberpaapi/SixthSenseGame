@@ -7,7 +7,7 @@ const GuessBankSet = new Set(GuessBank);
 
 assert.equal(Core.ANSWERS.length, new Set(Core.ANSWERS.map(item => item.word)).size, "answer words must be unique");
 assert.equal(Core.ANSWERS.length, 10187, "answer bank must contain every clueable answer-safe word");
-assert.deepEqual(Object.fromEntries(Object.entries(Core.ANSWER_TIERS).map(([tier, words]) => [tier, words.length])), { easy: 4309, medium: 1995, extreme: 3883 });
+assert.deepEqual(Object.fromEntries(Object.entries(Core.ANSWER_TIERS).map(([tier, words]) => [tier, words.length])), { easy: 4058, medium: 2246, extreme: 3883 });
 assert(Core.ANSWERS.every(item => ["easy", "medium", "extreme"].includes(item.tier)), "every answer must have a multiplayer difficulty tier");
 assert.deepEqual(Core.ANSWERS.filter(item => item.word.length !== 6), [], "every answer must have six letters");
 assert.deepEqual(Core.ANSWERS.filter(item => !item.clue || typeof item.clue !== "string"), [], "every answer must have a Sense clue");
@@ -23,6 +23,11 @@ assert(!Core.isValidWord("coates"), "COATES is a surname/malformed inflection an
 assert(!Core.ANSWERS.some(item => item.word === "coates"), "COATES must never be a puzzle answer");
 assert(!Core.isValidWord("george"), "ordinary proper names must not be accepted");
 assert(!Core.isValidWord("london"), "place names must not be accepted");
+for (const word of ["brooch", "napkin", "pewter", "tarmac", "walrus", "raffle", "rattle"]) {
+  assert(Core.ANSWER_TIERS.easy.some(item => item.word === word), `${word.toUpperCase()} should meet the Normal usage threshold`);
+}
+assert(Core.ANSWER_TIERS.medium.some(item => item.word === "genial"), "GENIAL should be Hard, not Normal");
+assert.equal(Core.ANSWERS.find(item => item.word === "armory")?.clue, "A place where weapons and military equipment are stored.");
 
 const answerSafetyExclusions = [
   "coitus", "condom", "dildos", "faggot", "fucked", "fucker", "fuckin", "hentai",
@@ -75,20 +80,22 @@ assert.equal(Core.ADVENTURE_TOTAL, 10187);
 assert.strictEqual(adventureRouteA, adventureRouteARepeat, "a saved Adventure seed must reproduce the identical cached route");
 assert.equal(adventureRouteA.length, Core.ADVENTURE_TOTAL);
 assert.equal(new Set(adventureRouteA.map(item => item.word)).size, Core.ADVENTURE_TOTAL, "Adventure must contain every answer exactly once");
-assert(adventureRouteA.slice(0, 4309).every(item => item.tier === "easy"), "all Easy levels must come first");
-assert(adventureRouteA.slice(4309, 6304).every(item => item.tier === "medium"), "Medium levels must follow Easy");
+assert(adventureRouteA.slice(0, 4058).every(item => item.tier === "easy"), "all Normal levels must come first");
+assert(adventureRouteA.slice(4058, 6304).every(item => item.tier === "medium"), "Hard levels must follow Normal");
 assert(adventureRouteA.slice(6304).every(item => item.tier === "extreme"), "Hard/Extreme levels must come last");
 assert.notDeepEqual(adventureRouteA.slice(0, 20).map(item => item.word), adventureRouteB.slice(0, 20).map(item => item.word), "different players should receive differently shuffled routes");
-assert.deepEqual(Core.adventureProgress(0), { level: 0, total: 10187, tier: "easy", tierIndex: 0, tierLevel: 0, tierTotal: 4309, complete: false });
-assert.deepEqual(Core.adventureProgress(4309), { level: 4309, total: 10187, tier: "medium", tierIndex: 1, tierLevel: 0, tierTotal: 1995, complete: false });
+assert.deepEqual(Core.adventureProgress(0), { level: 0, total: 10187, tier: "easy", tierIndex: 0, tierLevel: 0, tierTotal: 4058, complete: false });
+assert.deepEqual(Core.adventureProgress(4058), { level: 4058, total: 10187, tier: "medium", tierIndex: 1, tierLevel: 0, tierTotal: 2246, complete: false });
 assert.deepEqual(Core.adventureProgress(6304), { level: 6304, total: 10187, tier: "extreme", tierIndex: 2, tierLevel: 0, tierTotal: 3883, complete: false });
 assert.equal(Core.adventureProgress(10187).complete, true);
-assert.equal(Core.adventureAnswer(4309, 123456).tier, "medium");
+assert.equal(Core.adventureAnswer(4058, 123456).tier, "medium");
 assert.equal(Core.dateKey(new Date("2026-08-26T12:00:00Z")), "2026-08-26");
 assert.equal(Core.STARTING_COINS, 200);
 assert.equal(Core.MAX_GUESSES, 7);
 assert.deepEqual(Core.LIFELINE_COSTS, { sense: 30, peek: 50, clear: 40, skip: 60 });
+assert.equal(Core.LAST_CHANCE_COST, 80);
 assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.rewardForAttempts), [140, 120, 100, 80, 60, 40, 20]);
+assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.vsRewardForAttempts), [84, 72, 60, 48, 36, 24, 12], "VS rewards must be 40% lower than solo rewards");
 assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Core.pointsForAttempts), [700, 600, 500, 400, 300, 200, 100]);
 assert.equal(Core.rewardForAttempts(0), 20, "invalid attempt counts should fall back safely");
 assert.equal(Core.pointsForAttempts(0), 100, "invalid point attempt counts should fall back safely");

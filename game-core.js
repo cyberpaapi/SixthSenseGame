@@ -85,6 +85,7 @@
   const WORD_LENGTH = 6;
   const STARTING_COINS = 200;
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
+  const LAST_CHANCE_COST = 80;
   const ADVENTURE_TOTAL = ANSWERS.length;
   const adventureRouteCache = new Map();
 
@@ -96,6 +97,10 @@
   function pointsForAttempts(attempts) {
     const safeAttempts = Math.min(MAX_GUESSES, Math.max(1, Number(attempts) || MAX_GUESSES));
     return (MAX_GUESSES - safeAttempts + 1) * 100;
+  }
+
+  function vsRewardForAttempts(attempts) {
+    return Math.round(rewardForAttempts(attempts) * .6);
   }
 
   const EXTRA_GUESSES = `
@@ -252,9 +257,9 @@
   }
 
   return {
-    ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, LIFELINE_COSTS, ADVENTURE_TOTAL,
+    ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, LIFELINE_COSTS, LAST_CHANCE_COST, ADVENTURE_TOTAL,
     scoreGuess, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
-    rewardForAttempts, pointsForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
+    rewardForAttempts, pointsForAttempts, vsRewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
     adventureRoute, adventureProgress, adventureAnswer
   };
 });

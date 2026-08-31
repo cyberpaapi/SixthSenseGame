@@ -69,6 +69,10 @@
     adventureBack: document.querySelector("#adventure-back"),
     adventurePlay: document.querySelector("#adventure-play"),
     adventurePath: document.querySelector("#adventure-level-path"),
+    adventurePagePrevious: document.querySelector("#adventure-page-previous"),
+    adventurePageNext: document.querySelector("#adventure-page-next"),
+    adventurePageStatus: document.querySelector("#adventure-page-status"),
+    adventureLockVeil: document.querySelector("#adventure-lock-veil"),
     adventureFeatureArt: document.querySelector("#adventure-feature-art"),
     adventureMapArt: document.querySelector("#adventure-map-art"),
     brand: document.querySelector(".brand"),
@@ -115,6 +119,10 @@
     leaveGameCopy: document.querySelector("#leave-game-copy"),
     leaveGameCancel: document.querySelector("#leave-game-cancel"),
     leaveGameConfirm: document.querySelector("#leave-game-confirm"),
+    lastChanceDialog: document.querySelector("#last-chance-modal"),
+    lastChanceCopy: document.querySelector("#last-chance-copy"),
+    lastChanceBuy: document.querySelector("#last-chance-buy"),
+    lastChanceDecline: document.querySelector("#last-chance-decline"),
     avatarChoices: [...document.querySelectorAll("[data-avatar-option]")],
     decorationChoices: [...document.querySelectorAll("[data-decoration-option]")],
     accentChoices: [...document.querySelectorAll("[data-accent-option]")],
@@ -179,7 +187,7 @@
     .filter(word => typeof word === "string" && ANSWER_WORDS.has(word));
   stats.totalSolves = Math.max(Number(stats.wins) || 0, Number.isFinite(Number(stats.totalSolves)) ? Math.max(0, Math.floor(Number(stats.totalSolves))) : 0);
   const historicalBestAttempts = stats.distribution.findIndex(value => value > 0) + 1 || null;
-  stats.bestSolveAttempts = Number.isInteger(Number(stats.bestSolveAttempts)) && Number(stats.bestSolveAttempts) >= 1 && Number(stats.bestSolveAttempts) <= Core.MAX_GUESSES ? Number(stats.bestSolveAttempts) : historicalBestAttempts;
+  stats.bestSolveAttempts = Number.isInteger(Number(stats.bestSolveAttempts)) && Number(stats.bestSolveAttempts) >= 1 && Number(stats.bestSolveAttempts) <= Core.MAX_GUESSES + 1 ? Number(stats.bestSolveAttempts) : historicalBestAttempts;
   stats.fastestSolve = stats.fastestSolve && ANSWER_WORDS.has(stats.fastestSolve.word) && Number.isFinite(Number(stats.fastestSolve.ms))
     ? { word: stats.fastestSolve.word, ms: Math.max(1000, Math.floor(Number(stats.fastestSolve.ms))) }
     : null;
@@ -200,6 +208,9 @@
   let nextMusicAt = 0;
   let scheduledEffectCount = 0;
   let lastAdventureMapLevel = null;
+  let adventurePageStart = 0;
+  let selectedAdventureLevel = 0;
+  let adventureTouchStartX = null;
   let showHelpAfterUsername = false;
   let historyReady = false;
   let pendingLeave = null;
@@ -287,6 +298,9 @@
       clearUses: 0,
       eliminatedLetters: [],
       skipped: false,
+      adventureReplay: false,
+      extraAttemptPurchased: false,
+      lastChanceOffered: false,
       guesses: [],
       current: "",
       status: "playing",
@@ -318,7 +332,7 @@
   function loadModeGame(gameMode, forceNew) {
     const saved = loadJson(STORAGE[gameMode], {});
     const adventureLevelMatches = gameMode !== "adventure" || Number(saved.adventureLevel) === stats.adventure.level;
-    if (!forceNew && adventureLevelMatches && saved.mode === gameMode && saved.answer && saved.clue && Array.isArray(saved.guesses) && saved.status === "playing") {
+    if (!forceNew && adventureLevelMatches && saved.mode === gameMode && saved.answer && saved.clue && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
       return { ...emptyGame({ word: saved.answer, clue: saved.clue }, gameMode), ...saved, current: "" };
     }
     if (gameMode === "adventure") {
@@ -405,7 +419,7 @@
       dialog.close();
       return true;
     }
-    if (dialog === els.usernameDialog) return false;
+    if (dialog === els.usernameDialog || dialog === els.lastChanceDialog || dialog.id === "online-skip-result-modal") return false;
     dialog.close();
     return true;
   }
@@ -422,7 +436,8 @@
     }
     const openDialog = document.querySelector("dialog[open]");
     if (openDialog && openDialog !== els.leaveGameDialog && openDialog.id !== "online-leave-modal") {
-      if (closeTopDialogForBack(openDialog)) restoreCurrentHistoryState();
+      closeTopDialogForBack(openDialog);
+      restoreCurrentHistoryState();
       return;
     }
     if (currentScreen() === "online") {
@@ -431,7 +446,7 @@
       document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
       return;
     }
-    if (currentScreen() === "game" && game?.status === "playing") {
+    if (currentScreen() === "game" && ["playing", "last-chance"].includes(game?.status)) {
       restoreCurrentHistoryState();
       requestSoloLeave(target, true);
       return;
@@ -463,7 +478,8 @@
     setMode(nextMode);
     showScreen("game");
     playEffect("start");
-    if (game.status !== "playing") setTimeout(() => openCurrentResult(game.status === "won"), 180);
+    if (game.status === "last-chance") setTimeout(openLastChanceDialog, 180);
+    else if (game.status !== "playing") setTimeout(() => openCurrentResult(game.status === "won"), 180);
   }
 
   function renderAll() {
@@ -483,19 +499,28 @@
   function renderAdventure(options = {}) {
     const { progress, tier } = adventureState();
     const animateProgress = Boolean(options.animateProgress) && !progress.complete && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    els.adventurePlay.disabled = progress.complete;
-    els.adventurePlay.textContent = progress.complete ? "Journey complete" : "Play";
-    [els.adventureFeatureArt, els.adventureMapArt].forEach(image => {
-      if (image.getAttribute("src") !== tier.art) image.setAttribute("src", tier.art);
-    });
-    els.adventureMapArt.alt = tier.alt;
-
     const currentIndex = progress.complete ? Core.ADVENTURE_TOTAL - 1 : progress.level;
     const visibleCapacity = Math.min(8, Core.ADVENTURE_TOTAL);
-    let start = Math.max(0, currentIndex - 3);
-    let end = Math.min(Core.ADVENTURE_TOTAL - 1, start + visibleCapacity - 1);
-    start = Math.max(0, end - visibleCapacity + 1);
+    if (options.resetPage || adventurePageStart < 0 || adventurePageStart >= Core.ADVENTURE_TOTAL) {
+      adventurePageStart = Math.floor(currentIndex / visibleCapacity) * visibleCapacity;
+      selectedAdventureLevel = currentIndex;
+    }
+    const start = adventurePageStart;
+    const end = Math.min(Core.ADVENTURE_TOTAL - 1, start + visibleCapacity - 1);
     const visibleCount = end - start + 1;
+    if (selectedAdventureLevel < start || selectedAdventureLevel > end || selectedAdventureLevel > currentIndex) selectedAdventureLevel = Math.min(currentIndex, end);
+    const pageProgress = Core.adventureProgress(start);
+    const pageTier = start <= currentIndex && currentIndex <= end ? tier : ADVENTURE_TIERS[pageProgress.tier];
+    if (els.adventureFeatureArt.getAttribute("src") !== tier.art) els.adventureFeatureArt.setAttribute("src", tier.art);
+    if (els.adventureMapArt.getAttribute("src") !== pageTier.art) els.adventureMapArt.setAttribute("src", pageTier.art);
+    els.adventureMapArt.alt = pageTier.alt;
+    const selectedIsReplay = progress.complete || selectedAdventureLevel < currentIndex;
+    els.adventurePlay.disabled = selectedAdventureLevel > currentIndex;
+    els.adventurePlay.textContent = selectedIsReplay ? "Replay" : "Play";
+    els.adventurePagePrevious.disabled = start === 0;
+    els.adventurePageNext.disabled = end >= Core.ADVENTURE_TOTAL - 1;
+    els.adventurePageStatus.textContent = `Showing Adventure levels ${start + 1} through ${end + 1}${start > currentIndex ? ", locked" : ""}.`;
+    els.adventureLockVeil.hidden = start <= currentIndex;
     const ladderStep = 64 / 6;
     const rungPositions = Array.from({ length: visibleCapacity }, (_, index) => 82 - (index * ladderStep));
     els.adventurePath.innerHTML = "";
@@ -507,20 +532,23 @@
       const node = document.createElement("button");
       const isComplete = levelIndex < currentIndex || progress.complete;
       const isCurrent = levelIndex === currentIndex && !progress.complete;
+      const isLocked = levelIndex > currentIndex;
+      const isSelected = levelIndex === selectedAdventureLevel && !isLocked;
       node.type = "button";
-      node.className = `adventure-level-node${isComplete ? " is-complete" : ""}${isCurrent ? " is-current" : ""}`;
+      node.className = `adventure-level-node${isComplete ? " is-complete" : ""}${isCurrent ? " is-current" : ""}${isLocked ? " is-locked" : ""}${isSelected && !isCurrent ? " is-selected" : ""}`;
       node.dataset.tier = nodeProgress.tier;
       node.style.left = "50%";
       node.style.top = `${top}%`;
-      node.disabled = !isCurrent;
+      node.disabled = isLocked;
       node.setAttribute("aria-label", isComplete ? `Adventure level ${levelNumber}, complete` : isCurrent ? `Adventure level ${levelNumber}, current level` : `Adventure level ${levelNumber}, locked`);
       if (isCurrent) {
         node.setAttribute("aria-current", "step");
         node.innerHTML = `<span class="avatar-art avatar-${settings.avatar}${animateProgress ? " is-climbing" : ""}" data-decoration="${settings.decoration}" aria-hidden="true"></span><small aria-hidden="true">${levelNumber.toLocaleString()}</small>`;
-        node.addEventListener("click", startAdventureLevel);
+        node.addEventListener("click", () => { selectedAdventureLevel = levelIndex; renderAdventure(); });
       } else {
         node.textContent = isComplete ? "✓" : levelNumber.toLocaleString();
         if (!isComplete && levelNumber > 999) node.style.fontSize = levelNumber > 9999 ? "7px" : "8px";
+        if (isComplete) node.addEventListener("click", () => { selectedAdventureLevel = levelIndex; renderAdventure(); });
       }
       els.adventurePath.append(node);
       if (isCurrent && animateProgress) {
@@ -533,21 +561,43 @@
     const currentLevel = stats.adventure.level;
     const animateProgress = lastAdventureMapLevel !== null && currentLevel === lastAdventureMapLevel + 1;
     showScreen("adventure");
-    renderAdventure({ animateProgress });
+    renderAdventure({ animateProgress, resetPage: true });
     lastAdventureMapLevel = currentLevel;
     playEffect("room");
   }
 
   function startAdventureLevel() {
-    if (Core.adventureProgress(stats.adventure.level).complete) return;
-    setMode("adventure");
+    const currentLevel = Math.min(Core.ADVENTURE_TOTAL - 1, stats.adventure.level);
+    if (selectedAdventureLevel > currentLevel) return;
+    if (selectedAdventureLevel < stats.adventure.level || Core.adventureProgress(stats.adventure.level).complete) {
+      const answer = Core.adventureAnswer(selectedAdventureLevel, stats.adventure.seed);
+      game = emptyGame(answer, "adventure");
+      mode = "adventure";
+      game.adventureLevel = selectedAdventureLevel;
+      game.adventureSeed = stats.adventure.seed;
+      game.adventureReplay = true;
+      saveGame();
+      renderAll();
+    } else setMode("adventure");
     showScreen("game");
     playEffect("start");
   }
 
+  function changeAdventurePage(direction) {
+    const capacity = Math.min(8, Core.ADVENTURE_TOTAL);
+    const next = Math.max(0, Math.min(Math.floor((Core.ADVENTURE_TOTAL - 1) / capacity) * capacity, adventurePageStart + direction * capacity));
+    if (next === adventurePageStart) return;
+    adventurePageStart = next;
+    renderAdventure();
+    playEffect("open");
+  }
+
   function renderBoard() {
     els.board.innerHTML = "";
-    for (let rowIndex = 0; rowIndex < Core.MAX_GUESSES; rowIndex += 1) {
+    const rowCount = Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0);
+    els.board.setAttribute("aria-label", `${rowCount} rows of six-letter guesses`);
+    els.board.classList.toggle("has-extra-row", rowCount > Core.MAX_GUESSES);
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
       const row = document.createElement("div");
       row.className = "board-row";
       row.setAttribute("role", "row");
@@ -718,9 +768,13 @@
 
   function spendCoins(kind, label) {
     const cost = Core.LIFELINE_COSTS[kind];
+    return spendAmount(cost, label, kind);
+  }
+
+  function spendAmount(cost, label, lifelineKind = "") {
     if (stats.coins < cost) {
       announce(`${label} needs ${cost} coins. You have ${stats.coins}.`);
-      animateLifeline(kind, "is-unavailable");
+      if (lifelineKind) animateLifeline(lifelineKind, "is-unavailable");
       replayAnimation(els.coinWallet, "is-denied");
       playEffect("denied");
       return false;
@@ -730,6 +784,45 @@
     renderEconomy();
     replayAnimation(els.coinWallet, "is-spending");
     return true;
+  }
+
+  function creditCoins(amount, label = "Reward") {
+    const coins = Math.max(0, Math.floor(Number(amount) || 0));
+    if (!coins) return false;
+    stats.coins += coins;
+    saveJson(STORAGE.stats, stats);
+    renderEconomy();
+    replayAnimation(els.coinWallet, "is-earning");
+    announce(`${label} · +${coins} coins`);
+    playEffect("purchase");
+    return true;
+  }
+
+  function openLastChanceDialog() {
+    els.lastChanceCopy.textContent = `Unlock one final attempt for ${Core.LAST_CHANCE_COST} coins. The ad option is coming later.`;
+    els.lastChanceBuy.innerHTML = `<span class="coin-symbol" aria-hidden="true"></span> Continue · ${Core.LAST_CHANCE_COST}`;
+    if (!els.lastChanceDialog.open) els.lastChanceDialog.showModal();
+    setTimeout(() => els.lastChanceBuy.focus({ preventScroll: true }), 50);
+  }
+
+  function buySoloLastChance() {
+    if (game.status !== "last-chance" || !spendAmount(Core.LAST_CHANCE_COST, "Last Chance")) return;
+    game.extraAttemptPurchased = true;
+    game.lastChanceOffered = true;
+    game.status = "playing";
+    saveGame();
+    closeDialog(els.lastChanceDialog);
+    renderAll();
+    playEffect("success");
+  }
+
+  function declineSoloLastChance() {
+    if (game.status !== "last-chance") return closeDialog(els.lastChanceDialog);
+    game.status = "lost";
+    saveGame();
+    closeDialog(els.lastChanceDialog);
+    renderAll();
+    completeGame(false);
   }
 
   function buyLifeline(kind, label) {
@@ -787,7 +880,10 @@
     game.current = "";
     const won = guess === game.answer;
     if (won) game.status = "won";
-    else if (game.guesses.length >= Core.MAX_GUESSES) game.status = "lost";
+    else if (game.guesses.length >= Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0)) {
+      game.status = !game.extraAttemptPurchased && game.guesses.length === Core.MAX_GUESSES ? "last-chance" : "lost";
+      game.lastChanceOffered = game.status === "last-chance";
+    }
     saveGame();
     revealLatestRow(won);
   }
@@ -804,9 +900,8 @@
     setTimeout(() => {
       inputLocked = false;
       renderKeyboard();
-      if (game.status === "playing") {
-        return;
-      }
+      if (game.status === "playing") return;
+      if (game.status === "last-chance") return openLastChanceDialog();
       completeGame(won);
     }, tiles.length * 105 + 380);
   }
@@ -815,20 +910,20 @@
     let reward = 0;
     let points = 0;
     let streakReward = 0;
-    if (won && !game.rewarded) {
+    if (won && !game.rewarded && !game.adventureReplay) {
       reward = Core.rewardForAttempts(game.guesses.length);
       stats.coins += reward;
       game.solveReward = reward;
       game.rewarded = true;
     }
-    if (won && !game.pointsRewarded) {
+    if (won && !game.pointsRewarded && !game.adventureReplay) {
       points = Core.pointsForAttempts(game.guesses.length);
       stats.totalPoints += points;
       game.solvePoints = points;
       game.pointsRewarded = true;
     }
     if (won && !stats.completedWords.includes(game.answer)) stats.completedWords.push(game.answer);
-    if (won && !game.personalRecorded) {
+    if (won && !game.personalRecorded && !game.adventureReplay) {
       const elapsed = Math.max(1000, Date.now() - (Number(game.startedAt) || Date.now()));
       stats.totalSolves += 1;
       stats.bestSolveAttempts = stats.bestSolveAttempts === null ? game.guesses.length : Math.min(stats.bestSolveAttempts, game.guesses.length);
@@ -839,7 +934,7 @@
       stats.played += 1;
       if (won) {
         stats.wins += 1;
-        stats.distribution[game.guesses.length - 1] += 1;
+        stats.distribution[Math.min(Core.MAX_GUESSES, game.guesses.length) - 1] += 1;
         const yesterday = new Date();
         yesterday.setUTCDate(yesterday.getUTCDate() - 1);
         stats.currentStreak = stats.lastWinDate === Core.dateKey(yesterday) ? stats.currentStreak + 1 : 1;
@@ -861,7 +956,7 @@
       stats.bestModeStreak = Math.max(stats.bestModeStreak, stats.streakRun);
       game.modeRecorded = true;
     }
-    if (mode === "adventure" && (won || game.skipped) && !game.modeRecorded) {
+    if (mode === "adventure" && (won || game.skipped) && !game.modeRecorded && !game.adventureReplay) {
       if (Number(game.adventureLevel) === stats.adventure.level) stats.adventure.level = Math.min(Core.ADVENTURE_TOTAL, stats.adventure.level + 1);
       game.modeRecorded = true;
     }
@@ -990,7 +1085,7 @@
   function openSkipConfirmation() {
     if (game.status !== "playing") return;
     const purchaseCopy = stats.inventory.skip > 0 ? "Use one Skip?" : `Buy and use one Skip for ${Core.LIFELINE_COSTS.skip} coins?`;
-    els.skipCopy.textContent = mode === "daily" ? `${purchaseCopy} Today’s answer will be revealed and it counts as a loss.` : mode === "streak" ? `${purchaseCopy} This puzzle ends and your Streak run resets.` : mode === "adventure" ? `${purchaseCopy} This word will be revealed and your token will move to the next rung.` : `${purchaseCopy} A fresh ${MODE_CONFIG[mode].label.toLowerCase()} will begin.`;
+    els.skipCopy.textContent = mode === "daily" ? `${purchaseCopy} Today’s answer will be revealed and it counts as a loss.` : mode === "streak" ? `${purchaseCopy} The answer will be revealed with no reward, and your run resets after OK.` : mode === "adventure" ? `${purchaseCopy} The answer will be revealed with no reward, and your token moves after OK.` : `${purchaseCopy} The answer will be revealed with no reward. Continue after pressing OK.`;
     els.skipDialog.showModal();
   }
 
@@ -1006,12 +1101,6 @@
     animateLifeline("skip", "is-used-now");
     playEffect("skip");
     closeDialog(els.skipDialog);
-    if (mode !== "daily" && mode !== "streak" && mode !== "adventure") {
-      setMode(mode, true);
-      showScreen("game");
-      announce(`Fresh ${MODE_CONFIG[mode].label.toLowerCase()} ready.`);
-      return;
-    }
     game.status = "lost";
     game.skipped = true;
     game.current = "";
@@ -1088,8 +1177,9 @@
       { title: "Strong signal", summary: "Every clue landed exactly where it needed to." },
       { title: "Signal secured", summary: "Patient deduction turned noise into an answer." },
       { title: "Clutch finish", summary: "You held the thread and closed it out." },
-      { title: "Last-chance legend", summary: "Seven tries, zero surrender. Signal found." }
-    ][Math.max(0, Math.min(Core.MAX_GUESSES - 1, attempts - 1))];
+      { title: "Last-chance legend", summary: "Seven tries, zero surrender. Signal found." },
+      { title: "Encore secured", summary: "The extra signal paid off. One final read found the word." }
+    ][Math.max(0, Math.min(Core.MAX_GUESSES, attempts - 1))];
   }
 
   function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0, points = Number(game.solvePoints) || 0) {
@@ -1097,9 +1187,9 @@
     const performance = resultPerformance(Math.max(1, attempts));
     const earned = won ? reward + streakReward : 0;
     els.resultDialog.classList.toggle("is-loss", !won);
-    els.resultKicker.textContent = won ? "Puzzle complete" : "Signal ended";
-    els.resultTitle.textContent = won ? performance.title : "Signal missed";
-    els.resultSummary.textContent = won ? performance.summary : "The answer is yours now. Carry the pattern into the next word.";
+    els.resultKicker.textContent = game.skipped ? "Word revealed" : game.adventureReplay ? "Replay complete" : won ? "Puzzle complete" : "Signal ended";
+    els.resultTitle.textContent = game.skipped ? "No reward this time" : won ? performance.title : "Signal missed";
+    els.resultSummary.textContent = game.skipped ? "Take in the answer, then continue when you are ready." : won ? performance.summary : "The answer is yours now. Carry the pattern into the next word.";
     els.resultWord.setAttribute("aria-label", `${won ? "Solved word" : "Answer"}: ${game.answer.toUpperCase()}`);
     els.resultWord.innerHTML = [...game.answer.toUpperCase()].map((letter, index) => `<span style="--letter-delay:${.08 + index * .055}s">${letter}</span>`).join("");
     els.resultAttemptIcon.textContent = won ? String(attempts) : "×";
@@ -1113,6 +1203,10 @@
   function exitResult() {
     if (els.resultDialog.open) els.resultDialog.close();
     if (mode === "adventure") openAdventureMap();
+    else if (game.skipped && mode !== "daily") {
+      setMode(mode, true);
+      showScreen("game");
+    }
     else showScreen("home");
   }
 
@@ -1122,7 +1216,8 @@
 
   async function shareResult() {
     if (game.status === "playing") return;
-    const header = `Sixth Sense ${mode === "daily" ? `#${game.puzzleNumber}` : MODE_CONFIG[mode].label.replace(" Puzzle", "")} ${game.status === "won" ? `${game.guesses.length}/${Core.MAX_GUESSES}` : `—/${Core.MAX_GUESSES}`}`;
+    const maximum = Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0);
+    const header = `Sixth Sense ${mode === "daily" ? `#${game.puzzleNumber}` : MODE_CONFIG[mode].label.replace(" Puzzle", "")} ${game.status === "won" ? `${game.guesses.length}/${maximum}` : `—/${maximum}`}`;
     const body = game.guesses.map(entry => entry.score.map(status => ({ exact: "●", present: "◆", absent: "·" }[status])).join("")).join("\n");
     const text = `${header}\n${body}\n\nFeel the word.`;
     try {
@@ -1511,13 +1606,22 @@
     els.adventureOpenButtons.forEach(button => button.addEventListener("click", openAdventureMap));
     els.adventureBack.addEventListener("click", () => { showScreen("home"); playEffect("open"); });
     els.adventurePlay.addEventListener("click", startAdventureLevel);
+    els.adventurePagePrevious.addEventListener("click", () => changeAdventurePage(-1));
+    els.adventurePageNext.addEventListener("click", () => changeAdventurePage(1));
+    els.adventurePath.addEventListener("touchstart", event => { adventureTouchStartX = event.touches[0]?.clientX ?? null; }, { passive: true });
+    els.adventurePath.addEventListener("touchend", event => {
+      if (adventureTouchStartX === null) return;
+      const distance = (event.changedTouches[0]?.clientX ?? adventureTouchStartX) - adventureTouchStartX;
+      adventureTouchStartX = null;
+      if (Math.abs(distance) >= 58) changeAdventurePage(distance < 0 ? 1 : -1);
+    }, { passive: true });
     els.brand.addEventListener("click", event => {
       event.preventDefault();
       if (document.body.dataset.screen === "online") {
         document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
         return;
       }
-      if (document.body.dataset.screen === "game" && game.status === "playing") {
+      if (document.body.dataset.screen === "game" && ["playing", "last-chance"].includes(game.status)) {
         requestSoloLeave();
         return;
       }
@@ -1534,6 +1638,9 @@
     els.resultExit.addEventListener("click", exitResult);
     els.resultPrimary.addEventListener("click", continueFromResult);
     els.hintOkButton.addEventListener("click", () => closeDialog(els.hintDialog));
+    els.lastChanceBuy.addEventListener("click", () => document.body.dataset.screen === "online" ? document.dispatchEvent(new CustomEvent("sixth-sense-online-last-chance", { detail: { decision: "purchase" } })) : buySoloLastChance());
+    els.lastChanceDecline.addEventListener("click", () => document.body.dataset.screen === "online" ? document.dispatchEvent(new CustomEvent("sixth-sense-online-last-chance", { detail: { decision: "decline" } })) : declineSoloLastChance());
+    els.lastChanceDialog.addEventListener("cancel", event => event.preventDefault());
     els.leaveGameCancel.addEventListener("click", cancelSoloLeave);
     els.leaveGameConfirm.addEventListener("click", confirmSoloLeave);
     els.leaveGameDialog.addEventListener("cancel", event => { event.preventDefault(); cancelSoloLeave(); });
@@ -1587,6 +1694,12 @@
     }));
     document.addEventListener("pointerdown", unlockAudio, { once: true, capture: true });
     document.addEventListener("keydown", unlockAudio, { once: true, capture: true });
+    document.addEventListener("touchmove", event => {
+      if (event.touches.length > 1 && ["game", "online"].includes(document.body.dataset.screen)) event.preventDefault();
+    }, { passive: false });
+    document.addEventListener("gesturestart", event => {
+      if (["game", "online"].includes(document.body.dataset.screen)) event.preventDefault();
+    }, { passive: false });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stopMusic();
       else if (audioUnlocked && settings.music) startMusic();
@@ -1625,7 +1738,9 @@
           renderEconomy();
         }
         return consumed;
-      }
+      },
+      spend: (amount, label = "Purchase") => spendAmount(Math.max(0, Math.floor(Number(amount) || 0)), label),
+      credit: (amount, label = "Reward") => creditCoins(amount, label)
     };
     window.SixthSenseDialogs = { showHint: showHintDialog };
     window.SixthSenseCelebration = celebrate;

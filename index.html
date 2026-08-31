@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260831.1">
+  <link rel="stylesheet" href="styles.css?v=20260831.2">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -86,6 +86,7 @@
       <div class="online-mode-grid">
         <button class="online-mode-tile" type="button" data-open-online="race"><span class="online-mode-art online-mode-art-race" aria-hidden="true"></span><span><strong>Race</strong><small>2–8 players · 3, 5, or 10 words</small></span></button>
         <button class="online-mode-tile" type="button" data-open-online="vs"><span class="online-mode-art online-mode-art-vs" aria-hidden="true"></span><span><strong>VS</strong><small>1v1 · 3, 5, 9, or Endless rounds</small></span></button>
+        <button class="online-mode-tile online-mode-tile-coop" type="button" data-open-online="coop"><span class="online-mode-art online-mode-art-coop" aria-hidden="true"></span><span><strong>Co-op</strong><small>2–4 players · solve one shared route</small></span></button>
       </div>
     </section>
 
@@ -109,7 +110,13 @@
         <button class="icon-button adventure-back" id="adventure-back" type="button" aria-label="Back to home"><img src="assets/control-home.png" width="256" height="256" alt="" aria-hidden="true"></button>
         <div><p class="eyebrow">Adventure map</p><h1 id="adventure-map-title">The signal trail</h1></div>
       </header>
+      <div class="adventure-page-controls" aria-label="Browse Adventure sections">
+        <button id="adventure-page-previous" type="button" aria-label="Show previous eight levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></button>
+        <span id="adventure-page-status" class="sr-only" aria-live="polite"></span>
+        <button id="adventure-page-next" type="button" aria-label="Show next eight levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
+      </div>
       <div class="adventure-level-path" id="adventure-level-path" aria-label="Nearby Adventure levels"></div>
+      <div class="adventure-lock-veil" id="adventure-lock-veil" hidden aria-hidden="true"><span class="chain-link"></span><span class="chain-link"></span><span class="chain-link"></span></div>
       <footer class="adventure-map-foot">
         <button class="primary-button adventure-play" id="adventure-play" type="button">Play</button>
       </footer>
@@ -451,11 +458,34 @@
     </div>
   </dialog>
 
+  <dialog class="modal hint-modal online-skip-result-modal" id="online-skip-result-modal" aria-labelledby="online-skip-result-title">
+    <div class="modal-sheet popup-sheet">
+      <p class="eyebrow">Word revealed</p>
+      <h2 id="online-skip-result-title">No reward for this word</h2>
+      <div class="skip-revealed-word" id="online-skip-revealed-word" aria-label="Revealed word"></div>
+      <p>The route moves forward only after you acknowledge the answer.</p>
+      <button class="popup-ok" id="online-skip-result-ok" type="button">OK</button>
+    </div>
+  </dialog>
+
+  <dialog class="modal hint-modal last-chance-modal" id="last-chance-modal" aria-labelledby="last-chance-title">
+    <div class="modal-sheet popup-sheet">
+      <p class="eyebrow">One more signal</p>
+      <h2 id="last-chance-title">Take a Last Chance?</h2>
+      <p id="last-chance-copy">Unlock one final attempt for 80 coins.</p>
+      <div class="last-chance-actions">
+        <button class="popup-ok" id="last-chance-buy" type="button"><span class="coin-symbol" aria-hidden="true"></span> Continue · 80</button>
+        <button class="secondary-button" id="last-chance-decline" type="button">End this word</button>
+        <button class="secondary-button last-chance-ad" type="button" disabled>Watch an ad · Soon</button>
+      </div>
+    </div>
+  </dialog>
+
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260831.1"></script>
-  <script src="word-bank.js?v=20260831.1"></script>
-  <script src="game-core.js?v=20260831.1"></script>
-  <script src="app.js?v=20260831.1"></script>
-  <script src="multiplayer.js?v=20260831.1"></script>
+  <script src="answer-bank.js?v=20260831.2"></script>
+  <script src="word-bank.js?v=20260831.2"></script>
+  <script src="game-core.js?v=20260831.2"></script>
+  <script src="app.js?v=20260831.2"></script>
+  <script src="multiplayer.js?v=20260831.2"></script>
 </body>
 </html>

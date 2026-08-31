@@ -370,18 +370,31 @@ body[data-screen="adventure"] .topbar { flex:0 0 auto; }
 .adventure-map-head .eyebrow { color:#ffe66d; }
 .adventure-map-head h1 { color:#fff; font-size:clamp(24px,4vw,32px); }
 .adventure-map-head div > span { display:block; margin-top:4px; color:rgba(255,255,255,.82); font-size:11px; font-weight:800; }
+.adventure-page-controls { position:absolute; z-index:5; inset:50% 12px auto; display:flex; justify-content:space-between; pointer-events:none; transform:translateY(-50%); }
+.adventure-page-controls button { width:46px; height:46px; display:grid; place-items:center; padding:0; border:2px solid rgba(255,255,255,.72); border-radius:50%; background:rgba(255,255,255,.82); color:#54208a; box-shadow:5px 8px 17px rgba(33,7,66,.28),inset 2px 2px 3px rgba(255,255,255,.76); cursor:pointer; pointer-events:auto; backdrop-filter:blur(8px); }
+.adventure-page-controls button:disabled { opacity:.28; cursor:default; }
+.adventure-page-controls svg { width:24px; fill:none; stroke:currentColor; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
 .adventure-level-path { position:absolute; z-index:2; inset:88px 0 104px; }
 .adventure-level-node { --node-color:#b5a5cf; width:48px; height:48px; position:absolute; z-index:2; display:grid; place-items:center; padding:0; border:3px solid rgba(255,255,255,.82); border-radius:50%; background:linear-gradient(145deg,color-mix(in srgb,var(--node-color) 82%,white),var(--node-color)); color:#fff; box-shadow:0 8px 14px rgba(43,10,74,.28),inset 2px 2px 3px rgba(255,255,255,.42); transform:translate(-50%,-50%); font:900 12px/1 "Nunito"; font-variant-numeric:tabular-nums; }
 .adventure-level-node[data-tier="easy"] { --node-color:#0bc1af; }
 .adventure-level-node[data-tier="medium"] { --node-color:#f27658; }
 .adventure-level-node[data-tier="extreme"] { --node-color:#8b45e9; }
 .adventure-level-node.is-complete { background:linear-gradient(145deg,#ffe56c,#f69c2b); color:#5b2756; }
+.adventure-level-node.is-complete:not(:disabled) { cursor:pointer; }
+.adventure-level-node.is-complete:not(:disabled):focus-visible { outline:4px solid #fff; outline-offset:4px; }
+.adventure-level-node.is-locked::before,.adventure-level-node.is-locked::after { content:""; width:13px; height:8px; position:absolute; border:3px solid rgba(255,255,255,.9); border-radius:999px; transform:rotate(-32deg); }
+.adventure-level-node.is-locked::before { margin-left:-8px; }
+.adventure-level-node.is-locked::after { margin-left:8px; }
 .adventure-level-node:disabled:not(.is-current) { opacity:.62; filter:saturate(.55); }
 .adventure-level-node.is-current { width:68px; height:68px; z-index:4; border-width:4px; border-color:#fff4a0; box-shadow:0 0 0 7px rgba(255,238,93,.25),0 11px 23px rgba(52,8,92,.38),inset 2px 2px 4px rgba(255,255,255,.5); animation:adventure-pulse 2s ease-in-out infinite; }
 .adventure-level-node.is-current .avatar-art { width:54px; height:54px; border:2px solid rgba(255,255,255,.72); }
 .adventure-level-node.is-current .avatar-art.is-climbing { animation:adventure-token-climb .72s cubic-bezier(.2,.82,.24,1) both; }
 .adventure-level-node.is-current small { position:absolute; right:-6px; bottom:-5px; min-width:25px; height:22px; display:grid; place-items:center; padding:0 5px; border:2px solid #fff; border-radius:999px; background:#ff4f83; color:#fff; font:900 9px/1 "Nunito"; box-shadow:2px 4px 8px rgba(50,8,81,.3); }
 .adventure-map-foot { position:absolute; z-index:3; inset:auto 0 0; min-height:98px; display:flex; align-items:center; justify-content:center; gap:16px; padding:17px 20px; color:#fff; }
+.adventure-lock-veil { position:absolute; z-index:3; inset:88px 0 98px; display:flex; align-items:center; justify-content:center; gap:0; background:linear-gradient(180deg,rgba(43,16,82,.08),rgba(43,16,82,.42),rgba(43,16,82,.12)); pointer-events:none; backdrop-filter:blur(1.5px) saturate(.72); }
+.adventure-lock-veil[hidden] { display:none; }
+.chain-link { width:48px; height:26px; margin-inline:-7px; border:7px solid rgba(255,255,255,.68); border-radius:999px; box-shadow:0 5px 15px rgba(35,8,66,.28); transform:rotate(-28deg); }
+.chain-link:nth-child(2) { transform:rotate(28deg); }
 .adventure-play { min-width:142px; background:linear-gradient(145deg,#ff667e,#dc3a74); }
 
 @keyframes adventure-pulse { 0%,100% { transform:translate(-50%,-50%) scale(1); } 50% { transform:translate(-50%,-50%) scale(1.055); } }
@@ -401,7 +414,7 @@ body[data-screen="adventure"] .topbar { flex:0 0 auto; }
 .mode-tile strong { font: 900 16px/1.05 "Nunito", sans-serif; }
 .mode-tile small { margin-top: 5px; color: #705b7c; font-size: 10px; font-weight: 700; line-height: 1.15; }
 .online-shelf { padding: 22px; border: 1px solid rgba(255,255,255,.48); border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(229,244,255,.94)); box-shadow: 16px 20px 38px rgba(47,9,89,.26), inset 2px 2px 4px rgba(255,255,255,.8); }
-.online-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.online-mode-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .online-mode-tile { min-height: 116px; display: grid; grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 15px; padding: 8px; border: 1px solid rgba(101,57,165,.16); border-radius: 24px; background: #fff; color: #32134f; box-shadow: 7px 10px 20px rgba(75,34,120,.15); text-align: left; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .online-mode-tile:hover { transform: translateY(-3px); box-shadow: 10px 15px 26px rgba(75,34,120,.22); }
 .online-mode-tile:active { transform: scale(.98); }
@@ -411,6 +424,7 @@ body[data-screen="adventure"] .topbar { flex:0 0 auto; }
 .online-mode-art { width:112px; height:100px; display:block; border-radius:18px; background-size:cover; background-position:center; background-repeat:no-repeat; box-shadow:inset 0 0 0 1px rgba(255,255,255,.45); }
 .online-mode-art-race { background-image:url("assets/multiplayer-race-v2.webp"); }
 .online-mode-art-vs { background-image:url("assets/multiplayer-vs-v2.webp"); }
+.online-mode-art-coop { background-image:url("assets/multiplayer-coop-v1.webp"); }
 .secondary-button {
   min-height: 46px;
   display: inline-flex;
@@ -544,6 +558,7 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
   grid-template-rows: repeat(7, var(--tile-size));
   gap: clamp(6px, 1.5vw, 9px);
 }
+.board.has-extra-row { grid-template-rows: repeat(8, var(--tile-size)); }
 .board-row { display: grid; grid-template-columns: repeat(6, var(--tile-size)); gap: clamp(6px, 1.5vw, 9px); }
 .tile {
   position: relative;
@@ -1089,7 +1104,7 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .online-round-transition small { margin-top:9px; font-size:12px; font-weight:900; }
 .online-play-layout { min-width:0; display:grid; grid-template-columns:minmax(420px,1fr) minmax(270px,330px); gap:24px; padding-top:20px; }
 .online-puzzle-column { width:100%; min-width:0; max-width:100%; display:flex; flex-direction:column; align-items:center; }
-.online-live-status { min-height:24px; margin:0 0 8px; color:var(--ink-soft); font-size:13px; font-weight:800; text-align:center; }
+.online-live-status { height:24px; min-height:24px; overflow:hidden; margin:0 0 8px; color:var(--ink-soft); font-size:13px; font-weight:800; line-height:20px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
 .online-board { --tile-size:min(8vw,56px); }
 .online-keyboard { width:100%; max-width:620px; min-width:0; }
 .online-start { width:min(100%,330px); margin-top:18px; }
@@ -1130,6 +1145,14 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .online-result-crest img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 12px 13px rgba(45,19,73,.24)); }
 .online-result-modal h2 { margin:4px 0 0; color:#281041; font:900 clamp(34px,9vw,44px)/1 "Nunito",sans-serif; }
 .online-result-modal .popup-sheet > p:not(.eyebrow) { margin:10px auto 18px; color:#111; font-weight:800; }
+.skip-revealed-word { display:flex; justify-content:center; gap:5px; margin:17px 0 13px; }
+.skip-revealed-word span { width:40px; aspect-ratio:1; display:grid; place-items:center; border:2px solid rgba(112,53,186,.28); border-radius:11px; background:linear-gradient(145deg,#fff,#eaddff); color:#35124f; box-shadow:4px 6px 10px rgba(58,18,101,.16),inset 1px 1px 2px #fff; font:900 20px/1 "Nunito",sans-serif; }
+.last-chance-actions { display:grid; gap:9px; margin-top:18px; }
+.last-chance-actions .popup-ok,.last-chance-actions .secondary-button { width:100%; }
+#last-chance-buy .coin-symbol { width:18px; height:18px; margin-right:5px; }
+.adventure-level-node.is-selected { outline:3px solid #fff; outline-offset:3px; box-shadow:0 0 0 6px rgba(123,72,232,.42),0 10px 20px rgba(52,16,92,.3); }
+body[data-screen="game"],body[data-screen="online"] { touch-action:pan-x pan-y; }
+.last-chance-ad:disabled { opacity:.48; cursor:not-allowed; }
 .online-result-points { display:grid; grid-template-columns:42px 1fr; grid-template-rows:auto auto; align-items:center; margin:0 0 18px; padding:12px 16px; border-radius:18px; background:rgba(255,255,255,.6); color:#111; box-shadow:inset 3px 3px 8px rgba(72,36,104,.1); text-align:left; }
 .online-result-points > span { grid-row:1 / -1; width:36px; height:36px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(145deg,#8d64ff,#5928ce); color:#fff; }
 .online-result-points small { font-size:10px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
@@ -1250,6 +1273,9 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
   .mode-tile small { margin-top: 4px; min-height: 0; font-size: 8px; }
   .online-shelf { padding:16px 12px 14px; border-radius:24px; }
   .online-mode-grid { gap:8px; }
+  .online-mode-grid { grid-template-columns:1fr 1fr; }
+  .online-mode-tile-coop { grid-column:1 / -1; }
+  .online-mode-tile-coop .online-mode-art { width:104px; }
   .online-mode-tile { min-height:86px; grid-template-columns:72px minmax(0,1fr); gap:8px; padding:6px; border-radius:18px; }
   .online-mode-art { width:72px; height:72px; border-radius:14px; }
   .online-mode-tile strong { font-size:16px; }
@@ -1319,6 +1345,8 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
   .player-progress .avatar-art { width:40px; }
   .online-live-status { margin:0 0 3px; font-size:11px; }
   .online-board { --tile-size:min(13.7vw,52px); }
+  .online-board.has-extra-row { --tile-size:min(12.2vw,45px); gap:5px; }
+  .online-board.has-extra-row .board-row { gap:5px; }
   .online-keyboard .key { height:47px; }
   .online-lifeline-dock { width:min(100%,340px); }
   .online-lifeline-dock .lifeline-item { min-height:66px; }
@@ -1357,6 +1385,8 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
   body[data-screen="game"] .message-space { height: 22px; }
   body[data-screen="game"] .board { --tile-size: min(12.2vw, 45px); gap: 5px; }
   body[data-screen="game"] .board-row { gap: 5px; }
+  body[data-screen="game"] .board.has-extra-row { --tile-size:min(11.5vw,42px); gap:4px; }
+  body[data-screen="game"] .board.has-extra-row .board-row { gap:4px; }
   body[data-screen="game"] .keyboard { margin-top: 8px; gap: 4px; }
   body[data-screen="game"] .keyboard-row { gap: 4px; }
   body[data-screen="game"] .key { height: 41px; }

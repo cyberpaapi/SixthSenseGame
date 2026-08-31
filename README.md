@@ -18,10 +18,10 @@ Then open `http://localhost:4173`.
 
 ## Included
 
-- Eight modes: Daily, Adventure, Practice, ten-minute Time Tackle, Insight, Streak, private-room Race, and live one-on-one VS
-- A persistent 10,187-level Adventure signal trail with a per-device randomized route: all 4,309 Normal words, then 1,995 Hard words, then 3,883 Extreme words
+- Nine modes: Daily, Adventure, Practice, ten-minute Time Tackle, Insight, Streak, private-room Race, live one-on-one VS, and shared-route Co-op
+- A persistent 10,187-level Adventure signal trail with a per-device randomized route: all 4,058 usage-qualified Normal words, then 2,246 Hard words, then 3,883 Extreme words
 - Separate home and play screens, keeping the puzzle view focused
-- 10,187 clueable answers in Normal (4,309), Hard (1,995), and Extreme (3,883) player-facing tiers
+- 10,187 clueable answers in Normal (4,058), Hard (2,246), and Extreme (3,883) player-facing tiers
 - Silent solo progression from Normal into Hard and then Extreme as each tier is completed
 - 15,232 independently validated six-letter guesses from a proper-name-safe word-game lexicon
 - Correct repeated-letter scoring
@@ -34,6 +34,7 @@ Then open `http://localhost:4173`.
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information
 - Sense clues appear in a centered confirmable popup and can be reopened anytime without another charge
+- A paid 80-coin Last Chance offers one eighth attempt after the standard seven are exhausted; the rewarded-ad alternative is visibly reserved for later integration
 - Purposeful purchase, use, reveal, removal, wallet, and screen-entry motion with reduced-motion support
 - Optional hard mode
 - Dark and high-contrast themes
@@ -43,7 +44,7 @@ Then open `http://localhost:4173`.
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
 - Required first-open username setup with editable identity in avatar settings; names are unique inside each online room
-- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races and two-player point-based 3/5/9/Endless VS with a red confirmed Back action, match result cards, shared one-tap lifelines, stable polling without repeated full-board repaints, thin green avatar race tracks, refresh rejoin, live attempt patterns, and synchronized new-word transitions
+- Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races, two-player point-based 3/5/9/Endless VS, and 2–4-player 3/5/10-word Co-op. VS awards solve coins at 60% of solo rates and removes Skip; Race and Co-op reveal skipped words before acknowledged progression
 - Mobile browser Back follows the in-app screen stack and asks before leaving an active solo or multiplayer game
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
 

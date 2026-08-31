@@ -11,9 +11,11 @@
   const SETTINGS_KEY = "sixth-sense.settings.v1";
   const IDENTITY_KEY = "sixth-sense.online.identity.v1";
   const ACTIVE_ROOM_KEY = "sixth-sense.active-room.v1";
+  const ONLINE_REWARDS_KEY = "sixth-sense.online-rewards.v1";
   const LENGTH_OPTIONS = Object.freeze({
     race: [{ value: "3", label: "Sprint", detail: "3" }, { value: "5", label: "Normal", detail: "5" }, { value: "10", label: "Marathon", detail: "10" }],
-    vs: [{ value: "3", label: "Quick", detail: "3" }, { value: "5", label: "Classic", detail: "5" }, { value: "9", label: "Epic", detail: "9" }, { value: "endless", label: "Endless", detail: "∞" }]
+    vs: [{ value: "3", label: "Quick", detail: "3" }, { value: "5", label: "Classic", detail: "5" }, { value: "9", label: "Epic", detail: "9" }, { value: "endless", label: "Endless", detail: "∞" }],
+    coop: [{ value: "3", label: "Sprint", detail: "3" }, { value: "5", label: "Normal", detail: "5" }, { value: "10", label: "Marathon", detail: "10" }]
   });
 
   const els = {
@@ -57,6 +59,11 @@
     resultCopy: document.querySelector("#online-result-copy"),
     resultPoints: document.querySelector("#online-result-points"),
     resultOk: document.querySelector("#online-result-ok"),
+    skipDialog: document.querySelector("#online-skip-result-modal"),
+    skipWord: document.querySelector("#online-skip-revealed-word"),
+    skipOk: document.querySelector("#online-skip-result-ok"),
+    lastChanceDialog: document.querySelector("#last-chance-modal"),
+    lastChanceCopy: document.querySelector("#last-chance-copy"),
     lifelines: [...document.querySelectorAll("[data-online-lifeline]")]
   };
 
@@ -72,7 +79,8 @@
     pollTimer: null,
     transitionTimer: null,
     busy: false,
-    finishedResultShown: false
+    finishedResultShown: false,
+    lastRoundCoinReward: 0
   };
 
   function readJson(key, fallback) {
@@ -105,12 +113,12 @@
   }
 
   function openLobby(mode) {
-    state.requestedMode = mode === "vs" ? "vs" : "race";
-    const label = state.requestedMode === "vs" ? "One-on-one VS" : "Multiplayer Race";
+    state.requestedMode = ["race", "vs", "coop"].includes(mode) ? mode : "race";
+    const label = state.requestedMode === "vs" ? "One-on-one VS" : state.requestedMode === "coop" ? "Co-op journey" : "Multiplayer Race";
     els.lobbyKicker.textContent = label;
     els.distance.hidden = false;
     renderLengthOptions();
-    els.create.textContent = state.requestedMode === "vs" ? "Create VS room" : "Create private race";
+    els.create.textContent = state.requestedMode === "vs" ? "Create VS room" : state.requestedMode === "coop" ? "Create co-op room" : "Create private race";
     const savedIdentity = readJson(IDENTITY_KEY, { name: "" });
     els.name.value = savedIdentity.name || "";
     const player = identity();
@@ -195,7 +203,7 @@
     state.token = result.resumeToken;
     state.playerId = result.playerId;
     state.current = "";
-    state.activeRound = result.snapshot.room.mode === "vs" ? Number(result.snapshot.room.currentRound) || 0 : result.snapshot.me.currentWordIndex;
+    state.activeRound = ["vs", "coop"].includes(result.snapshot.room.mode) ? Number(result.snapshot.room.currentRound) || 0 : result.snapshot.me.currentWordIndex;
     state.snapshot = result.snapshot;
     state.finishedResultShown = false;
     state.renderedSnapshotSignature = "";
@@ -221,6 +229,8 @@
     localStorage.removeItem(ACTIVE_ROOM_KEY);
     clearTimeout(state.transitionTimer);
     els.roundTransition.hidden = true;
+    if (els.skipDialog.open) els.skipDialog.close();
+    if (els.lastChanceDialog.open) els.lastChanceDialog.close();
     els.screen.hidden = true;
     els.home.hidden = false;
     els.solo.hidden = true;
@@ -232,10 +242,10 @@
 
   function requestLeave() {
     if (els.screen.hidden || !state.snapshot) return;
-    const isVs = state.snapshot.room.mode === "vs";
+    const mode = state.snapshot.room.mode;
     els.leaveKicker.textContent = "Leave this match?";
-    els.leaveTitle.textContent = isVs ? "Leave VS room" : "Leave race";
-    els.leaveCopy.textContent = "Your saved seat on this device will be cleared, so you can’t resume this match after leaving. The room stays open for the other player.";
+    els.leaveTitle.textContent = mode === "vs" ? "Leave VS room" : mode === "coop" ? "Leave co-op room" : "Leave race";
+    els.leaveCopy.textContent = "Your saved seat on this device will be cleared, so you can’t resume this match after leaving. The room stays open for the other players.";
     if (!els.leaveDialog.open) els.leaveDialog.showModal();
     setTimeout(() => els.leaveCancel.focus(), 60);
   }
@@ -280,11 +290,12 @@
     if (signature === state.renderedSnapshotSignature) return false;
     state.renderedSnapshotSignature = signature;
     const room = snapshot.room;
-    const nextRound = room.mode === "vs" ? Number(room.currentRound) || 0 : snapshot.me.currentWordIndex;
-    const roundAdvanced = room.mode === "vs" && state.activeRound !== null && nextRound > state.activeRound;
+    const sharedRound = ["vs", "coop"].includes(room.mode);
+    const nextRound = sharedRound ? Number(room.currentRound) || 0 : snapshot.me.currentWordIndex;
+    const roundAdvanced = sharedRound && state.activeRound !== null && nextRound > state.activeRound;
     if (nextRound !== state.activeRound) state.current = "";
     state.activeRound = nextRound;
-    els.kicker.textContent = room.mode === "vs" ? "One-on-one VS" : "Multiplayer Race";
+    els.kicker.textContent = room.mode === "vs" ? "One-on-one VS" : room.mode === "coop" ? "Co-op journey" : "Multiplayer Race";
     const lengthLabel = room.mode === "vs" && room.endless ? "Endless" : `${room.wordCount} ${room.mode === "vs" ? "rounds" : "words"}`;
     els.title.textContent = `${DIFFICULTY_LABELS[room.difficulty] || "Normal"} · ${lengthLabel}`;
     renderVersusNames();
@@ -295,12 +306,15 @@
     else if (room.status === "finished") els.status.textContent = winner ? `${winner.name} won the match!` : "Match complete.";
     else if (snapshot.me.finished) els.status.textContent = "Match complete.";
     else if (room.mode === "race") els.status.textContent = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}`;
+    else if (room.mode === "coop") els.status.textContent = `Shared word ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount} · Solve it together.`;
     else els.status.textContent = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`} · First solve wins the point.`;
     els.start.hidden = !(room.status === "waiting" && snapshot.me.isHost && snapshot.players.length >= 2);
     renderBoard();
     renderKeyboard();
     renderLifelines();
     renderProgress();
+    awardVsRoundIfNeeded();
+    showPendingDecisionIfNeeded();
     if (roundAdvanced) showRoundTransition();
     if (room.status === "finished" && !state.finishedResultShown) showMatchResult();
     return true;
@@ -310,13 +324,14 @@
     const snapshot = state.snapshot;
     const winner = snapshot.players.find(player => player.id === snapshot.room.winnerPlayerId);
     const me = snapshot.me;
-    const won = winner?.id === me.id;
+    const isCoop = snapshot.room.mode === "coop";
+    const won = isCoop || winner?.id === me.id;
     const progress = snapshot.room.mode === "vs" ? Number(me.score) || 0 : Math.min(Number(me.currentWordIndex) || 0, snapshot.room.wordCount);
     const points = progress * 100;
     state.finishedResultShown = true;
     els.resultKicker.textContent = won ? "Match complete" : "Final signal";
-    els.resultTitle.textContent = won ? "Victory!" : "Match complete";
-    els.resultCopy.textContent = won ? "You carried the strongest signal to the finish." : winner ? `${winner.name} reached the finish first. Your progress still earned points.` : "The room has completed.";
+    els.resultTitle.textContent = isCoop ? "Team victory!" : won ? "Victory!" : "Match complete";
+    els.resultCopy.textContent = isCoop ? "Every signal connected. Your team completed the shared route." : won ? "You carried the strongest signal to the finish." : winner ? `${winner.name} reached the finish first. Your progress still earned points.` : "The room has completed.";
     els.resultPoints.textContent = `+${points.toLocaleString()}`;
     if (!els.resultDialog.open) els.resultDialog.showModal();
     if (won) {
@@ -347,9 +362,10 @@
     const winner = snapshot.players.find(player => player.id === snapshot.room.lastRoundWinnerPlayerId);
     const players = [...snapshot.players].sort((a, b) => a.seat - b.seat);
     clearTimeout(state.transitionTimer);
-    els.roundKicker.textContent = winner ? `${winner.name} wins the point` : "Round complete";
+    els.roundKicker.textContent = snapshot.room.mode === "coop" ? (winner ? `${winner.name} found the word` : "Word complete") : winner ? `${winner.name} wins the point` : "Round complete";
     els.roundTitle.textContent = snapshot.room.status === "finished" ? "Match complete" : "New word";
-    els.roundScore.textContent = players.map(player => `${player.name} ${player.score || 0}`).join(" · ");
+    els.roundScore.textContent = snapshot.room.mode === "coop" ? "The team advances together" : `${players.map(player => `${player.name} ${player.score || 0}`).join(" · ")}${state.lastRoundCoinReward ? ` · +${state.lastRoundCoinReward} coins` : ""}`;
+    state.lastRoundCoinReward = 0;
     els.roundTransition.hidden = false;
     els.roundTransition.classList.remove("is-showing");
     void els.roundTransition.offsetWidth;
@@ -369,7 +385,9 @@
     const attempts = currentAttempts();
     const peeked = new Map((state.snapshot?.me?.lifelines?.peeked || []).map(entry => [Number(entry.position), entry.letter]));
     els.board.innerHTML = "";
-    for (let rowIndex = 0; rowIndex < Core.MAX_GUESSES; rowIndex += 1) {
+    const maxGuesses = Core.MAX_GUESSES + (state.snapshot?.me?.lifelines?.extraAttempt ? 1 : 0);
+    els.board.classList.toggle("has-extra-row", maxGuesses > Core.MAX_GUESSES);
+    for (let rowIndex = 0; rowIndex < maxGuesses; rowIndex += 1) {
       const row = document.createElement("div");
       row.className = "board-row";
       row.setAttribute("role", "row");
@@ -408,7 +426,9 @@
   function renderKeyboard() {
     const states = keyStates();
     const eliminated = new Set(state.snapshot?.me?.lifelines?.eliminatedLetters || []);
-    const canPlay = state.snapshot?.room.status === "running" && !state.snapshot.me.finished && currentAttempts().length < Core.MAX_GUESSES && !state.busy;
+    const lifelines = state.snapshot?.me?.lifelines || {};
+    const maxGuesses = Core.MAX_GUESSES + (lifelines.extraAttempt ? 1 : 0);
+    const canPlay = state.snapshot?.room.status === "running" && !state.snapshot.me.finished && !lifelines.lastChancePending && !lifelines.pendingSkip && currentAttempts().length < maxGuesses && !state.busy;
     els.keyboard.innerHTML = "";
     KEY_ROWS.forEach(keys => {
       const row = document.createElement("div");
@@ -471,16 +491,18 @@
       setPlayStatus(friendlyError(error));
       if (/opponent won|round changed/i.test(error.message)) schedulePoll(0);
     }
-    finally { state.busy = false; renderKeyboard(); }
+    finally { state.busy = false; renderKeyboard(); renderLifelines(); }
   }
 
   function renderLifelines() {
     const economy = window.SixthSenseEconomy?.state() || { inventory: {}, costs: Core.LIFELINE_COSTS };
-    const active = state.snapshot?.room.status === "running" && !state.snapshot?.me.finished && !state.busy;
     const effects = state.snapshot?.me?.lifelines || {};
+    const active = state.snapshot?.room.status === "running" && !state.snapshot?.me.finished && !effects.lastChancePending && !effects.pendingSkip && !state.busy;
     const names = { sense: "Sense", peek: "Peek", clear: "Clear", skip: "Skip" };
     els.lifelines.forEach(item => {
       const kind = item.dataset.onlineLifeline;
+      item.hidden = state.snapshot?.room.mode === "vs" && kind === "skip";
+      if (item.hidden) return;
       const button = item.querySelector("button");
       const stock = item.querySelector(".lifeline-stock");
       const price = item.querySelector(".lifeline-price");
@@ -500,17 +522,104 @@
   function showLifelineEffect(effect) {
     if (!effect) return;
     if (effect.kind === "sense") {
-      els.status.textContent = "Sense unlocked — tap again anytime to reopen it.";
       window.SixthSenseDialogs?.showHint(effect.clue);
     }
     else if (effect.kind === "peek") els.status.textContent = `Peek: position ${Number(effect.position) + 1} is ${String(effect.letter).toUpperCase()}.`;
     else if (effect.kind === "clear") els.status.textContent = `Clear removed ${effect.letters.map(letter => letter.toUpperCase()).join(", ")}.`;
-    else els.status.textContent = "Skip used — moving on.";
+    else if (effect.kind === "skip") showOnlineSkip(effect.answer);
     playAudio(effect.kind === "sense" ? "hint" : effect.kind);
+  }
+
+  function rewardedRounds() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(ONLINE_REWARDS_KEY));
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch (_) { return new Set(); }
+  }
+
+  function awardVsRoundIfNeeded() {
+    const snapshot = state.snapshot;
+    if (snapshot?.room.mode !== "vs" || snapshot.room.lastRoundWinnerPlayerId !== snapshot.me.id) return;
+    const completed = snapshot.me.lastCompletedRound;
+    if (!completed || completed.forfeit || !Number.isInteger(Number(completed.attempts))) return;
+    const roundIndex = Number(snapshot.room.currentRound) - 1;
+    if (Number(completed.wordIndex) !== roundIndex) return;
+    const key = `${snapshot.room.code}:${roundIndex}`;
+    const claimed = rewardedRounds();
+    if (claimed.has(key)) return;
+    const reward = Core.vsRewardForAttempts(Number(completed.attempts));
+    if (!window.SixthSenseEconomy?.credit(reward, "VS round reward")) return;
+    claimed.add(key);
+    try { localStorage.setItem(ONLINE_REWARDS_KEY, JSON.stringify([...claimed].slice(-300))); } catch (_) { /* Ignore storage limits. */ }
+    state.lastRoundCoinReward = reward;
+  }
+
+  function showOnlineSkip(answer) {
+    if (!answer || !els.skipDialog) return;
+    els.skipWord.innerHTML = "";
+    String(answer).toUpperCase().split("").forEach(letter => {
+      els.skipWord.appendChild(Object.assign(document.createElement("span"), { textContent: letter }));
+    });
+    if (!els.skipDialog.open) els.skipDialog.showModal();
+    setTimeout(() => els.skipOk.focus({ preventScroll: true }), 60);
+  }
+
+  function showPendingDecisionIfNeeded() {
+    const lifelines = state.snapshot?.me?.lifelines || {};
+    if (!lifelines.pendingSkip && els.skipDialog.open) els.skipDialog.close();
+    if (!lifelines.lastChancePending && els.lastChanceDialog.open) els.lastChanceDialog.close();
+    if (lifelines.pendingSkip) {
+      showOnlineSkip(lifelines.skippedAnswer);
+      return;
+    }
+    if (lifelines.lastChancePending && !els.lastChanceDialog.open) {
+      els.lastChanceCopy.textContent = `Unlock one final attempt for ${Core.LAST_CHANCE_COST} coins. No coins are spent until you continue.`;
+      els.lastChanceDialog.showModal();
+    }
+  }
+
+  async function confirmOnlineSkip() {
+    if (state.busy || !state.snapshot?.me?.lifelines?.pendingSkip) return;
+    state.busy = true;
+    els.skipOk.disabled = true;
+    try {
+      const result = await api("advance_skip", { roomCode: state.roomCode, resumeToken: state.token, actionId: crypto.randomUUID() });
+      state.snapshot = result.snapshot;
+      state.current = "";
+      if (els.skipDialog.open) els.skipDialog.close();
+      state.renderedSnapshotSignature = "";
+      renderSnapshot();
+      schedulePoll(200);
+    } catch (error) { setPlayStatus(friendlyError(error)); }
+    finally { state.busy = false; els.skipOk.disabled = false; renderKeyboard(); renderLifelines(); }
+  }
+
+  async function resolveOnlineLastChance(purchase) {
+    if (state.busy || !state.snapshot?.me?.lifelines?.lastChancePending) return;
+    const economy = window.SixthSenseEconomy;
+    if (purchase && !economy?.spend(Core.LAST_CHANCE_COST, "Last Chance")) return;
+    state.busy = true;
+    try {
+      const result = await api("last_chance", { roomCode: state.roomCode, resumeToken: state.token, decision: purchase ? "purchase" : "decline", actionId: crypto.randomUUID() });
+      state.snapshot = result.snapshot;
+      state.current = "";
+      if (els.lastChanceDialog.open) els.lastChanceDialog.close();
+      state.renderedSnapshotSignature = "";
+      renderSnapshot();
+      schedulePoll(200);
+    } catch (error) {
+      if (purchase) economy?.credit(Core.LAST_CHANCE_COST, "Last Chance refund");
+      setPlayStatus(friendlyError(error));
+    } finally {
+      state.busy = false;
+      renderKeyboard();
+      renderLifelines();
+    }
   }
 
   async function useLifeline(item) {
     const kind = item.dataset.onlineLifeline;
+    if (state.snapshot?.room.mode === "vs" && kind === "skip") return;
     if (state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
     const currentEffect = state.snapshot.me.lifelines || {};
     if (kind === "sense" && currentEffect.clue) {
@@ -558,12 +667,13 @@
   function renderProgress() {
     const snapshot = state.snapshot;
     const isVs = snapshot.room.mode === "vs";
+    const isCoop = snapshot.room.mode === "coop";
     const sorted = [...snapshot.players].sort((a, b) => isVs
       ? (Number(b.score) - Number(a.score) || a.seat - b.seat)
       : (b.currentWordIndex - a.currentWordIndex || a.seat - b.seat));
     els.progress.innerHTML = "";
-    els.progress.classList.toggle("is-race", !isVs);
-    if (!isVs) {
+    els.progress.classList.toggle("is-race", snapshot.room.mode === "race");
+    if (snapshot.room.mode === "race") {
       const course = document.createElement("div");
       course.className = "race-course";
       const courseHeight = Math.max(82, sorted.length * 10 + 46);
@@ -593,13 +703,13 @@
       avatar.setAttribute("aria-hidden", "true");
       const copy = document.createElement("div");
       copy.className = "player-progress-copy";
-      const completedWords = Math.min(player.currentWordIndex, snapshot.room.wordCount);
+      const completedWords = Math.min(isCoop ? snapshot.room.currentRound : player.currentWordIndex, snapshot.room.wordCount);
       const label = !isVs
         ? `${completedWords} / ${snapshot.room.wordCount} words`
-        : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${Core.MAX_GUESSES} attempts`;
+        : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${Core.MAX_GUESSES + (player.id === snapshot.me.id && snapshot.me.lifelines?.extraAttempt ? 1 : 0)} attempts`;
       copy.innerHTML = `<strong>${escapeHtml(player.name)}${player.id === snapshot.me.id ? " · You" : ""}</strong><small>${label}</small>`;
-      if (isVs) {
-        if (!snapshot.room.endless) {
+      if (isVs || isCoop) {
+        if (isVs && !snapshot.room.endless) {
           const track = document.createElement("span");
           track.className = "series-track";
           track.innerHTML = `<i style="--progress:${Math.min(100, ((Number(player.score) || 0) / snapshot.room.wordCount) * 100)}%"></i>`;
@@ -616,7 +726,7 @@
       }
       const place = document.createElement("span");
       place.className = "player-rank";
-      place.textContent = isVs ? `${Number(player.score) || 0}pt` : player.finished ? "✓" : `#${rank + 1}`;
+      place.textContent = isVs ? `${Number(player.score) || 0}pt` : isCoop ? "◆" : player.finished ? "✓" : `#${rank + 1}`;
       card.append(avatar, copy, place);
       els.progress.appendChild(card);
     });
@@ -656,6 +766,7 @@
   els.resultOk.addEventListener("click", () => { els.resultDialog.close(); leaveRoom(); });
   els.lifelines.forEach(item => item.querySelector("button").addEventListener("click", () => useLifeline(item)));
   document.addEventListener("sixth-sense-economy-change", renderLifelines);
+  document.addEventListener("sixth-sense-online-last-chance", event => resolveOnlineLastChance(event.detail?.decision === "purchase"));
   document.addEventListener("sixth-sense-identity-change", async event => {
     if (!state.snapshot || !state.roomCode || !state.token) {
       if (els.lobby.open) decorateAvatar(els.preview, identity());
@@ -678,5 +789,7 @@
   });
   window.addEventListener("online", () => { if (!els.screen.hidden) schedulePoll(0); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && !els.screen.hidden) schedulePoll(0); });
+  els.skipOk.addEventListener("click", confirmOnlineSkip);
+  els.skipDialog.addEventListener("cancel", event => event.preventDefault());
   restoreActiveRoom();
 })();

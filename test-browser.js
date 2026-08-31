@@ -26,7 +26,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.waitForSelector("#help-modal[open]");
     await page.click(".modal-got-it");
     assert.equal(await page.evaluate(() => window.SixthSenseCore.ANSWERS.length), 10187);
-    assert.deepEqual(await page.evaluate(() => Object.fromEntries(Object.entries(window.SixthSenseCore.ANSWER_TIERS).map(([tier, words]) => [tier, words.length]))), { easy: 4309, medium: 1995, extreme: 3883 });
+    assert.deepEqual(await page.evaluate(() => Object.fromEntries(Object.entries(window.SixthSenseCore.ANSWER_TIERS).map(([tier, words]) => [tier, words.length]))), { easy: 4058, medium: 2246, extreme: 3883 });
     assert.equal(await page.evaluate(() => window.SixthSenseCore.WORDS.size), 15232);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("rattle")), true);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("raffle")), true);
@@ -34,7 +34,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#home-screen").isVisible(), true);
     assert.equal(await page.locator("#game-screen").isHidden(), true);
     assert.equal(await page.locator("[data-start-mode]").count(), 5);
-    assert.equal(await page.locator("[data-open-online]").count(), 2);
+    assert.equal(await page.locator("[data-open-online]").count(), 3);
     assert.equal(await page.locator("[data-open-adventure-map]").count(), 1);
     assert.equal(await page.locator("#adventure-feature").isVisible(), true);
     assert.match(await page.locator("#adventure-feature-art").getAttribute("src"), /adventure-zone-sky-ladder-v1\.webp$/);
@@ -391,7 +391,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ZoneFox" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ adventure: { seed: 123456, level: 4309 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ adventure: { seed: 123456, level: 4058 } }));
     });
     await zonePage.goto(baseUrl, { waitUntil: "networkidle" });
     await zonePage.click("[data-open-adventure-map]");
@@ -520,6 +520,11 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     };
     await onlinePage.route("**/api/multiplayer", mockOnlineApi);
     await onlinePage.goto(baseUrl, { waitUntil: "networkidle" });
+    assert.match(await onlinePage.locator(".online-mode-art-coop").evaluate(element => getComputedStyle(element).backgroundImage), /multiplayer-coop-v1\.webp/, "Co-op must use its original generated team artwork");
+    await onlinePage.click('[data-open-online="coop"]');
+    assert.equal(await onlinePage.locator("#online-lobby-kicker").textContent(), "Co-op journey");
+    assert.deepEqual(await onlinePage.locator('input[name="online-distance"]').evaluateAll(inputs => inputs.map(input => input.value)), ["3", "5", "10"], "Co-op must offer 3, 5, and 10 shared words");
+    await onlinePage.click("#online-lobby-modal .modal-close");
     await onlinePage.click('[data-open-online="vs"]');
     assert.equal(await onlinePage.locator("#online-distance-options").isVisible(), true, "VS should expose the shared game-length control");
     assert.equal(await onlinePage.locator("#online-distance-options legend").textContent(), "Game length");
@@ -564,16 +569,19 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await onlinePage.locator("#online-board .tile").count(), 42);
     assert.equal(await onlinePage.locator("#online-keyboard .key").count(), 27);
     assert.equal(await onlinePage.locator('[data-online-key="ENTER"]').count(), 0, "multiplayer must use the same automatic six-letter submission");
+    assert.equal(await onlinePage.locator('[data-online-lifeline="sense"] button').isEnabled(), true, "VS lifelines must be usable before the first attempt");
     for (const letter of "rattle") await onlinePage.click(`[data-online-key="${letter.toUpperCase()}"]`);
     await onlinePage.waitForTimeout(120);
     assert.equal(submittedOnlineGuess, "rattle", "typing the sixth multiplayer letter must submit without Enter");
-    assert.equal(await onlinePage.locator("[data-online-lifeline]").count(), 4, "multiplayer must expose all four lifelines");
+    assert.equal(await onlinePage.locator("[data-online-lifeline]:visible").count(), 3, "VS must expose Sense, Peek, and Clear without Skip");
+    assert.equal(await onlinePage.locator('[data-online-lifeline="skip"]').isHidden(), true, "Skip must not be available in VS");
+    assert.equal(await onlinePage.locator('[data-online-lifeline="sense"] button').isEnabled(), true, "VS lifelines must be usable immediately after a guess finishes");
     assert.equal(await onlinePage.locator("#online-leave").textContent().then(text => text.trim()), "Back", "every multiplayer mode needs an explicit exit");
     await onlinePage.click('[data-online-lifeline="sense"] button');
     await onlinePage.waitForSelector("#hint-modal[open]");
     assert.equal(await onlinePage.locator("#hint-dialog-copy").textContent(), "A test clue");
     await onlinePage.click("#hint-ok-button");
-    await onlinePage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Sense unlocked"));
+    assert.doesNotMatch(await onlinePage.locator("#online-live-status").textContent(), /Sense unlocked/, "Sense must use the centered message box instead of shifting the live status");
     assert.equal(await onlinePage.locator('[data-online-lifeline="sense"] .lifeline-stock').isVisible(), true, "used Sense should remain reopenable in multiplayer");
     const onlineOverflow = await onlinePage.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
@@ -659,6 +667,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.click('[data-start-mode="practice"]');
     await repeatPage.click("#skip-puzzle-button");
     await repeatPage.click("#confirm-skip-button");
+    await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
+    await repeatPage.click("#result-primary");
     assert.equal(await repeatPage.locator('[data-lifeline="skip"] .lifeline-price').isVisible(), true, "Skip should be purchasable again after starting the fresh puzzle");
     await repeatPage.click("#skip-puzzle-button");
     assert.equal(await repeatPage.locator("#skip-modal").isVisible(), true, "a second purchased Skip should also be usable");
@@ -670,6 +680,25 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.click("#result-primary");
     assert.equal(await repeatPage.locator("#home-screen").isVisible(), true);
     assert.equal(await repeatPage.locator("#result-modal").getAttribute("open"), null);
+
+    await repeatPage.click('[data-start-mode="practice"]');
+    const lastChanceGame = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")));
+    const missCandidates = ["rattle", "raffle", "planet", "banner", "market", "school", "bridge", "coffee"].filter(word => word !== lastChanceGame.answer).slice(0, 7);
+    for (let guessIndex = 0; guessIndex < missCandidates.length; guessIndex += 1) {
+      for (const letter of missCandidates[guessIndex]) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
+      await repeatPage.waitForTimeout(1150);
+      assert.equal(await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).guesses.length), guessIndex + 1, `${missCandidates[guessIndex]} must record as Last Chance setup guess ${guessIndex + 1}`);
+    }
+    await repeatPage.waitForSelector("#last-chance-modal[open]", { timeout: 4000 });
+    const coinsBeforeLastChance = await repeatPage.evaluate(() => window.SixthSenseEconomy.state().coins);
+    await repeatPage.click("#last-chance-buy");
+    assert.equal(await repeatPage.locator("#game-board .board-row").count(), 8, "buying Last Chance must add exactly one eighth row");
+    assert.equal(await repeatPage.evaluate(() => window.SixthSenseEconomy.state().coins), coinsBeforeLastChance - 80, "Last Chance must charge 80 coins once");
+    const lastChanceAnswer = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).answer);
+    for (const letter of lastChanceAnswer) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
+    await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
+    assert.equal(await repeatPage.locator("#result-attempts").textContent(), "Solved in 8", "the victory card must acknowledge an eighth-attempt solve");
+    await repeatPage.click("#result-primary");
     assert(await repeatPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "repeatable lifelines must not introduce horizontal overflow");
     await repeats.close();
 

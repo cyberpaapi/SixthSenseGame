@@ -54,6 +54,8 @@ async function submitWord(page, word) {
       hostPage.waitForFunction(() => !document.querySelector('[data-online-key="A"]')?.disabled, null, { timeout: 10000 }),
       guestPage.waitForFunction(() => !document.querySelector('[data-online-key="A"]')?.disabled, null, { timeout: 10000 })
     ]);
+    assert.equal(await hostPage.locator('[data-online-lifeline="sense"] button').isEnabled(), true, "VS lifelines must be live before the first attempt");
+    assert.equal(await hostPage.locator('[data-online-lifeline="skip"]').isHidden(), true, "VS must not expose Skip");
 
     assert.match(await hostPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
     assert.match(await guestPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
@@ -70,6 +72,11 @@ async function submitWord(page, word) {
     for (const word of guesses.slice(1)) {
       if (await hostPage.locator("#online-round-transition:not([hidden])").count()) break;
       await submitWord(hostPage, word);
+    }
+
+    if (!(await hostPage.locator("#online-round-transition:not([hidden])").count())) {
+      await hostPage.waitForSelector("#last-chance-modal[open]", { timeout: 6000 });
+      await hostPage.click("#last-chance-decline");
     }
 
     await Promise.all([
