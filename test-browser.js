@@ -344,6 +344,23 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.doesNotMatch(await adventurePage.locator("#adventure-screen").textContent(), /10,187|4,309|1,995|3,883/, "the current zone should stay focused on nearby levels");
     assert(await adventurePage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "Adventure map must fit the phone viewport without page scroll");
     assert(await adventurePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "Adventure map must not overflow horizontally");
+    assert.equal(await adventurePage.locator("#adventure-lock-veil").count(), 0, "future pages must not cover the Adventure screen with a lock veil");
+    const adventureNavAxis = await adventurePage.locator(".adventure-page-controls").evaluate(element => getComputedStyle(element).flexDirection);
+    assert.equal(adventureNavAxis, "column", "Adventure page controls should follow the vertical ladder");
+    const swipeAdventure = async ({ fromX, fromY, toX, toY }) => adventurePage.locator("#adventure-level-path").evaluate((pathElement, points) => {
+      const start = new Touch({ identifier: 1, target: pathElement, clientX: points.fromX, clientY: points.fromY });
+      const end = new Touch({ identifier: 1, target: pathElement, clientX: points.toX, clientY: points.toY });
+      pathElement.dispatchEvent(new TouchEvent("touchstart", { bubbles: true, touches: [start] }));
+      pathElement.dispatchEvent(new TouchEvent("touchend", { bubbles: true, changedTouches: [end] }));
+    }, { fromX, fromY, toX, toY });
+    await swipeAdventure({ fromX: 320, fromY: 430, toX: 70, toY: 430 });
+    assert.match(await adventurePage.locator(".adventure-level-node").first().getAttribute("aria-label"), /level 1, current/, "horizontal swipes should no longer page Adventure");
+    await swipeAdventure({ fromX: 195, fromY: 620, toX: 195, toY: 300 });
+    assert.match(await adventurePage.locator(".adventure-level-node").first().getAttribute("aria-label"), /level 9, locked/, "an upward swipe should reveal the next eight levels");
+    assert.equal(await adventurePage.locator(".adventure-level-node.is-locked").count(), 8, "future rungs should each carry their own locked state");
+    assert.equal(await adventurePage.locator("#adventure-play").isDisabled(), true, "a future page cannot start a locked level");
+    await swipeAdventure({ fromX: 195, fromY: 300, toX: 195, toY: 620 });
+    assert.match(await adventurePage.locator(".adventure-level-node").first().getAttribute("aria-label"), /level 1, current/, "a downward swipe should return to lower levels");
     const adventureSeed = await adventurePage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).adventure.seed);
     assert.equal(await adventurePage.evaluate(seed => window.SixthSenseCore.adventureAnswer(0, seed).tier, adventureSeed), "easy");
     await adventurePage.click("#adventure-play");

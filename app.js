@@ -72,7 +72,6 @@
     adventurePagePrevious: document.querySelector("#adventure-page-previous"),
     adventurePageNext: document.querySelector("#adventure-page-next"),
     adventurePageStatus: document.querySelector("#adventure-page-status"),
-    adventureLockVeil: document.querySelector("#adventure-lock-veil"),
     adventureFeatureArt: document.querySelector("#adventure-feature-art"),
     adventureMapArt: document.querySelector("#adventure-map-art"),
     brand: document.querySelector(".brand"),
@@ -211,7 +210,7 @@
   let lastAdventureMapLevel = null;
   let adventurePageStart = 0;
   let selectedAdventureLevel = 0;
-  let adventureTouchStartX = null;
+  let adventureTouchStart = null;
   let showHelpAfterUsername = false;
   let historyReady = false;
   let pendingLeave = null;
@@ -509,19 +508,20 @@
     const start = adventurePageStart;
     const end = Math.min(Core.ADVENTURE_TOTAL - 1, start + visibleCapacity - 1);
     const visibleCount = end - start + 1;
-    if (selectedAdventureLevel < start || selectedAdventureLevel > end || selectedAdventureLevel > currentIndex) selectedAdventureLevel = Math.min(currentIndex, end);
+    if (selectedAdventureLevel < start || selectedAdventureLevel > end || selectedAdventureLevel > currentIndex) {
+      selectedAdventureLevel = end < currentIndex ? end : start <= currentIndex && currentIndex <= end ? currentIndex : -1;
+    }
     const pageProgress = Core.adventureProgress(start);
     const pageTier = start <= currentIndex && currentIndex <= end ? tier : ADVENTURE_TIERS[pageProgress.tier];
     if (els.adventureFeatureArt.getAttribute("src") !== tier.art) els.adventureFeatureArt.setAttribute("src", tier.art);
     if (els.adventureMapArt.getAttribute("src") !== pageTier.art) els.adventureMapArt.setAttribute("src", pageTier.art);
     els.adventureMapArt.alt = pageTier.alt;
-    const selectedIsReplay = progress.complete || selectedAdventureLevel < currentIndex;
-    els.adventurePlay.disabled = selectedAdventureLevel > currentIndex;
+    const selectedIsReplay = selectedAdventureLevel >= 0 && (progress.complete || selectedAdventureLevel < currentIndex);
+    els.adventurePlay.disabled = selectedAdventureLevel < 0 || selectedAdventureLevel > currentIndex;
     els.adventurePlay.textContent = selectedIsReplay ? "Replay" : "Play";
     els.adventurePagePrevious.disabled = start === 0;
     els.adventurePageNext.disabled = end >= Core.ADVENTURE_TOTAL - 1;
     els.adventurePageStatus.textContent = `Showing Adventure levels ${start + 1} through ${end + 1}${start > currentIndex ? ", locked" : ""}.`;
-    els.adventureLockVeil.hidden = start <= currentIndex;
     const ladderStep = 64 / 6;
     const rungPositions = Array.from({ length: visibleCapacity }, (_, index) => 82 - (index * ladderStep));
     els.adventurePath.innerHTML = "";
@@ -569,7 +569,7 @@
 
   function startAdventureLevel() {
     const currentLevel = Math.min(Core.ADVENTURE_TOTAL - 1, stats.adventure.level);
-    if (selectedAdventureLevel > currentLevel) return;
+    if (selectedAdventureLevel < 0 || selectedAdventureLevel > currentLevel) return;
     if (selectedAdventureLevel < stats.adventure.level || Core.adventureProgress(stats.adventure.level).complete) {
       const answer = Core.adventureAnswer(selectedAdventureLevel, stats.adventure.seed);
       game = emptyGame(answer, "adventure");
@@ -1639,12 +1639,17 @@
     els.adventurePlay.addEventListener("click", startAdventureLevel);
     els.adventurePagePrevious.addEventListener("click", () => changeAdventurePage(-1));
     els.adventurePageNext.addEventListener("click", () => changeAdventurePage(1));
-    els.adventurePath.addEventListener("touchstart", event => { adventureTouchStartX = event.touches[0]?.clientX ?? null; }, { passive: true });
+    els.adventurePath.addEventListener("touchstart", event => {
+      const touch = event.touches[0];
+      adventureTouchStart = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    }, { passive: true });
     els.adventurePath.addEventListener("touchend", event => {
-      if (adventureTouchStartX === null) return;
-      const distance = (event.changedTouches[0]?.clientX ?? adventureTouchStartX) - adventureTouchStartX;
-      adventureTouchStartX = null;
-      if (Math.abs(distance) >= 58) changeAdventurePage(distance < 0 ? 1 : -1);
+      if (!adventureTouchStart) return;
+      const touch = event.changedTouches[0];
+      const distanceX = (touch?.clientX ?? adventureTouchStart.x) - adventureTouchStart.x;
+      const distanceY = (touch?.clientY ?? adventureTouchStart.y) - adventureTouchStart.y;
+      adventureTouchStart = null;
+      if (Math.abs(distanceY) >= 58 && Math.abs(distanceY) > Math.abs(distanceX) * 1.15) changeAdventurePage(distanceY < 0 ? 1 : -1);
     }, { passive: true });
     els.brand.addEventListener("click", event => {
       event.preventDefault();

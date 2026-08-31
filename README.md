@@ -19,7 +19,7 @@ Then open `http://localhost:4173`.
 ## Included
 
 - Nine modes: Daily, Adventure, Practice, ten-minute Time Tackle, Insight, Streak, private-room Race, live one-on-one VS, and shared-route Co-op
-- A persistent 10,187-level Adventure signal trail with a per-device randomized route: all 4,058 usage-qualified Normal words, then 2,246 Hard words, then 3,883 Extreme words
+- A persistent 10,187-level Adventure signal trail with a per-device randomized route, vertical eight-level paging, replayable completed rungs, and individually chained future rungs
 - Separate home and play screens, keeping the puzzle view focused
 - 10,187 clueable answers in Normal (4,058), Hard (2,246), and Extreme (3,883) player-facing tiers
 - Silent solo progression from Normal into Hard and then Extreme as each tier is completed

@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260831.3">
+  <link rel="stylesheet" href="styles.css?v=20260831.4">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -111,12 +111,11 @@
         <div><p class="eyebrow">Adventure map</p><h1 id="adventure-map-title">The signal trail</h1></div>
       </header>
       <div class="adventure-page-controls" aria-label="Browse Adventure sections">
-        <button id="adventure-page-previous" type="button" aria-label="Show previous eight levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></button>
+        <button id="adventure-page-next" type="button" aria-label="Show next eight higher levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 15 7-7 7 7"></path></svg></button>
         <span id="adventure-page-status" class="sr-only" aria-live="polite"></span>
-        <button id="adventure-page-next" type="button" aria-label="Show next eight levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
+        <button id="adventure-page-previous" type="button" aria-label="Show previous eight lower levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 9 7 7 7-7"></path></svg></button>
       </div>
       <div class="adventure-level-path" id="adventure-level-path" aria-label="Nearby Adventure levels"></div>
-      <div class="adventure-lock-veil" id="adventure-lock-veil" hidden aria-hidden="true"><span class="chain-link"></span><span class="chain-link"></span><span class="chain-link"></span></div>
       <footer class="adventure-map-foot">
         <button class="primary-button adventure-play" id="adventure-play" type="button">Play</button>
       </footer>
@@ -482,10 +481,10 @@
   </dialog>
 
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260831.3"></script>
-  <script src="word-bank.js?v=20260831.3"></script>
-  <script src="game-core.js?v=20260831.3"></script>
-  <script src="app.js?v=20260831.3"></script>
-  <script src="multiplayer.js?v=20260831.3"></script>
+  <script src="answer-bank.js?v=20260831.4"></script>
+  <script src="word-bank.js?v=20260831.4"></script>
+  <script src="game-core.js?v=20260831.4"></script>
+  <script src="app.js?v=20260831.4"></script>
+  <script src="multiplayer.js?v=20260831.4"></script>
 </body>
 </html>
