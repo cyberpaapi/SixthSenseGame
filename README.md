@@ -29,7 +29,7 @@ Then open `http://localhost:4173`.
 - A compact bottom icon dock for coin-powered Sense, Peek, Clear, and Skip lifelines
 - Price-under-icon and top-right inventory badges that never show redundant zeroes
 - A fixed one-viewport play layout with no page-level game-screen scrolling
-- Persistent coin wallet with attempt-based solve rewards (140 coins down to 20) and a one-time migration that preserves existing players’ purchasing power
+- A 250-coin starting wallet with attempt-based solve rewards (140 coins down to 20) and an economy-v3 migration that resets every older saved wallet to the same baseline once
 - A visible 300-coin reward every seven consecutive Daily wins
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information

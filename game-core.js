@@ -83,7 +83,7 @@
 
   const MAX_GUESSES = 7;
   const WORD_LENGTH = 6;
-  const STARTING_COINS = 200;
+  const STARTING_COINS = 250;
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
   const LAST_CHANCE_COST = 80;
   const ADVENTURE_TOTAL = ANSWERS.length;

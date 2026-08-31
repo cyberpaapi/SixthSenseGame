@@ -88,7 +88,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator(".topbar .brand").isVisible(), true);
     assert.equal(await page.locator("#game-mode-label").textContent(), "Daily Puzzle");
     assert.equal(await page.locator(".mode-spark").count(), 0);
-    assert.equal(await page.locator("#coin-count").textContent(), "200");
+    assert.equal(await page.locator("#coin-count").textContent(), "250");
     assert.equal(await page.locator(".topbar #coin-wallet").isVisible(), true);
     assert.equal(await page.locator("#game-screen .lifeline-button img").count(), 4);
     assert.equal(await page.locator("#game-screen .lifeline-price:visible").count(), 4);
@@ -122,7 +122,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.screenshot({ path: path.join(evidenceDir, "mobile-inventory-390x844.png"), fullPage: true });
 
     await page.click("#clue-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "170");
+    assert.equal(await page.locator("#coin-count").textContent(), "220");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').isVisible(), true);
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-stock').textContent(), "1");
     assert.equal(await page.locator('[data-lifeline="sense"] .lifeline-price').isHidden(), true);
@@ -144,19 +144,19 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.click("#hint-ok-button");
     await page.click("#clue-button");
     assert.equal(await page.locator("#hint-dialog-copy").textContent(), firstHint, "Sense should show the same hint again");
-    assert.equal(await page.locator("#coin-count").textContent(), "170", "reopening Sense should not charge twice");
+    assert.equal(await page.locator("#coin-count").textContent(), "220", "reopening Sense should not charge twice");
     await page.click("#hint-ok-button");
     await page.click("#peek-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "120");
+    assert.equal(await page.locator("#coin-count").textContent(), "170");
     assert.equal(await page.locator("#game-board .tile.peeked").count(), 1);
     assert.equal(await page.locator('[data-lifeline="peek"] .lifeline-price').isVisible(), true, "one tap should buy and immediately use Peek");
     await page.click("#clear-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "80");
+    assert.equal(await page.locator("#coin-count").textContent(), "130");
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.daily.v1")).eliminatedLetters.length), 3);
     await page.click("#skip-puzzle-button");
     assert.equal(await page.locator("#skip-modal").isVisible(), true);
     await page.click("#cancel-skip-button");
-    assert.equal(await page.locator("#coin-count").textContent(), "80", "cancelling Skip should not buy or consume anything");
+    assert.equal(await page.locator("#coin-count").textContent(), "130", "cancelling Skip should not buy or consume anything");
 
     const probe = await page.evaluate(() => {
       const core = window.SixthSenseCore;
@@ -218,8 +218,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#result-modal img[src*='result-signal-crest-v1.webp']").count(), 1, "the victory art should be purpose-made and optimized");
     assert(await page.evaluate(() => document.querySelector("#result-modal").scrollWidth <= document.querySelector("#result-modal").clientWidth), "the result screen must not overflow horizontally");
     assert.equal(await page.locator("#stats-modal").getAttribute("open"), null, "ordinary Statistics must stay separate from the completion moment");
-    assert.equal(await page.locator("#coin-count").textContent(), "200", "a two-attempt solve should award 120 coins");
-    assert.equal(await page.locator("#stat-coins").textContent(), "200");
+    assert.equal(await page.locator("#coin-count").textContent(), "250", "a two-attempt solve should award 120 coins after lifeline spending");
+    assert.equal(await page.locator("#stat-coins").textContent(), "250");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "1");
     assert((await page.evaluate(() => window.SixthSenseAudio.state().scheduledEffects)) >= 9, "the solved row and victory moment should schedule layered completion audio");
     assert.deepEqual(await page.evaluate(() => window.SixthSenseAudio.state().lastCelebration), { hoots: 2, claps: 18 }, "victory audio must include the celebratory two-part hoot and background applause sequence");
@@ -272,9 +272,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RewardFox" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 0, currentStreak: 6, maxStreak: 6, lastWinDate: yesterday, distribution: [0,0,0,0,0,0,0] }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 0, economyVersion: 2, currentStreak: 6, maxStreak: 6, lastWinDate: yesterday, distribution: [0,0,0,0,0,0,0] }));
     }, yesterdayKey);
     await rewardPage.goto(baseUrl, { waitUntil: "networkidle" });
+    assert.deepEqual(await rewardPage.evaluate(() => { const stats = JSON.parse(localStorage.getItem("sixth-sense.stats.v1")); return { coins: stats.coins, economyVersion: stats.economyVersion }; }), { coins: 250, economyVersion: 3 }, "every existing economy-v2 wallet should reset once to the new 250-coin baseline");
     await rewardPage.click('[data-start-mode="daily"]');
     const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
@@ -424,7 +425,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await modesPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ModeFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 5000, economyVersion: 2 }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 5000, economyVersion: 3 }));
     });
     await modesPage.goto(baseUrl, { waitUntil: "networkidle" });
     await modesPage.click('[data-modal-open="settings-modal"]');
@@ -656,7 +657,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RepeatFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 2, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 3, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
     });
     await repeatPage.goto(baseUrl, { waitUntil: "networkidle" });
     await repeatPage.click('[data-start-mode="daily"]');

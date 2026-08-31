@@ -69,7 +69,7 @@ The app opens on the home screen. Game-adjacent marketing, mode selection, and s
 
 ## Coins, rewards, and lifelines
 
-Starting wallet: 200 coins. Solving rewards fewer coins as more attempts are used:
+Starting wallet: 250 coins. Economy version 3 resets every existing version-1/version-2 saved wallet to exactly 250 once on its next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
 
 | Attempts | Coins earned |
 | ---: | ---: |
@@ -94,7 +94,7 @@ Lifeline prices and behavior:
 | Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
 | Skip | 60 | Can be stocked, consumed, purchased again, and reused outside VS. It reveals the answer in a modal, awards no coins, and changes the word only after green OK. Solo modes route through the shared result card; Adventure advances the current rung; Race advances that player; Co-op advances the shared route. VS does not render or accept Skip. |
 
-Inventory, coins, points, and economy version persist in `localStorage`. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Existing pre-scale wallets migrate once by multiplying saved coins by 10. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
+Inventory, coins, points, and economy version persist in `localStorage`. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 3 supersedes the older scale migration: every version-1/version-2 wallet is assigned the same 250-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
 ## Current experience and visual system
 
@@ -203,7 +203,7 @@ Current `localStorage` keys:
 
 Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, Last-Chance purchase state, solve/streak coin reward, puzzle points, reward/stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed/replay state when relevant. The current game schema uses `version: 3`.
 
-Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. The economy-v2 migration multiplies an explicitly saved legacy coin balance once by 10; all other new fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
+Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. Economy version 3 assigns all older saved wallets exactly 250 coins once while preserving every other stored field; all new fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
 
 Online room rules and security:
 
@@ -272,9 +272,9 @@ Current verified result on 2026-08-31:
 - JavaScript syntax: passed.
 - Core rules/data: passed — 10,187 answers across player-facing Normal 4,058 / Hard 2,246 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; frequency threshold, `genial`, familiar-word, and `armory` clue regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — phone playthrough, vertical Adventure paging and individual future-rung locks, replay surfaces, centered hints, one-tap lifelines, paid eighth-row Last Chance and eighth-attempt victory, VS lifeline availability before and after submission, hidden VS Skip, Co-op launcher/lengths, automatic sixth-letter submission, victory-card confetti cannons, procedural hoot/applause scheduling, dark-theme feedback, and overflow checks.
+- Browser QA: passed — new-player 250-coin baseline, forced economy-v3 reset of an existing zero-coin wallet, spending/reward persistence, phone playthrough, vertical Adventure paging and individual future-rung locks, replay surfaces, centered hints, one-tap lifelines, paid eighth-row Last Chance and eighth-attempt victory, VS lifeline availability before and after submission, hidden VS Skip, Co-op launcher/lengths, automatic sixth-letter submission, victory-card confetti cannons, procedural hoot/applause scheduling, dark-theme feedback, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
-- Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260831.4` contains the current vertical Adventure navigation and individual-rung lock release plus the unified completion celebration described above.
+- Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260831.5` contains the universal 250-coin wallet reset plus the current Adventure and completion releases described above.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
 - Multiplayer production: activated through the Vercel Neon integration on its free plan with `DATABASE_URL` connected to Production, Preview, and Development. Runtime `20260831.2` passed two isolated-client VS create/join/start, refresh rejoin, 1,901ms opponent-attempt visibility, immediate lifelines, hidden Skip, Last Chance decline, and synchronized round advancement. The same production suite continued into a Co-op room and passed shared start, six-letter Skip reveal, no advancement before OK, and synchronized word-two advancement after acknowledgement.
 - The bundled broad project validator now reports three marker gaps: polling rather than WebSocket/SSE, its expected literal reconnect+snapshot marker is absent even though refresh/reopen seat restoration is implemented and production-tested, and there is no Force End/Play Again room lifecycle. The explicit static build now passes.
@@ -315,6 +315,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-08-31 — Universal 250-coin wallet reset
+
+- Raised the new-player starting wallet from 200 to 250 coins.
+- Added economy version 3 as a one-time forced migration: every existing version-1/version-2 local wallet is set to exactly 250 on next load, regardless of its prior balance. Adventure progress, solved words, stats, lifeline inventory, and cosmetic ownership remain untouched; after migration, coin earning and spending persist normally.
+- Added core and browser regressions for the new baseline, exact old-wallet reset, version marker, purchases, solve rewards, and phone-header fit. Versioned the static runtime as `20260831.5` so cached phones receive the migration code.
 
 ### 2026-08-31 — Vertical Adventure paging and individual rung locks
 

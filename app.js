@@ -23,7 +23,8 @@
   const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
   const DECORATIONS = ["none", "aurora", "sunburst", "prism", "champion"];
   const DAILY_STREAK_REWARD = 300;
-  const ECONOMY_VERSION = 2;
+  const ECONOMY_VERSION = 3;
+  const WALLET_RESET_VERSION = 3;
   const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#f3cf32", leaf: "#22b66f", aqua: "#08b9c8", sky: "#347cf4", violet: "#7c45e8", berry: "#d83cac" });
   const ADVENTURE_TIERS = Object.freeze({
     easy: { title: "Sky Garden", art: "assets/adventure-zone-sky-ladder-v1.webp", alt: "An endless golden ladder rising through the current Adventure zone" },
@@ -158,12 +159,10 @@
   const storedStatsText = localStorage.getItem(STORAGE.stats);
   const hadSavedStats = storedStatsText !== null;
   let storedEconomyVersion = ECONOMY_VERSION;
-  let storedStatsHasCoins = false;
   if (hadSavedStats) {
     try {
       const storedStats = JSON.parse(storedStatsText) || {};
       storedEconomyVersion = Math.max(1, Math.floor(Number(storedStats.economyVersion) || 1));
-      storedStatsHasCoins = Object.hasOwn(storedStats, "coins");
     }
     catch (_) { storedEconomyVersion = 1; }
   }
@@ -174,7 +173,7 @@
     economyVersion: ECONOMY_VERSION
   });
   stats.coins = Number.isFinite(Number(stats.coins)) ? Math.max(0, Math.floor(Number(stats.coins))) : Core.STARTING_COINS;
-  if (hadSavedStats && storedStatsHasCoins && storedEconomyVersion < ECONOMY_VERSION) stats.coins *= 10;
+  if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION) stats.coins = Core.STARTING_COINS;
   stats.economyVersion = ECONOMY_VERSION;
   stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
   stats.distribution = Array.from({ length: Core.MAX_GUESSES }, (_, index) => Number(stats.distribution?.[index]) || 0);
