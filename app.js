@@ -172,7 +172,7 @@
     streakRun: 0, bestModeStreak: 0, totalSolves: 0, totalPoints: 0, bestSolveAttempts: null, fastestSolve: null,
     economyVersion: ECONOMY_VERSION
   });
-  stats.coins = Number.isFinite(Number(stats.coins)) ? Math.max(0, Math.floor(Number(stats.coins))) : Core.STARTING_COINS;
+  stats.coins = Number.isFinite(Number(stats.coins)) ? clampCoinTotal(stats.coins) : Core.STARTING_COINS;
   if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION) stats.coins = Core.STARTING_COINS;
   stats.economyVersion = ECONOMY_VERSION;
   stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
@@ -771,6 +771,17 @@
     return spendAmount(cost, label, kind);
   }
 
+  function clampCoinTotal(value) {
+    return Math.min(Core.MAX_COINS, Math.max(0, Math.floor(Number(value) || 0)));
+  }
+
+  function addCoinBalance(amount) {
+    const requested = Math.max(0, Math.floor(Number(amount) || 0));
+    const previous = stats.coins;
+    stats.coins = clampCoinTotal(previous + requested);
+    return stats.coins - previous;
+  }
+
   function spendAmount(cost, label, lifelineKind = "") {
     if (stats.coins < cost) {
       announce(`${label} needs ${cost} coins. You have ${stats.coins}.`);
@@ -789,12 +800,14 @@
   function creditCoins(amount, label = "Reward") {
     const coins = Math.max(0, Math.floor(Number(amount) || 0));
     if (!coins) return false;
-    stats.coins += coins;
+    const credited = addCoinBalance(coins);
     saveJson(STORAGE.stats, stats);
     renderEconomy();
-    replayAnimation(els.coinWallet, "is-earning");
-    announce(`${label} · +${coins} coins`);
-    playEffect("purchase");
+    if (credited > 0) {
+      replayAnimation(els.coinWallet, "is-earning");
+      announce(`${label} · +${credited} coins`);
+      playEffect("purchase");
+    } else announce(`Wallet full · ${Core.MAX_COINS.toLocaleString()} coins`);
     return true;
   }
 
@@ -911,8 +924,7 @@
     let points = 0;
     let streakReward = 0;
     if (won && !game.rewarded && !game.adventureReplay) {
-      reward = Core.rewardForAttempts(game.guesses.length);
-      stats.coins += reward;
+      reward = addCoinBalance(Core.rewardForAttempts(game.guesses.length));
       game.solveReward = reward;
       game.rewarded = true;
     }
@@ -941,8 +953,7 @@
         stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
         stats.lastWinDate = Core.dateKey();
         if (stats.currentStreak % 7 === 0 && stats.lastDailyRewardStreak < stats.currentStreak) {
-          streakReward = DAILY_STREAK_REWARD;
-          stats.coins += streakReward;
+          streakReward = addCoinBalance(DAILY_STREAK_REWARD);
           stats.lastDailyRewardStreak = stats.currentStreak;
           game.streakReward = streakReward;
         }

@@ -103,6 +103,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator(".lifeline-heading").count(), 0);
     assert.equal(await page.evaluate(() => Boolean(document.querySelector("#keyboard + .lifeline-dock"))), true, "lifelines should sit below the keyboard");
     assert.equal(await page.locator(".topbar .profile-trigger .avatar-art").count(), 1);
+    assert.equal(await page.locator('.topbar [data-modal-open="stats-modal"]').count(), 0, "Statistics should no longer occupy the game header");
     assert.equal(await page.locator(".topbar .profile-trigger").evaluate(element => getComputedStyle(element).boxShadow), "none", "the avatar must not sit on a raised square pedestal");
     const layoutMetrics = await page.evaluate(() => {
       const board = document.querySelector("#game-board").getBoundingClientRect();
@@ -264,6 +265,28 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await compactPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "360px Adventure map must not overflow horizontally");
     assert(await compactPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "360×800 Adventure map must not scroll vertically");
     await compact.close();
+
+    const cappedWallet = await browser.newContext({ viewport: { width: 360, height: 800 } });
+    const cappedWalletPage = await cappedWallet.newPage();
+    await cappedWalletPage.addInitScript(() => {
+      localStorage.setItem("sixth-sense.visited.v1", "yes");
+      localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "CapFox" }));
+      if (!localStorage.getItem("sixth-sense.stats.v1")) localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 99990, economyVersion: 3 }));
+    });
+    await cappedWalletPage.goto(baseUrl, { waitUntil: "networkidle" });
+    assert.equal(await cappedWalletPage.evaluate(() => window.SixthSenseCore.MAX_COINS), 99999);
+    assert.equal(await cappedWalletPage.locator("#coin-count").textContent(), "99990", "the wallet should render an existing five-digit balance");
+    assert.equal(await cappedWalletPage.evaluate(() => window.SixthSenseEconomy.credit(50, "Cap test")), true);
+    assert.equal(await cappedWalletPage.locator("#coin-count").textContent(), "99999", "rewards should stop exactly at the five-digit cap");
+    assert.equal(await cappedWalletPage.evaluate(() => window.SixthSenseEconomy.credit(10, "Cap test")), true);
+    assert.deepEqual(await cappedWalletPage.evaluate(() => { const stats = JSON.parse(localStorage.getItem("sixth-sense.stats.v1")); return { rendered: document.querySelector("#coin-count").textContent, saved: stats.coins }; }), { rendered: "99999", saved: 99999 }, "credits above the cap must neither render nor persist a sixth digit");
+    assert(await cappedWalletPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "a five-digit wallet must fit the 360px header");
+    await cappedWalletPage.reload({ waitUntil: "networkidle" });
+    assert.equal(await cappedWalletPage.locator("#coin-count").textContent(), "99999", "the capped wallet should survive reload");
+    await cappedWalletPage.evaluate(() => { const stats = JSON.parse(localStorage.getItem("sixth-sense.stats.v1")); stats.coins = 120000; localStorage.setItem("sixth-sense.stats.v1", JSON.stringify(stats)); });
+    await cappedWalletPage.reload({ waitUntil: "networkidle" });
+    assert.equal(await cappedWalletPage.locator("#coin-count").textContent(), "99999", "oversized saved balances should clamp back to the cap on load");
+    await cappedWallet.close();
 
     const rewardContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const rewardPage = await rewardContext.newPage();
@@ -434,6 +457,13 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(settingsScrollStyle.overflowY, "auto", "settings must remain scrollable after hiding the bar");
     assert.equal(settingsScrollStyle.scrollable, true, "the phone settings sheet should still have scrollable content");
     assert.equal(await modesPage.evaluate(() => getComputedStyle(document.documentElement).overflowY), "hidden", "the page scrollbar behind Settings should also be hidden");
+    assert.equal(await modesPage.locator('.topbar [data-modal-open="stats-modal"]').count(), 0, "Statistics should be absent from the top bar");
+    assert.equal(await modesPage.locator('#settings-modal [data-modal-open="stats-modal"]').isVisible(), true, "Settings should contain the Statistics action");
+    await modesPage.click('#settings-modal [data-modal-open="stats-modal"]');
+    assert.equal(await modesPage.locator("#stats-modal").isVisible(), true, "the Settings Statistics action should open the statistics sheet");
+    assert.equal(await modesPage.locator("#stat-coins").textContent(), "5000");
+    await modesPage.click("#stats-modal .modal-close");
+    assert.equal(await modesPage.locator("#settings-modal").isVisible(), true, "closing Statistics should return to Settings");
     assert.equal(await modesPage.locator("#music-mode").isChecked(), true, "music should be enabled by default");
     assert.equal(await modesPage.locator("#effects-mode").isChecked(), true, "sound effects should be enabled by default");
     await modesPage.click('label:has(#music-mode)');

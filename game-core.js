@@ -84,6 +84,7 @@
   const MAX_GUESSES = 7;
   const WORD_LENGTH = 6;
   const STARTING_COINS = 250;
+  const MAX_COINS = 99999;
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
   const LAST_CHANCE_COST = 80;
   const ADVENTURE_TOTAL = ANSWERS.length;
@@ -257,7 +258,7 @@
   }
 
   return {
-    ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, LIFELINE_COSTS, LAST_CHANCE_COST, ADVENTURE_TOTAL,
+    ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, MAX_COINS, LIFELINE_COSTS, LAST_CHANCE_COST, ADVENTURE_TOTAL,
     scoreGuess, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
     rewardForAttempts, pointsForAttempts, vsRewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
     adventureRoute, adventureProgress, adventureAnswer

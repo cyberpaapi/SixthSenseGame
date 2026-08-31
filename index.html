@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260831.5">
+  <link rel="stylesheet" href="styles.css?v=20260831.6">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -30,9 +30,6 @@
       <div class="coin-wallet header-wallet" id="coin-wallet" aria-label="250 coins"><span class="coin-symbol" aria-hidden="true"></span><strong id="coin-count">250</strong></div>
       <button class="icon-button" type="button" data-modal-open="help-modal" aria-label="How to play">
         <img src="assets/control-help.png" width="256" height="256" alt="" aria-hidden="true">
-      </button>
-      <button class="icon-button" type="button" data-modal-open="stats-modal" aria-label="Statistics">
-        <img src="assets/control-stats.png" width="256" height="256" alt="" aria-hidden="true">
       </button>
       <button class="icon-button" type="button" data-modal-open="settings-modal" aria-label="Settings">
         <img src="assets/control-settings.png" width="256" height="256" alt="" aria-hidden="true">
@@ -291,7 +288,7 @@
         <div><strong id="stat-streak">0</strong><span>Streak</span></div>
         <div><strong id="stat-max-streak">0</strong><span>Best</span></div>
       </div>
-      <div class="wallet-summary"><span class="coin-symbol" aria-hidden="true"></span><span>Your coins</span><strong id="stat-coins">200</strong></div>
+      <div class="wallet-summary"><span class="coin-symbol" aria-hidden="true"></span><span>Your coins</span><strong id="stat-coins">250</strong></div>
       <div class="daily-reward-earned" id="daily-reward-earned" hidden><img src="assets/decor-champion.webp" width="512" height="512" alt=""><span><small>Seven-day streak reward</small><strong>+300 coins</strong></span></div>
       <h3>Guess rhythm</h3>
       <div class="distribution" id="distribution" aria-label="Guess distribution"></div>
@@ -325,7 +322,7 @@
         <div><strong id="profile-best-attempts">—</strong><span>Best solve</span></div>
         <div><strong id="profile-best-streak">0</strong><span>Best streak</span></div>
         <div class="profile-fastest-stat"><strong id="profile-fastest-word">—</strong><span>Fastest word</span><small id="profile-fastest-time">No timed solve yet</small></div>
-        <div><strong id="profile-coins">200</strong><span>Coins</span></div>
+        <div><strong id="profile-coins">250</strong><span>Coins</span></div>
       </div>
     </div>
   </dialog>
@@ -345,6 +342,11 @@
         <label class="setting-row"><span><strong>Music</strong><small>Original dreamy claybeat soundtrack</small></span><input type="checkbox" id="music-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, reveals, and wins</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
       </div>
+      <button class="settings-stats-link" type="button" data-modal-open="stats-modal">
+        <img src="assets/control-stats.png" width="256" height="256" alt="" aria-hidden="true">
+        <span><strong>Statistics</strong><small>View your play history, streak, and guess rhythm</small></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+      </button>
       <section class="identity-studio" aria-labelledby="identity-studio-title">
         <div><p class="eyebrow">Identity studio</p><h3 id="identity-studio-title">Choose your avatar</h3><p>Your animal and highlight color travel with you into every room.</p></div>
         <div class="username-editor">
@@ -481,10 +483,10 @@
   </dialog>
 
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260831.5"></script>
-  <script src="word-bank.js?v=20260831.5"></script>
-  <script src="game-core.js?v=20260831.5"></script>
-  <script src="app.js?v=20260831.5"></script>
-  <script src="multiplayer.js?v=20260831.5"></script>
+  <script src="answer-bank.js?v=20260831.6"></script>
+  <script src="word-bank.js?v=20260831.6"></script>
+  <script src="game-core.js?v=20260831.6"></script>
+  <script src="app.js?v=20260831.6"></script>
+  <script src="multiplayer.js?v=20260831.6"></script>
 </body>
 </html>

@@ -91,6 +91,7 @@ assert.equal(Core.adventureProgress(10187).complete, true);
 assert.equal(Core.adventureAnswer(4058, 123456).tier, "medium");
 assert.equal(Core.dateKey(new Date("2026-08-26T12:00:00Z")), "2026-08-26");
 assert.equal(Core.STARTING_COINS, 250);
+assert.equal(Core.MAX_COINS, 99999);
 assert.equal(Core.MAX_GUESSES, 7);
 assert.deepEqual(Core.LIFELINE_COSTS, { sense: 30, peek: 50, clear: 40, skip: 60 });
 assert.equal(Core.LAST_CHANCE_COST, 80);
