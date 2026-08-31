@@ -1161,6 +1161,7 @@ body[data-screen="game"],body[data-screen="online"] { touch-action:pan-x pan-y; 
 .celebration { position: fixed; z-index: 150; inset: 0; overflow: hidden; pointer-events: none; }
 .confetti { position: absolute; top: -24px; width: var(--confetti-width, 9px); height: var(--confetti-height, 16px); border-radius: 3px; animation: fall var(--fall-time) cubic-bezier(.12,.64,.32,1) forwards; }
 .confetti.is-burst { top: 50%; left: 50%; animation: confetti-burst var(--burst-time) cubic-bezier(.1,.62,.25,1) forwards; }
+.confetti.is-cannon { top:auto; bottom:10%; opacity:0; animation:confetti-cannon var(--cannon-time) var(--cannon-delay) cubic-bezier(.12,.72,.24,1) both; }
 .celebration-ring { position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; border: 5px solid var(--ring-color); border-radius: 50%; opacity: 0; transform: translate(-50%,-50%); animation: celebration-ring .75s cubic-bezier(.16,1,.3,1) forwards; }
 .celebration-spark { position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; border-radius: 50%; background: var(--spark-color); box-shadow: 0 0 12px var(--spark-color); animation: celebration-spark .72s var(--spark-delay) ease-out both; }
 
@@ -1190,6 +1191,7 @@ body[data-screen="game"],body[data-screen="online"] { touch-action:pan-x pan-y; 
 @keyframes result-letter-in { from { opacity: 0; transform: translateY(16px) rotateX(70deg) scale(.82); } }
 @keyframes streak-bonus-in { from { opacity: 0; transform: translateY(8px) scale(.9); } }
 @keyframes confetti-burst { 0% { opacity: 1; transform: translate(-50%,-50%) scale(.4) rotate(0); } 100% { opacity: 0; transform: translate(calc(-50% + var(--burst-x)),calc(-50% + var(--burst-y))) scale(1) rotate(var(--burst-rotate)); } }
+@keyframes confetti-cannon { 0% { opacity:0; transform:translate3d(0,12px,0) scale(.7) rotate(0); } 8% { opacity:1; } 72% { opacity:1; } 100% { opacity:0; transform:translate3d(var(--cannon-x),var(--cannon-y),0) scale(1) rotate(var(--cannon-rotate)); } }
 @keyframes celebration-ring { 10% { opacity: .8; } 100% { width: min(82vw,620px); height: min(82vw,620px); border-width: 1px; opacity: 0; } }
 @keyframes celebration-spark { from { opacity: 1; transform: translate(-50%,-50%) scale(1); } to { opacity: 0; transform: translate(calc(-50% + var(--spark-x)),calc(-50% + var(--spark-y))) scale(.1); } }
 @keyframes result-confetti-fall { 0% { opacity: 0; transform: translate3d(0,-10px,0) rotate(0); } 10% { opacity: .95; } 100% { opacity: 0; transform: translate3d(var(--result-drift),72vh,0) rotate(var(--result-rotate)); } }

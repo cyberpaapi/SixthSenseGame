@@ -207,6 +207,7 @@
   let musicStep = 0;
   let nextMusicAt = 0;
   let scheduledEffectCount = 0;
+  let lastCelebrationAudio = { hoots: 0, claps: 0 };
   let lastAdventureMapLevel = null;
   let adventurePageStart = 0;
   let selectedAdventureLevel = 0;
@@ -1259,6 +1260,21 @@
       burst.style.setProperty("--confetti-height", `${8 + Math.random() * 9}px`);
       els.celebration.appendChild(burst);
     }
+    for (let i = 0; i < 20; i += 1) {
+      const cannon = document.createElement("i");
+      const fromLeft = i % 2 === 0;
+      cannon.className = "confetti is-cannon";
+      cannon.style.left = fromLeft ? `${3 + Math.random() * 9}%` : `${88 + Math.random() * 9}%`;
+      cannon.style.background = colors[(i + 3) % colors.length];
+      cannon.style.setProperty("--cannon-x", `${(fromLeft ? 1 : -1) * (80 + Math.random() * 190)}px`);
+      cannon.style.setProperty("--cannon-y", `${-(170 + Math.random() * 250)}px`);
+      cannon.style.setProperty("--cannon-rotate", `${(fromLeft ? 1 : -1) * (420 + Math.random() * 620)}deg`);
+      cannon.style.setProperty("--cannon-time", `${.9 + Math.random() * .5}s`);
+      cannon.style.setProperty("--cannon-delay", `${.5 + Math.random() * .28}s`);
+      cannon.style.setProperty("--confetti-width", `${6 + Math.random() * 6}px`);
+      cannon.style.setProperty("--confetti-height", `${10 + Math.random() * 9}px`);
+      els.celebration.appendChild(cannon);
+    }
     ["#5be3bd", "#ffd54f"].forEach((color, index) => {
       const ring = document.createElement("i");
       ring.className = "celebration-ring";
@@ -1371,6 +1387,16 @@
     source.stop(start + duration + .02);
   }
 
+  function scheduleApplause(start, clapCount = 18) {
+    for (let index = 0; index < clapCount; index += 1) {
+      const at = start + index * .105 + Math.random() * .085;
+      const pan = index % 2 ? .46 : -.46;
+      scheduleNoise({ at, duration: .055 + Math.random() * .025, volume: .012 + Math.random() * .009, filter: 1250 + Math.random() * 1150 }, effectsGain);
+      scheduleNoise({ at: at + .018, duration: .04 + Math.random() * .018, volume: .007 + Math.random() * .006, filter: 2200 + Math.random() * 900 }, effectsGain);
+      scheduleTone({ at, frequency: 165 + Math.random() * 55, endFrequency: 120, duration: .045, volume: .0038, wave: "triangle", pan, filter: 520 }, effectsGain);
+    }
+  }
+
   function playEffect(name, detail = {}) {
     if (!settings.effects) return;
     const context = ensureAudio();
@@ -1409,12 +1435,17 @@
     } else if (name === "skip") {
       [659, 494, 370].forEach((frequency, index) => later(index * .065, { frequency, endFrequency: frequency * .93, duration: .15, volume: .024, wave: "triangle", filter: 1900 }));
     } else if (name === "win") {
+      lastCelebrationAudio = { hoots: 2, claps: 18 };
+      tone({ frequency: 392, endFrequency: 698, duration: .3, volume: .046, wave: "sine", attack: .035, pan: -.12, filter: 1700 });
+      later(.17, { frequency: 523, endFrequency: 1047, duration: .38, volume: .05, wave: "sine", attack: .028, pan: .12, filter: 2400 });
+      later(.19, { frequency: 1047, endFrequency: 1568, duration: .32, volume: .014, wave: "triangle", attack: .025, pan: .22, filter: 3200 });
       tone({ frequency: 196, endFrequency: 261.63, duration: .48, volume: .047, wave: "triangle", filter: 900 });
       scheduleNoise({ at: now + .015, duration: .11, volume: .018, filter: 1500 }, effectsGain);
       [523, 659, 784, 1047].forEach((frequency, index) => later(.035 + index * .085, { frequency, duration: .5, volume: .042 - index * .004, wave: index < 2 ? "triangle" : "sine", pan: index % 2 ? .28 : -.28, filter: 3300 }));
       [1319, 1568, 2093, 2637].forEach((frequency, index) => later(.24 + index * .065, { frequency, duration: .28, volume: .014 - index * .0015, wave: "sine", pan: .48 - index * .32 }));
       [784, 988, 1175].forEach((frequency, index) => later(.52 + index * .075, { frequency, duration: .38, volume: .022 - index * .003, wave: "triangle", pan: (index - 1) * .28, filter: 2800 }));
       scheduleNoise({ at: now + .5, duration: .2, volume: .012, filter: 2300 }, effectsGain);
+      scheduleApplause(now + .72, lastCelebrationAudio.claps);
     } else if (name === "lose") {
       [330, 262, 196].forEach((frequency, index) => later(index * .12, { frequency, endFrequency: frequency * .9, duration: .28, volume: .029, wave: "triangle", filter: 1300 }));
     } else if (name === "start" || name === "room" || name === "open") {
@@ -1714,7 +1745,7 @@
     window.SixthSenseAudio = {
       play: playEffect,
       unlock: unlockAudio,
-      state: () => ({ music: Boolean(settings.music), effects: Boolean(settings.effects), unlocked: audioUnlocked, musicRunning: Boolean(musicTimer), scheduledEffects: scheduledEffectCount })
+      state: () => ({ music: Boolean(settings.music), effects: Boolean(settings.effects), unlocked: audioUnlocked, musicRunning: Boolean(musicTimer), scheduledEffects: scheduledEffectCount, lastCelebration: { ...lastCelebrationAudio } })
     };
     window.SixthSenseAdventure = {
       state: () => ({ ...stats.adventure, ...Core.adventureProgress(stats.adventure.level) })

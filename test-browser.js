@@ -213,6 +213,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#result-primary").textContent(), "OK");
     assert.equal(await page.locator("#result-share").count(), 0, "the completion card should stay focused on the result and OK action");
     assert(await page.locator("#celebration .confetti").count() >= 70, "completion should trigger a full confetti burst");
+    assert.equal(await page.locator("#celebration .confetti.is-cannon").count(), 20, "the victory card should receive a delayed two-sided confetti cannon");
     assert.equal(await page.locator("#result-confetti i").count(), 26, "the reward card should keep a visible confetti cascade above its backdrop");
     assert.equal(await page.locator("#result-modal img[src*='result-signal-crest-v1.webp']").count(), 1, "the victory art should be purpose-made and optimized");
     assert(await page.evaluate(() => document.querySelector("#result-modal").scrollWidth <= document.querySelector("#result-modal").clientWidth), "the result screen must not overflow horizontally");
@@ -221,6 +222,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#stat-coins").textContent(), "200");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "1");
     assert((await page.evaluate(() => window.SixthSenseAudio.state().scheduledEffects)) >= 9, "the solved row and victory moment should schedule layered completion audio");
+    assert.deepEqual(await page.evaluate(() => window.SixthSenseAudio.state().lastCelebration), { hoots: 2, claps: 18 }, "victory audio must include the celebratory two-part hoot and background applause sequence");
     await page.waitForTimeout(850);
     await page.screenshot({ path: path.join(evidenceDir, "victory-result-390x844.png"), fullPage: true });
     await page.click("#result-primary");

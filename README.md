@@ -39,7 +39,7 @@ Then open `http://localhost:4173`.
 - Optional hard mode
 - Dark and high-contrast themes
 - An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
-- A dedicated victory flow across every solo mode with performance copy, solved-word reveal, puzzle points, earned coins, layered confetti, a richer completion chord, and a clear green OK action; completed Daily saves reliably reopen the card
+- A dedicated victory flow across every solo mode with performance copy, solved-word reveal, puzzle points, earned coins, full-screen and two-sided confetti, an original two-part celebratory hoot followed by background applause, and a clear green OK action; completed Daily saves reliably reopen the card
 - Statistics remain a separate, player-opened screen instead of interrupting every successful solve
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
