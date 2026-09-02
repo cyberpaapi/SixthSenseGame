@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-08-31
+Last updated: 2026-09-02
 
-Last verified: 2026-08-31
+Last verified: 2026-09-02
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -69,7 +69,7 @@ The app opens on the home screen. Game-adjacent marketing, mode selection, and s
 
 ## Coins, rewards, and lifelines
 
-Starting wallet: 250 coins. The wallet hard-caps at 99,999 across saved-state loading, solo rewards, Daily streak rewards, multiplayer credits, and refunds; a reward that crosses the ceiling grants only the remaining room. Economy version 3 resets every existing version-1/version-2 saved wallet to exactly 250 once on its next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
+Starting wallet: 250 coins. The wallet hard-caps at 99,999 across saved-state loading, solo rewards, Daily streak rewards, multiplayer credits, and refunds; a reward that crosses the ceiling grants only the remaining room. Economy version 4 resets every existing pre-version-4 saved wallet to exactly 250 once on its next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
 
 | Attempts | Coins earned |
 | ---: | ---: |
@@ -94,7 +94,7 @@ Lifeline prices and behavior:
 | Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
 | Skip | 60 | Can be stocked, consumed, purchased again, and reused outside VS. It reveals the answer in a modal, awards no coins, and changes the word only after green OK. Solo modes route through the shared result card; Adventure advances the current rung; Race advances that player; Co-op advances the shared route. VS does not render or accept Skip. |
 
-Inventory, coins, points, and economy version persist in `localStorage`. Coin totals are normalized into the inclusive 0–99,999 range whenever loaded or credited, so malformed/oversized saves and repeated rewards cannot create a sixth digit. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 3 supersedes the older scale migration: every version-1/version-2 wallet is assigned the same 250-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
+Inventory, coins, points, and economy version persist in `localStorage`. Coin totals are normalized into the inclusive 0–99,999 range whenever loaded or credited, so malformed/oversized saves and repeated rewards cannot create a sixth digit. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 4 performs the latest universal reset: every wallet saved under version 1, 2, or 3 is assigned the same 250-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
 ## Current experience and visual system
 
@@ -272,9 +272,9 @@ Current verified result on 2026-08-31:
 - JavaScript syntax: passed.
 - Core rules/data: passed — 10,187 answers across player-facing Normal 4,058 / Hard 2,246 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; frequency threshold, `genial`, familiar-word, and `armory` clue regressions pass.
 - Vocabulary audit: passed — hash-verified source, deterministic bank output, no duplicate/invalid-length entries, and no clue answer leaks, broken placeholders, proper-name senses, or offensive senses.
-- Browser QA: passed — new-player 250-coin baseline, forced economy-v3 reset of an existing zero-coin wallet, 99,999 earning/load cap, five-digit 360px header fit, Statistics-in-Settings navigation, spending/reward persistence, phone playthrough, vertical Adventure paging and individual future-rung locks, replay surfaces, centered non-reflowing hints with visible remaining price chips, one-tap lifelines, paid eighth-row Last Chance and eighth-attempt victory, VS lifeline availability before and after submission, hidden VS Skip, Co-op launcher/lengths, automatic sixth-letter submission, victory-card confetti cannons, procedural hoot/applause scheduling, dark-theme feedback, and overflow checks.
+- Browser QA: passed — new-player 250-coin baseline, forced economy-v4 reset of an existing version-3 wallet, 99,999 earning/load cap after migration, five-digit 360px header fit, Statistics-in-Settings navigation, spending/reward persistence, phone playthrough, vertical Adventure paging and individual future-rung locks, replay surfaces, centered non-reflowing hints with visible remaining price chips, one-tap lifelines, paid eighth-row Last Chance and eighth-attempt victory, VS lifeline availability before and after submission, hidden VS Skip, Co-op launcher/lengths, automatic sixth-letter submission, victory-card confetti cannons, procedural hoot/applause scheduling, dark-theme feedback, and overflow checks.
 - Local server: HTTP 200 at `http://127.0.0.1:4173/`.
-- Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260831.7` contains the non-reflowing Sense popup fix plus the five-digit wallet cap, Statistics-in-Settings, Adventure, and completion releases described above.
+- Vercel production: primary release target at `https://sixth-sense-game.vercel.app/`; runtime `20260902.1` contains the universal 250-coin reset plus the current hint, wallet-cap, Settings, Adventure, and completion releases described above.
 - GitHub Pages: built with HTTPS at `https://cyberpaapi.github.io/SixthSenseGame/`; the latest completed deployment workflow passed.
 - Multiplayer production: activated through the Vercel Neon integration on its free plan with `DATABASE_URL` connected to Production, Preview, and Development. Runtime `20260831.2` passed two isolated-client VS create/join/start, refresh rejoin, 1,901ms opponent-attempt visibility, immediate lifelines, hidden Skip, Last Chance decline, and synchronized round advancement. The same production suite continued into a Co-op room and passed shared start, six-letter Skip reveal, no advancement before OK, and synchronized word-two advancement after acknowledgement.
 - The bundled broad project validator now reports three marker gaps: polling rather than WebSocket/SSE, its expected literal reconnect+snapshot marker is absent even though refresh/reopen seat restoration is implemented and production-tested, and there is no Force End/Play Again room lifecycle. The explicit static build now passes.
@@ -315,6 +315,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-02 — Universal wallet reset to 250 coins
+
+- Advanced the economy and wallet-reset version from 3 to 4. On the first load of this release, every existing local wallet from versions 1–3 is set to exactly 250 coins; new players also begin with 250.
+- Kept all non-wallet state intact, including Adventure progress, solved words, statistics, lifeline inventory, avatars, decorations, and highlight choices. After the one-time migration, ordinary rewards and purchases persist normally.
+- Updated browser fixtures and migration coverage to distinguish pre-reset version-3 wallets from current version-4 wallets. Versioned the static runtime as `20260902.1` so cached devices receive the reset.
 
 ### 2026-08-31 — Non-reflowing Sense feedback
 

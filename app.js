@@ -23,8 +23,8 @@
   const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
   const DECORATIONS = ["none", "aurora", "sunburst", "prism", "champion"];
   const DAILY_STREAK_REWARD = 300;
-  const ECONOMY_VERSION = 3;
-  const WALLET_RESET_VERSION = 3;
+  const ECONOMY_VERSION = 4;
+  const WALLET_RESET_VERSION = 4;
   const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#f3cf32", leaf: "#22b66f", aqua: "#08b9c8", sky: "#347cf4", violet: "#7c45e8", berry: "#d83cac" });
   const ADVENTURE_TIERS = Object.freeze({
     easy: { title: "Sky Garden", art: "assets/adventure-zone-sky-ladder-v1.webp", alt: "An endless golden ladder rising through the current Adventure zone" },

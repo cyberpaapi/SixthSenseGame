@@ -285,7 +285,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await cappedWalletPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "CapFox" }));
-      if (!localStorage.getItem("sixth-sense.stats.v1")) localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 99990, economyVersion: 3 }));
+      if (!localStorage.getItem("sixth-sense.stats.v1")) localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 99990, economyVersion: 4 }));
     });
     await cappedWalletPage.goto(baseUrl, { waitUntil: "networkidle" });
     assert.equal(await cappedWalletPage.evaluate(() => window.SixthSenseCore.MAX_COINS), 99999);
@@ -309,10 +309,10 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RewardFox" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 0, economyVersion: 2, currentStreak: 6, maxStreak: 6, lastWinDate: yesterday, distribution: [0,0,0,0,0,0,0] }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 0, economyVersion: 3, currentStreak: 6, maxStreak: 6, lastWinDate: yesterday, distribution: [0,0,0,0,0,0,0] }));
     }, yesterdayKey);
     await rewardPage.goto(baseUrl, { waitUntil: "networkidle" });
-    assert.deepEqual(await rewardPage.evaluate(() => { const stats = JSON.parse(localStorage.getItem("sixth-sense.stats.v1")); return { coins: stats.coins, economyVersion: stats.economyVersion }; }), { coins: 250, economyVersion: 3 }, "every existing economy-v2 wallet should reset once to the new 250-coin baseline");
+    assert.deepEqual(await rewardPage.evaluate(() => { const stats = JSON.parse(localStorage.getItem("sixth-sense.stats.v1")); return { coins: stats.coins, economyVersion: stats.economyVersion }; }), { coins: 250, economyVersion: 4 }, "every existing economy-v3 wallet should reset once to the 250-coin baseline");
     await rewardPage.click('[data-start-mode="daily"]');
     const rewardAnswer = await rewardPage.evaluate(() => window.SixthSenseCore.dailyAnswer().word);
     for (const letter of rewardAnswer) await rewardPage.click(`[data-key="${letter.toUpperCase()}"]`);
@@ -462,7 +462,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await modesPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ModeFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 5000, economyVersion: 3 }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 5000, economyVersion: 4 }));
     });
     await modesPage.goto(baseUrl, { waitUntil: "networkidle" });
     await modesPage.click('[data-modal-open="settings-modal"]');
@@ -701,7 +701,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.addInitScript(() => {
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "RepeatFox" }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 3, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 4, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
     });
     await repeatPage.goto(baseUrl, { waitUntil: "networkidle" });
     await repeatPage.click('[data-start-mode="daily"]');
