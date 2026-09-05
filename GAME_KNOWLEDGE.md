@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-05
 
-Last verified: 2026-09-05 (core, deterministic clue refresh, syntax/build, full browser suite, and focused engagement browser suite)
+Last verified: 2026-09-05 (core, deterministic clue refresh, syntax/build, full local browser suite, live engagement suite, and live two-client multiplayer suite)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -265,7 +265,9 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 5 release verification: `npm test`, syntax/build checks, `test-browser.js`, and `test-engagement-browser.js` passed. Re-running the clue pipeline produced identical bank bytes. Focused QA verified corrected saved `dipped`, no second Sense charge, unchanged keyboard position, one 60-coin third-word bonus, persisted 700-coin final test wallet, mastery threshold crossing, personal-best feedback, Next-word state, six immediately visible result letters with reduced motion, and visible OK/no horizontal overflow at 390×844, 360×800, and 320×568. The full suite passed existing phone/desktop, Daily/Adventure result exits, dark keyboard, lifeline, navigation, and multiplayer-mock checks. Release runtime is `20260905.1`; production verification follows publication. Local QA for this turn uses `http://127.0.0.1:4267/` because other projects occupy 4173/4174; do not terminate those other servers.
+September 5 release verification: `npm test`, syntax/build checks, `test-browser.js`, and `test-engagement-browser.js` passed. Re-running the clue pipeline produced identical bank bytes. Focused QA verified corrected saved `dipped`, no second Sense charge, unchanged keyboard position, one 60-coin third-word bonus, persisted 700-coin final test wallet, mastery threshold crossing, personal-best feedback, Next-word state, six immediately visible result letters with reduced motion, and visible OK/no horizontal overflow at 390×844, 360×800, and 320×568. The full suite passed existing phone/desktop, Daily/Adventure result exits, dark keyboard, lifeline, navigation, and multiplayer-mock checks. Local QA for this turn uses `http://127.0.0.1:4267/` because other projects occupy 4173/4174; do not terminate those other servers.
+
+Production runtime `20260905.1` was verified on the primary Vercel URL after GitHub commit `7e2648e`; Vercel reported success and GitHub Pages run `33977677710` passed. The focused engagement suite also passed against the public Vercel URL. The expanded production multiplayer suite passed with two independent browser contexts: current-bank Sense purchase, same-clue free reopening after authoritative refresh, restored seats, 2,340ms opponent-attempt visibility, synchronized VS round advancement, and Co-op Skip reveal/OK-gated shared advancement (31,018ms total). Test saves belong only to isolated QA contexts, not the user's wallet. No full-match lifecycle or WebSocket behavior is claimed by these checks.
 
 Core checks:
 
@@ -341,6 +343,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Refresh saved and already-purchased room clues after content updates, preserving purchases, attempts, and hidden-information boundaries.
 - Added a three-distinct-word daily solo goal with a fixed 60-coin completion bonus, point-derived mastery, genuine personal-best feedback, and optional Next word after suitable solo wins. These give immediate goals, visible competence, and convenient voluntary continuation without changing Daily/Adventure exits, punishments for absence, or random payouts. The direction is informed by competence/autonomy principles described in [PENS](https://selfdeterminationtheory.org/player-experience-of-needs-satisfaction-pens/), not an assertion of measured retention gains.
 - Reused the existing clay/generated art system, kept controls at thumb-friendly sizes, checked light/dark phone surfaces, removed reduced-motion reveal delays, and corrected a pre-existing Co-op thumbnail/text overlap found during visual QA. Added pure and real-browser regression coverage and this handoff context.
+- Published runtime `20260905.1` to Vercel and GitHub Pages; verified the public solo loop and expanded the two-client production test to cover current-bank Sense wording plus free reopening after refresh. The current release leaves every existing version-4 wallet intact.
 
 ### 2026-09-02 — Universal wallet reset to 250 coins
 

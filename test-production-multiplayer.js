@@ -57,6 +57,20 @@ async function submitWord(page, word) {
     assert.equal(await hostPage.locator('[data-online-lifeline="sense"] button').isEnabled(), true, "VS lifelines must be live before the first attempt");
     assert.equal(await hostPage.locator('[data-online-lifeline="skip"]').isHidden(), true, "VS must not expose Skip");
 
+    await hostPage.click('[data-online-lifeline="sense"] button');
+    await hostPage.waitForSelector("#hint-modal[open]", { timeout: 10000 });
+    const purchasedClue = await hostPage.locator("#hint-dialog-copy").textContent();
+    assert(await hostPage.evaluate(clue => window.SixthSenseCore.ANSWERS.some(entry => entry.clue === clue), purchasedClue), "server clue must belong to the current published bank");
+    await hostPage.click("#hint-ok-button");
+    const balanceAfterHint = await hostPage.locator("#coin-count").textContent();
+    await hostPage.reload({ waitUntil: "networkidle" });
+    await hostPage.waitForSelector("#online-screen:not([hidden])", { timeout: 10000 });
+    await hostPage.click('[data-online-lifeline="sense"] button');
+    await hostPage.waitForSelector("#hint-modal[open]");
+    assert.equal(await hostPage.locator("#hint-dialog-copy").textContent(), purchasedClue, "purchased clue must survive an authoritative refresh");
+    assert.equal(await hostPage.locator("#coin-count").textContent(), balanceAfterHint, "reopening after refresh must not charge again");
+    await hostPage.click("#hint-ok-button");
+
     assert.match(await hostPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
     assert.match(await guestPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
 
@@ -116,7 +130,7 @@ async function submitWord(page, word) {
       guestPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 2"), null, { timeout: 10000 })
     ]);
 
-    console.log(`Production multiplayer QA passed: VS room ${roomCode}, Co-op room ${coopCode}, two isolated clients, refresh rejoin, live attempt visibility (${observerLatencyMs}ms), synchronized VS transition, and acknowledged shared Co-op advancement (${Date.now() - startedAt}ms total).`);
+    console.log(`Production multiplayer QA passed: VS room ${roomCode}, Co-op room ${coopCode}, two isolated clients, current-bank hint purchase/free reopening after refresh, live attempt visibility (${observerLatencyMs}ms), synchronized VS transition, and acknowledged shared Co-op advancement (${Date.now() - startedAt}ms total).`);
   } finally {
     await hostContext.close();
     await guestContext.close();
