@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-09-02
+Last updated: 2026-09-05
 
-Last verified: 2026-09-02
+Last verified: 2026-09-05 (core, deterministic clue refresh, syntax/build, full browser suite, and focused engagement browser suite)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -66,6 +66,13 @@ The home screen exposes nine modes:
 | Co-op | A 2–4-player shared-word journey with 3, 5, or 10 words. Everyone receives the same route and the first teammate to solve a word advances the entire room. Teammates retain private boards and authoritative lifelines while progress and transitions are shared. |
 
 The app opens on the home screen. Game-adjacent marketing, mode selection, and streak progress live outside the focused puzzle screen.
+
+### Short goals and mastery
+
+- A compact home shelf below Adventure shows Today's trio and a mastery bar, using the existing generated visual language. Trio counts three **different solo answers solved in the current UTC day** and credits a fixed 60-coin bonus once. Skips, losses, Adventure replays, duplicate words on the same day, and reopened result cards do not advance or repay it. A new UTC day begins a new trio without taking away coins or mastery. Completing all three is a natural stopping point, not a forced continuation.
+- Mastery is derived from cumulative earned solo points, with a new level every 3,000 points. Titles are Curious mind, Pattern finder, Word explorer, Sharp thinker, Signal seeker, and Sense master; the last title persists while numeric mastery continues. Historical points count immediately. There is no separate mastery currency, extra rank payout, wallet reset, or account requirement.
+- Solo win cards show mastery progress, actual personal-best timing/attempt improvements, and trio progress/bonus when relevant. Coin totals include only coins actually credited under the 99,999 cap. Practice, Time Tackle, Insight, and Streak offer optional **Next word** beside the existing green OK. Time Tackle's action explicitly says it starts a fresh ten-minute word. Daily OK still returns home; Adventure OK still returns to its map. No automatic next-word trigger, coercive timer, random reward schedule, energy gate, or new ads were added.
+- Existing confetti, celebratory hoot/applause, sound settings, and reduced-motion support remain. Reduced motion now clears animation/transition delays as well as durations so all result letters appear promptly. The phone Co-op thumbnail was reduced to its actual grid-column width to stop overlapping its label.
 
 ## Coins, rewards, and lifelines
 
@@ -139,12 +146,14 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `index.html` | Semantic home/game screens, dedicated result sheet, modal content, settings, stats, icon dock, and script loading order. |
 | `styles.css` | Responsive claymorphic presentation, phone viewport fitting, dark/high-contrast themes, keyboard states, modal styling, and all motion. |
 | `game-core.js` | Environment-neutral rules: constants, answer/guess loading, repeated-letter scoring, hard-mode validation, daily/practice selection, deterministic seeded Adventure shuffling/progress, and coin rewards. It exports to both browser globals and CommonJS tests. |
+| `progression.js` | Pure, separately tested daily-trio normalization/reward transitions and point-derived mastery levels; loaded before app.js. |
 | `app.js` | Browser state, rendering, input, modes, Adventure map/progress, persistence, inventory/economy migration, streak/point rewards, cosmetic unlocks, modal and browser-history navigation, animations, the procedural soundtrack/effects engine, sharing, and statistics. It exposes narrow audio, economy, dialog, celebration, and navigation interfaces so multiplayer shares the same services. |
 | `multiplayer.js` | Room create/join/leave flows, resume-token session state, polling/reconnect, online board/keyboard/one-tap lifeline rendering, shared hint and match-result popups, the shared Race course, VS series progress, attempt patterns, and live identity synchronization. |
 | `api/multiplayer.js` | Vercel serverless authority for codes, seats, room lifecycle, answer selection, guess validation/scoring, lifeline effects, identity updates, CAS revisions, idempotency, results, and redacted snapshots. It creates and migrates its Postgres tables idempotently after a database is connected. |
 | `answer-bank.js` | 10,187 answer objects with a six-letter `word`, `clue`, and `tier`. Loaded before `game-core.js` in the browser and required by the server. |
 | `word-bank.js` | Expanded accepted-guess vocabulary. Loaded before `game-core.js` in the browser. |
 | `scripts/build_word_banks.py` | Deterministically audits and regenerates both banks from a hash-verified ENABLE lexicon, pinned `wordfreq`, and WordNet. |
+| `scripts/clue_overrides.json` / `scripts/clue-audit.json` | 143 explicit editorial clue corrections and a complete before/after clue-only release audit against c055f52. The refresh path preserves all words, tier assignments, and ordering. |
 | `scripts/requirements-word-banks.txt` | Pinned build-time Python dependencies for vocabulary regeneration. |
 | `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
 | `assets/` | Generated logo, hero, three separate Adventure zone maps, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
@@ -157,13 +166,14 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `.gitignore` | Excludes Vercel's local project link, pulled environment files, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
+| `test-progression.js` / `test-engagement-browser.js` | Pure reward/deduplication/date/rank tests, editorial clue and sequence-hash regressions, plus focused phone saved-clue, free reopening, dock stability, victory, trio, mastery, Next-word, and persistence tests. |
 | `test-production-multiplayer.js` | Public-URL Playwright acceptance test using two isolated browser contexts for create/join/start, opponent attempt visibility, and synchronized VS round advancement. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
 | `README.md` | Concise setup and feature overview. |
 | `AGENTS.md` | Mandatory instructions for AI contributors, including this document’s update rule. |
 | `GAME_KNOWLEDGE.md` | This canonical living context and change record. |
 
-Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, `app.js`, then `multiplayer.js`.
+Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, `progression.js`, `app.js`, then `multiplayer.js`.
 
 ## Data and selection
 
@@ -176,7 +186,9 @@ Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-c
 - The accepted vocabulary includes legitimate uncommon, technical, archaic, and inflected word-game entries, while excluding ordinary names, places, trademarks, malformed inflections, abbreviations, and corpus noise.
 - All clueable eligible guesses with a usable non-proper WordNet clue and no answer-only safety exclusion are answers. Normal is determined only by the Zipf ≥2.75 threshold, without fixed-count padding or manual rescues. Hard uses the remaining Zipf ≥2.0 words; Extreme contains the remainder. Reviewed clue overrides may correct a misleading WordNet sense; `armory` has a specific weapons-storage clue.
 - The 2026-08-27 full audit retained 14,850 old guesses, removed 17,218 unsupported entries, added 382 valid omissions, retained 4,782 old answers, and replaced 218 answers.
-- Sense clues may not contain their own answer, broken placeholder/example text, proper-name definitions, or offensive senses. The audit preserved 4,633 clean existing clues, repaired 149 retained clues, and generated clues for 218 new answers.
+- Sense clues must not reveal their answer or use broken placeholder text. The September 5 clue-only refresh processed all 10,187 entries: 10,082 strings changed, including 1,310 definition-text changes and 8,772 grammatical-label-only changes. It preserves the old word/tier sequence, verified by SHA-256 in test-progression.js. The earlier August counts in the change log describe historical releases, not this refresh.
+- Sense ranking now uses usage counts for the target lemma or its morphological root, not the most frequent unrelated synonym in the sense. Cleaned definitions are checked for answer leakage and flagged proper/offensive patterns. Generated clues label nouns/verbs/adjectives/adverbs and inflected forms; 143 explicit overrides and the starter hand-written clues prefer familiar clear meanings. `dipped` now means briefly lowering something into liquid, not a horse's spine; `entire`, `behind`, `father`, and `jersey` are also corrected.
+- This is an algorithmic corpus refresh with an editorial override layer, **not a manual review of every definition or a guarantee of perfect clues**. WordNet sense counts are sparse and dated. Future reported bad senses should become override entries plus tests. Do not blindly preserve old clues based only on syntax, and use `--refresh-clues` for clue-only fixes rather than changing word membership or tiers. See VOCABULARY_AUDIT.md for pinned, reproducible commands.
 - `coates` is excluded from both banks because it entered as a surname/malformed inflection with the clue for `coat`.
 - Source notices are preserved in `THIRD_PARTY_LICENSES.md`.
 
@@ -203,7 +215,9 @@ Current `localStorage` keys:
 
 Game records include answer/clue, mode, date, puzzle number, guesses, current status, clue state, Peek positions/use count, cleared letters/use count, skip state, Last-Chance purchase state, solve/streak coin reward, puzzle points, reward/stat-recording guards, solve-start time, the backward-compatible Time Tackle deadline, and Adventure level/seed/replay state when relevant. The current game schema uses `version: 3`.
 
-Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. Economy version 3 assigns all older saved wallets exactly 250 coins once while preserving every other stored field; all new fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
+New win records optionally include `solveTime`, `newBestTime`, `newBestAttempts`, `trioReward`, `trioCompleted`, `trioCount`, `mastery`, and `rankUp`. The existing `personalRecorded` guard controls trio/best updates; older completed records are not awarded retrospective trio bonuses. Statistics optionally include `dailyTrio: {date, words, claimed}`; missing or prior-day values normalize safely. Saved Daily/solo clues are refreshed from the current answer bank after spreading old save fields, so a stale clue cannot override current wording. Multiplayer seat snapshots similarly refresh an already-unlocked current-round clue server-side, without exposing clues to opponents or unpurchased seats.
+
+Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, seven-slot guess distribution, wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. Economy version 4 assigns all older saved wallets exactly 250 coins once while preserving every other stored field; this release does not change that version or reset existing version-4 wallets. New fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
 
 Online room rules and security:
 
@@ -251,6 +265,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 5 release verification: `npm test`, syntax/build checks, `test-browser.js`, and `test-engagement-browser.js` passed. Re-running the clue pipeline produced identical bank bytes. Focused QA verified corrected saved `dipped`, no second Sense charge, unchanged keyboard position, one 60-coin third-word bonus, persisted 700-coin final test wallet, mastery threshold crossing, personal-best feedback, Next-word state, six immediately visible result letters with reduced motion, and visible OK/no horizontal overflow at 390×844, 360×800, and 320×568. The full suite passed existing phone/desktop, Daily/Adventure result exits, dark keyboard, lifeline, navigation, and multiplayer-mock checks. Release runtime is `20260905.1`; production verification follows publication. Local QA for this turn uses `http://127.0.0.1:4267/` because other projects occupy 4173/4174; do not terminate those other servers.
+
 Core checks:
 
 ```powershell
@@ -267,7 +283,7 @@ $env:CHROME_BIN='C:\Program Files\Google\Chrome\Application\chrome.exe'
 node test-browser.js
 ```
 
-Current verified result on 2026-08-31:
+Previously verified production baseline (August 31–September 2):
 
 - JavaScript syntax: passed.
 - Core rules/data: passed — 10,187 answers across player-facing Normal 4,058 / Hard 2,246 / Extreme 3,883 and 15,232 accepted guesses; all answers are guessable; frequency threshold, `genial`, familiar-word, and `armory` clue regressions pass.
@@ -302,6 +318,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ## Known limitations
 
+- Clue validation catches structural leaks/patterns and the explicit regression list, not every semantic mistake. Rare-word/sense quality still benefits from human editing; the content audit does not claim a complete manual review.
+- Trio, mastery, and personal bests currently apply to solo play; multiplayer retains its existing independent coin/round rewards. Local progress is not cheat-resistant and should not be used for real-money entitlements. There is no telemetry or evidence yet that these changes improve retention; they provide clearer short goals and competence feedback, not a promised addiction outcome.
+
 - Solo progress, wallet, inventory, settings, and statistics are device/browser-local and can be cleared with site storage.
 - The game does not provide accounts, cloud saves, or leaderboards.
 - Production multiplayer uses 900ms bounded polling rather than WebSockets/SSE. It is playable and production-tested, but is not yet a push-realtime architecture.
@@ -315,6 +334,13 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-05 — Fairer clues and a stronger voluntary play loop
+
+- Corrected misleading senses reported by the user, including the horse-related `dipped` clue. Fixed synonym-frequency contamination in the generator, added 143 editorial overrides, made inflected forms explicit, preserved intentional starter clues, and stored a complete clue diff. All 10,187 answer/tier positions and 15,232 guesses remain unchanged; no player route or difficulty migration occurs.
+- Refresh saved and already-purchased room clues after content updates, preserving purchases, attempts, and hidden-information boundaries.
+- Added a three-distinct-word daily solo goal with a fixed 60-coin completion bonus, point-derived mastery, genuine personal-best feedback, and optional Next word after suitable solo wins. These give immediate goals, visible competence, and convenient voluntary continuation without changing Daily/Adventure exits, punishments for absence, or random payouts. The direction is informed by competence/autonomy principles described in [PENS](https://selfdeterminationtheory.org/player-experience-of-needs-satisfaction-pens/), not an assertion of measured retention gains.
+- Reused the existing clay/generated art system, kept controls at thumb-friendly sizes, checked light/dark phone surfaces, removed reduced-motion reveal delays, and corrected a pre-existing Co-op thumbnail/text overlap found during visual QA. Added pure and real-browser regression coverage and this handoff context.
 
 ### 2026-09-02 — Universal wallet reset to 250 coins
 

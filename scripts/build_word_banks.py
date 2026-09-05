@@ -34,9 +34,7 @@ REQUIRED_NORMAL = {
     "brooch", "gopher", "magpie", "napkin", "pewter",
     "raffle", "rattle", "tarmac", "walrus",
 }
-CLUE_OVERRIDES = {
-    "armory": "A place where weapons and military equipment are stored.",
-}
+CLUE_OVERRIDES = json.loads((Path(__file__).with_name("clue_overrides.json")).read_text(encoding="utf-8"))
 
 # These remain valid guesses but are intentionally not selected as puzzles.
 ANSWER_ONLY_EXCLUSIONS = {
@@ -145,6 +143,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--enable", type=Path, help="Use a local ENABLE source file")
     parser.add_argument("--audit", type=Path, help="Write the JSON audit to this path")
     parser.add_argument("--baseline-ref", help="Compare against bank files from this Git ref")
+    parser.add_argument("--refresh-clues", action="store_true", help="Refresh clues without changing any answer, tier, order, or accepted guess")
     return parser.parse_args()
 
 
@@ -171,14 +170,16 @@ def contains_answer(text: str, word: str) -> bool:
 
 def ranked_synsets(word: str):
     synsets = [synset for synset in wn.synsets(word) if not synset.instance_hypernyms()]
+    def target_count(synset):
+        roots = {word, wn.morphy(word, synset.pos())}
+        return max((lemma.count() for lemma in synset.lemmas() if lemma.name().lower() in roots), default=0)
     return [
         synset
         for _, synset in sorted(
             enumerate(synsets),
             key=lambda item: (
                 clue_looks_proper(item[1].definition()),
-                contains_answer(item[1].definition(), word),
-                -max((lemma.count() for lemma in item[1].lemmas()), default=0),
+                -target_count(item[1]),
                 item[0],
             ),
         )
@@ -203,7 +204,20 @@ def clue_for(word: str) -> str | None:
         clue = definition[0].upper() + definition[1:]
         if clue[-1] not in ".!?":
             clue += "."
-        return clue
+        exact = any(lemma.name().lower() == word for lemma in synset.lemmas())
+        label = {"n": "Noun", "v": "Verb", "a": "Adjective", "s": "Adjective", "r": "Adverb"}[synset.pos()]
+        if not exact:
+            if synset.pos() == "n" and word.endswith("s"):
+                label = "Plural noun"
+            elif synset.pos() == "v":
+                label = "Verb form"
+                if word.endswith("ing"):
+                    label = "Verb (-ing form)"
+                elif word.endswith("ed"):
+                    label = "Past-tense verb"
+            elif synset.pos() in ("a", "s"):
+                label = "Adjective form"
+        return f"{label} · {clue}"
     return None
 
 
@@ -277,9 +291,44 @@ def render_guesses(words: list[str]) -> str:
     )
 
 
+def curated_clues(project: Path) -> dict[str, str]:
+    core = (project / "game-core.js").read_text(encoding="utf-8").split("].map(([word, clue])")[0]
+    return dict(re.findall(r'\["([a-z]{6})", "([^"]+)"\]', core))
+
+
 def main() -> int:
     args = parse_args()
     project = args.project.resolve()
+    curated = curated_clues(project)
+    if args.refresh_clues:
+        source = (project / "answer-bank.js").read_text(encoding="utf-8")
+        entries = [json.loads(raw) for raw in re.findall(r'^\s*(\{.+\}),?$', source, re.MULTILINE)]
+        baseline = read_old_banks(project, args.baseline_ref)[0] if args.baseline_ref else {}
+        # The original hand-written starter clues are deliberate, not WordNet output.
+        changes, unresolved = [], []
+        for entry in entries:
+            word = entry["word"]
+            old = baseline.get(word, entry["clue"])
+            clue = CLUE_OVERRIDES.get(word) or curated.get(word) or clue_for(word)
+            if not clue:
+                unresolved.append(word)
+                continue
+            if clue != old:
+                changes.append({"word": word, "before": old, "after": clue})
+                entry["clue"] = clue
+        if unresolved:
+            raise RuntimeError(f"Review these words before publishing; no output written: {unresolved}")
+        definition_changes = sum(change["before"] != change["after"].split(" · ")[-1] for change in changes)
+        audit = {"baselineRef": args.baseline_ref, "answers": len(entries), "changed": len(changes),
+                 "definitionTextChanged": definition_changes, "labelOnlyChanged": len(changes) - definition_changes,
+                 "explicitOverrides": len(set(CLUE_OVERRIDES) & {e['word'] for e in entries}),
+                 "policy": "Target-lemma frequency; exclude named instances; explicit sense overrides; label grammatical forms. Existing answer membership, order, and tiers unchanged. Algorithmic refresh, not a human review of every meaning.",
+                 "unresolved": unresolved, "changes": changes}
+        (project / "answer-bank.js").write_text(render_answers(entries), encoding="utf-8", newline="\n")
+        if args.audit:
+            args.audit.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        print(json.dumps({key: value for key, value in audit.items() if key != "changes"}, indent=2))
+        return 0
     accepted = load_enable(args.enable)
     old_clues, old_accepted = read_old_banks(project, args.baseline_ref)
     old_answers = set(old_clues)
@@ -287,8 +336,7 @@ def main() -> int:
     clue_map: dict[str, str] = {}
     scored: list[tuple[float, str]] = []
     for word in accepted:
-        old_clue = old_clues.get(word)
-        clue = CLUE_OVERRIDES.get(word) or (old_clue if reusable_old_clue(old_clue, word) else clue_for(word))
+        clue = CLUE_OVERRIDES.get(word) or curated.get(word) or clue_for(word)
         if clue and word not in ANSWER_ONLY_EXCLUSIONS:
             clue_map[word] = clue
             scored.append((zipf_frequency(word, "en"), word))
@@ -356,11 +404,11 @@ def main() -> int:
         },
         "clueReview": {
             "preservedCleanExisting": sum(
-                word in old_clues and reusable_old_clue(old_clues[word], word)
+                word in old_clues and old_clues[word] == clue_map[word]
                 for word in selected_set
             ),
             "regeneratedExisting": sum(
-                word in old_clues and not reusable_old_clue(old_clues[word], word) for word in selected_set
+                word in old_clues and old_clues[word] != clue_map[word] for word in selected_set
             ),
             "generatedForNewAnswers": len(selected_set - old_answers),
         },

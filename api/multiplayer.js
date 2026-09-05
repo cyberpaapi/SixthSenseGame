@@ -3,6 +3,7 @@
 const crypto = require("node:crypto");
 const { neon } = require("@neondatabase/serverless");
 const Core = require("../game-core.js");
+const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const ROOM_TTL_HOURS = 24;
@@ -166,6 +167,13 @@ async function snapshot(sql, room, me) {
     };
   });
   const own = players.find(player => player.id === me.id);
+  const ownLifelines = parseJson(own.lifeline_state, {});
+  const active = activeAnswer(room, own);
+  // Update an already purchased clue after a content release, without revealing
+  // anything to seats that have not unlocked Sense or carrying it into a new round.
+  if (ownLifelines.clue && Number(ownLifelines.round) === active.index) {
+    ownLifelines.clue = ANSWER_CLUES.get(active.answer) || ownLifelines.clue;
+  }
   return {
     room: {
       code: room.code,
@@ -187,7 +195,7 @@ async function snapshot(sql, room, me) {
       score: own.score,
       finished: own.finished,
       eliminated: own.eliminated,
-      lifelines: parseJson(own.lifeline_state, {}),
+      lifelines: ownLifelines,
       lastCompletedRound: parseJson(own.completed_rounds, []).at(-1) || null
     },
     players: normalized
@@ -505,7 +513,7 @@ async function submitLifeline(sql, body) {
 
   let effect;
   if (kind === "sense") {
-    lifelines.clue = lifelines.clue || Core.ANSWERS.find(item => item.word === answer)?.clue || "A familiar six-letter word.";
+    lifelines.clue = ANSWER_CLUES.get(answer) || lifelines.clue || "A familiar six-letter word.";
     effect = { kind, clue: lifelines.clue };
   } else if (kind === "peek") {
     const used = new Set((lifelines.peeked || []).map(entry => Number(entry.position)));

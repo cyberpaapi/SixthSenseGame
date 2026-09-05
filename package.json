@@ -5,8 +5,9 @@
   "description": "A vibrant six-letter deduction game with realtime private rooms.",
   "scripts": {
     "build": "node -e \"console.log('Sixth Sense static client is ready for deployment.')\"",
-    "test": "node test-core.js && node test-multiplayer.js",
+    "test": "node test-core.js && node test-multiplayer.js && node test-progression.js",
     "test:browser": "node test-browser.js",
+    "test:engagement": "node test-engagement-browser.js",
     "test:production-multiplayer": "node test-production-multiplayer.js"
   },
   "dependencies": {

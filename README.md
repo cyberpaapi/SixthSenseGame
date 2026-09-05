@@ -31,6 +31,9 @@ Then open `http://localhost:4173`.
 - A fixed one-viewport play layout with no page-level game-screen scrolling
 - A 250-coin starting wallet capped at 99,999, with attempt-based solve rewards (140 coins down to 20) and an economy-v4 migration that resets every older saved wallet to the same baseline once
 - A visible 300-coin reward every seven consecutive Daily wins
+- Today's trio: solve three different solo words in a UTC day for one 60-coin bonus; no penalty for missing a day
+- Persistent mastery ranks every 3,000 earned solo points, personal-best feedback, and an optional Next word action after Practice, Time Tackle, Insight, and Streak wins
+- Sense clues use target-word sense ranking, grammatical-form labels, and 143 explicit wording overrides; saved solo and purchased multiplayer clues refresh from the current bank
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information
 - Sense clues appear in a centered confirmable popup and can be reopened anytime without another charge
@@ -52,6 +55,7 @@ Then open `http://localhost:4173`.
 
 ```powershell
 node test-core.js
+npm test
 node --check app.js
 node --check multiplayer.js
 node --check api/multiplayer.js
@@ -59,6 +63,8 @@ npm run test:production-multiplayer
 ```
 
 ## Maintainer and AI context
+
+`npm run test:engagement` checks corrected saved hints, single-payment reopening, trio rewards, mastery, Next word, and small-phone result layouts. Set `CHROME_BIN` to your installed Chrome and `SIXTH_SENSE_URL` to the local game server if not using port 4173.
 
 Read [GAME_KNOWLEDGE.md](GAME_KNOWLEDGE.md) before changing the game. It is the living source of truth for the product rules, architecture, design decisions, current behavior, verification workflow, and change history. [AGENTS.md](AGENTS.md) requires every future code, content, data, art, configuration, or behavior change to update that knowledge file in the same commit.
 

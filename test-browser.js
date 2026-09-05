@@ -430,7 +430,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await adventurePage.locator("#profile-best-attempts").textContent(), "1 try");
     assert.equal(await adventurePage.locator("#profile-fastest-word").textContent(), adventureAnswer.toUpperCase());
     assert.match(await adventurePage.locator("#profile-fastest-time").textContent(), /^Solved in /);
-    assert.equal(await adventurePage.locator("#profile-zone").textContent(), "Adventure in progress");
+    assert.match(await adventurePage.locator("#profile-zone").textContent(), /Curious mind · Mastery 1/);
     await adventurePage.click("#profile-modal .modal-close");
     await adventurePage.click("#adventure-play");
     await adventurePage.click("#skip-puzzle-button");

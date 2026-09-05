@@ -1,6 +1,6 @@
 # Sixth Sense vocabulary audit
 
-Verified: 2026-08-31
+Verified: 2026-09-05
 
 ## Result
 
@@ -35,6 +35,25 @@ Normal contains every eligible answer with an English `wordfreq` Zipf score of a
 Solo non-Daily selection begins with Easy. Solved words are stored locally and excluded from fresh selections. Completing all Easy words silently adds Medium; completing Medium silently adds Extreme. Daily remains a shared deterministic Easy puzzle. Multiplayer difficulty selects exactly one tier and does not depend on a player's solo unlock state.
 
 ## Reproducibility
+
+### Clue-only release, 2026-09-05
+
+All 10,187 answers were passed through the refreshed clue pipeline. Answer membership, order, and tiers are identical when projected to `[word, tier]`; the 15,232 accepted guesses were not edited. 10,082 clue strings changed: 1,310 changed their definition wording, while the other 8,772 changes add a grammatical label only. There are 143 explicit wording overrides, plus the original hand-written starter clues.
+
+The previous ranking used the largest usage count of *any synonym* in a WordNet sense. It now uses counts attached to the target word (or its morphological root). Common clues such as `dipped`, `entire`, `behind`, `father`, and `jersey` have explicit overrides. Parenthetical answer leaks are cleaned before candidate rejection, rather than penalizing an otherwise useful common sense. Plural nouns, verb forms, and past-tense forms are labeled to distinguish the answer form from a dictionary headword.
+
+`scripts/clue-audit.json` records the full before/after diff against `c055f52`; `scripts/clue_overrides.json` is the version-controlled editorial correction layer. The rest is an **algorithmic refresh, not a claim that all 10,187 definitions were manually reviewed**. WordNet is a dated, sparse sense-frequency source, so rare and ambiguous clues still need editorial judgment. Word-frequency difficulty thresholds do not measure which meaning of a word is familiar.
+
+For subsequent hint fixes, edit the override file and use clue-only refresh (this cannot add/remove answers or change progression):
+
+```powershell
+python scripts/build_word_banks.py --refresh-clues --baseline-ref c055f52 --audit scripts/clue-audit.json
+npm test
+```
+
+Requires the pinned Python dependencies and WordNet data described below. The bank is generated mechanically; do not hand-edit individual generated entries. The server sends current wording only to players who already unlocked Sense; saved solo games also refresh their clue without resetting guesses or purchases.
+
+### Full vocabulary rebuild
 
 The source ENABLE file is verified before use with SHA-256:
 

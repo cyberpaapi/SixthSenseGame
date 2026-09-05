@@ -2,6 +2,8 @@
   "use strict";
 
   const Core = window.SixthSenseCore;
+  const Progression = window.SixthSenseProgression;
+  const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
   const ANSWER_WORDS = new Set(Core.ANSWERS.map(item => item.word));
   const STORAGE = {
     daily: "sixth-sense.daily.v1",
@@ -112,6 +114,11 @@
     resultPoints: document.querySelector("#result-points"),
     resultStreakReward: document.querySelector("#result-streak-reward"),
     resultPrimary: document.querySelector("#result-primary"),
+    resultNext: document.querySelector("#result-next"),
+    resultProgress: document.querySelector("#result-progress"),
+    resultProgressLabel: document.querySelector("#result-progress-label"),
+    resultProgressFill: document.querySelector("#result-progress-fill"),
+    resultBonus: document.querySelector("#result-bonus"),
     hintDialog: document.querySelector("#hint-modal"),
     hintDialogCopy: document.querySelector("#hint-dialog-copy"),
     hintOkButton: document.querySelector("#hint-ok-button"),
@@ -323,7 +330,7 @@
     const answer = Core.dailyAnswer();
     const saved = loadJson(STORAGE.daily, {});
     if (saved.date === Core.dateKey() && saved.answer === answer.word && Array.isArray(saved.guesses)) {
-      return { ...emptyGame(answer, "daily"), ...saved, current: "" };
+      return { ...emptyGame(answer, "daily"), ...saved, clue: answer.clue, current: "" };
     }
     return emptyGame(answer, "daily");
   }
@@ -332,7 +339,7 @@
     const saved = loadJson(STORAGE[gameMode], {});
     const adventureLevelMatches = gameMode !== "adventure" || Number(saved.adventureLevel) === stats.adventure.level;
     if (!forceNew && adventureLevelMatches && saved.mode === gameMode && saved.answer && saved.clue && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
-      return { ...emptyGame({ word: saved.answer, clue: saved.clue }, gameMode), ...saved, current: "" };
+      return { ...emptyGame({ word: saved.answer, clue: saved.clue }, gameMode), ...saved, clue: ANSWER_CLUES.get(saved.answer) || saved.clue, current: "" };
     }
     if (gameMode === "adventure") {
       const next = emptyGame(Core.adventureAnswer(stats.adventure.level, stats.adventure.seed), gameMode);
@@ -355,6 +362,7 @@
   }
 
   function showScreen(screen, options = {}) {
+    if (screen === "home") renderProgression();
     const gameVisible = screen === "game";
     const adventureVisible = screen === "adventure";
     els.homeScreen.hidden = screen !== "home";
@@ -933,6 +941,16 @@
     if (won && !stats.completedWords.includes(game.answer)) stats.completedWords.push(game.answer);
     if (won && !game.personalRecorded && !game.adventureReplay) {
       const elapsed = Math.max(1000, Date.now() - (Number(game.startedAt) || Date.now()));
+      game.newBestTime = Boolean(stats.fastestSolve && elapsed < stats.fastestSolve.ms);
+      game.newBestAttempts = Boolean(stats.bestSolveAttempts && game.guesses.length < stats.bestSolveAttempts);
+      game.solveTime = elapsed;
+      const progress = Progression.recordSolve(stats.dailyTrio, { date: Core.dateKey(), word: game.answer, won });
+      stats.dailyTrio = progress.state;
+      game.trioReward = progress.reward ? addCoinBalance(progress.reward) : 0;
+      game.trioCompleted = progress.reward > 0;
+      game.trioCount = progress.state.words.length;
+      game.mastery = Progression.mastery(stats.totalPoints);
+      game.rankUp = game.mastery.level > Progression.mastery(stats.totalPoints - points).level;
       stats.totalSolves += 1;
       stats.bestSolveAttempts = stats.bestSolveAttempts === null ? game.guesses.length : Math.min(stats.bestSolveAttempts, game.guesses.length);
       if (!stats.fastestSolve || elapsed < stats.fastestSolve.ms) stats.fastestSolve = { word: game.answer, ms: elapsed };
@@ -971,7 +989,7 @@
     saveGame();
     renderLifelines();
     if (won) {
-      const totalReward = reward + streakReward;
+      const totalReward = reward + streakReward + (Number(game.trioReward) || 0);
       announce(totalReward ? `Solved in ${game.guesses.length} — +${totalReward} coins!` : "Beautiful intuition.");
       celebrate();
       playEffect("win");
@@ -1110,6 +1128,7 @@
   }
 
   function renderStats() {
+    renderProgression();
     const winrate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
     const streakStep = stats.currentStreak ? ((stats.currentStreak - 1) % 7) + 1 : 0;
     const daysRemaining = 7 - streakStep;
@@ -1151,7 +1170,8 @@
     const bestStreak = Math.max(Number(stats.maxStreak) || 0, Number(stats.bestModeStreak) || 0);
     decorateAvatar(els.profileAvatar);
     els.profileName.textContent = playerIdentity.name || "Player";
-    els.profileZone.textContent = progress.complete ? "Adventure complete" : "Adventure in progress";
+    const rank = Progression.mastery(stats.totalPoints);
+    els.profileZone.textContent = `${rank.name} · Mastery ${rank.level}${progress.complete ? " · Adventure complete" : ""}`;
     els.profileWordsSolved.textContent = stats.completedWords.length.toLocaleString();
     els.profileTotalSolves.textContent = stats.totalSolves.toLocaleString();
     els.profileBestAttempts.textContent = stats.bestSolveAttempts ? `${stats.bestSolveAttempts} ${stats.bestSolveAttempts === 1 ? "try" : "tries"}` : "—";
@@ -1185,7 +1205,7 @@
   function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0, points = Number(game.solvePoints) || 0) {
     const attempts = game.guesses.length;
     const performance = resultPerformance(Math.max(1, attempts));
-    const earned = won ? reward + streakReward : 0;
+    const earned = won ? reward + streakReward + (Number(game.trioReward) || 0) : 0;
     els.resultDialog.classList.toggle("is-loss", !won);
     els.resultKicker.textContent = game.skipped ? "Word revealed" : game.adventureReplay ? "Replay complete" : won ? "Puzzle complete" : "Signal ended";
     els.resultTitle.textContent = game.skipped ? "No reward this time" : won ? performance.title : "Signal missed";
@@ -1198,6 +1218,36 @@
     els.resultPoints.textContent = won ? `+${points} ${points === 1 ? "point" : "points"}` : "No points";
     els.resultStreakReward.hidden = !(won && streakReward > 0);
     els.resultPrimary.textContent = "OK";
+    els.resultNext.hidden = !(won && ["practice", "sprint", "insight", "streak"].includes(mode));
+    els.resultNext.textContent = mode === "sprint" ? "Next word · 10 min" : "Next word";
+    els.resultProgress.hidden = !won || game.adventureReplay;
+    const rank = game.mastery || Progression.mastery(stats.totalPoints);
+    els.resultProgressLabel.textContent = `${game.rankUp ? "Mastery up! " : ""}${rank.name} · ${rank.remaining.toLocaleString()} points to next`;
+    els.resultProgressFill.style.width = `${rank.current / rank.target * 100}%`;
+    els.resultProgress.setAttribute("aria-label", `Mastery ${rank.level}: ${rank.current} of ${rank.target} points`);
+    const highlights = [];
+    if (won && game.newBestTime) highlights.push(`New fastest · ${formatSolveTime(game.solveTime)}`);
+    else if (won && game.newBestAttempts) highlights.push("New best attempt count!");
+    if (won && game.trioCompleted) highlights.push(`Today's trio complete · +${game.trioReward || 0} bonus coins`);
+    else if (won && game.trioCount > 0 && game.trioCount < 3) highlights.push(`Today's trio · ${game.trioCount}/3 words`);
+    els.resultBonus.hidden = highlights.length === 0;
+    els.resultBonus.textContent = highlights.join(" · ");
+  }
+
+  function renderProgression() {
+    const daily = Progression.trio(stats.dailyTrio, Core.dateKey());
+    const rank = Progression.mastery(stats.totalPoints);
+    document.querySelector("#trio-count").textContent = `${daily.words.length}/3`;
+    document.querySelector("#trio-caption").textContent = daily.claimed ? "Complete. Nicely done!" : "Solve 3 different solo words · +60 coins";
+    document.querySelector("#trio-stamps").setAttribute("aria-label", `${daily.words.length} of 3 words solved today`);
+    document.querySelectorAll("#trio-stamps span").forEach((stamp, index) => {
+      stamp.classList.toggle("is-complete", index < daily.words.length);
+      stamp.textContent = index < daily.words.length ? "✓" : String(index + 1);
+    });
+    document.querySelector("#mastery-name").textContent = rank.name;
+    document.querySelector("#mastery-caption").textContent = `Mastery ${rank.level} · ${rank.remaining.toLocaleString()} points to next`;
+    document.querySelector("#mastery-fill").style.width = `${rank.current / rank.target * 100}%`;
+    document.querySelector("#mastery-track").setAttribute("aria-valuenow", String(rank.current));
   }
 
   function exitResult() {
@@ -1672,6 +1722,13 @@
     });
     els.resultExit.addEventListener("click", exitResult);
     els.resultPrimary.addEventListener("click", continueFromResult);
+    els.resultNext.addEventListener("click", () => {
+      if (!["practice", "sprint", "insight", "streak"].includes(mode) || game.status !== "won") return;
+      els.resultDialog.close();
+      setMode(mode, true);
+      showScreen("game");
+      playEffect("start");
+    });
     els.hintOkButton.addEventListener("click", () => closeDialog(els.hintDialog));
     els.lastChanceBuy.addEventListener("click", () => document.body.dataset.screen === "online" ? document.dispatchEvent(new CustomEvent("sixth-sense-online-last-chance", { detail: { decision: "purchase" } })) : buySoloLastChance());
     els.lastChanceDecline.addEventListener("click", () => document.body.dataset.screen === "online" ? document.dispatchEvent(new CustomEvent("sixth-sense-online-last-chance", { detail: { decision: "decline" } })) : declineSoloLastChance());

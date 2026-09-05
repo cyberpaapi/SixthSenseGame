@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260902.1">
+  <link rel="stylesheet" href="styles.css?v=20260905.1">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -73,6 +73,20 @@
         <h2 id="adventure-feature-title">Adventure</h2>
         <p>Follow a trail that unfolds one word at a time.</p>
         <button class="adventure-enter" type="button" data-open-adventure-map>Continue adventure</button>
+      </div>
+    </section>
+
+    <section class="progression-shelf" aria-label="Your progress">
+      <div class="trio-card">
+        <div class="progression-heading"><strong>Today's trio <span id="trio-count">0/3</span></strong><span class="coin-symbol" aria-hidden="true"></span></div>
+        <p id="trio-caption">Solve 3 different solo words · +60 coins</p>
+        <div class="trio-stamps" id="trio-stamps" aria-label="0 of 3 words solved today"><span>1</span><span>2</span><span>3</span></div>
+      </div>
+      <div class="mastery-card">
+        <div class="progression-heading"><strong id="mastery-name">Curious mind</strong><img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true"></div>
+        <p id="mastery-caption">Mastery 1 · 3,000 points to next</p>
+        <div class="mastery-track" id="mastery-track" role="progressbar" aria-label="Mastery points" aria-valuemin="0" aria-valuemax="3000" aria-valuenow="0"><span id="mastery-fill"></span></div>
+        <small>Every earned point moves you forward.</small>
       </div>
     </section>
 
@@ -269,8 +283,14 @@
         <span><small>Seven-day bonus</small><strong>+300 coins</strong></span>
       </div>
       <div class="result-actions">
+        <button class="result-next" id="result-next" type="button" hidden>Next word</button>
         <button class="result-primary" id="result-primary" type="button">OK</button>
       </div>
+      <div class="result-progress" id="result-progress" hidden>
+        <div class="result-progress-copy"><strong id="result-progress-label"></strong></div>
+        <div class="result-progress-track" aria-hidden="true"><i id="result-progress-fill"></i></div>
+      </div>
+      <p class="result-bonus" id="result-bonus" hidden></p>
     </div>
   </dialog>
 
@@ -483,10 +503,11 @@
   </dialog>
 
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260902.1"></script>
-  <script src="word-bank.js?v=20260902.1"></script>
-  <script src="game-core.js?v=20260902.1"></script>
-  <script src="app.js?v=20260902.1"></script>
-  <script src="multiplayer.js?v=20260902.1"></script>
+  <script src="answer-bank.js?v=20260905.1"></script>
+  <script src="word-bank.js?v=20260905.1"></script>
+  <script src="game-core.js?v=20260905.1"></script>
+  <script src="progression.js?v=20260905.1"></script>
+  <script src="app.js?v=20260905.1"></script>
+  <script src="multiplayer.js?v=20260905.1"></script>
 </body>
 </html>
