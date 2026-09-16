@@ -15,6 +15,7 @@
   --present: #ec7610;
   --absent: #292731;
   --tile: #eadfff;
+  --tile-background: linear-gradient(145deg, #f6efff, #dcd0ff);
   --focus: #075fce;
   --shadow-out: 12px 15px 28px rgba(49, 12, 103, .26), -7px -7px 16px rgba(255, 255, 255, .72);
   --shadow-soft: 6px 8px 15px rgba(72, 32, 122, .18), -4px -4px 11px rgba(255, 255, 255, .75);
@@ -75,6 +76,7 @@ body.is-dark {
   --present: #ff942e;
   --absent: #292630;
   --tile: #37205f;
+  --tile-background: linear-gradient(145deg, #40256d, #2d194e);
   --focus: #76dfff;
   --shadow-out: 12px 15px 28px rgba(4, 0, 22, .46), -6px -6px 15px rgba(107, 61, 168, .2);
   --shadow-soft: 6px 8px 14px rgba(4, 0, 22, .4), -4px -4px 11px rgba(107, 61, 168, .2);
@@ -552,8 +554,8 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
   place-items: center;
   border: 1px solid var(--line);
   border-radius: clamp(11px, 2.5vw, 17px);
-  background: linear-gradient(145deg, #f6efff, #dcd0ff);
-  border-color: rgba(92, 45, 166, .2);
+  background: var(--tile-background);
+  border-color: var(--line);
   box-shadow: var(--shadow-soft);
   font: 900 clamp(20px, 5vw, 29px)/1 "Nunito", sans-serif;
   text-transform: uppercase;

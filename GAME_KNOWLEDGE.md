@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-09-05
+Last updated: 2026-09-16
 
-Last verified: 2026-09-05 (core, deterministic clue refresh, syntax/build, full local browser suite, live engagement suite, and live two-client multiplayer suite)
+Last verified: 2026-09-16 (core/progression/multiplayer helper tests, build, full local browser suite, and focused light/dark tile contrast regression; earlier live multiplayer verification recorded below)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -122,6 +122,7 @@ Inventory, coins, points, and economy version persist in `localStorage`. Coin to
 - All optional motion collapses under `prefers-reduced-motion`.
 - Audio uses an original procedural Web Audio system with two independent persistent controls: Music runs a low-volume 32-step “aurora claybeat” of soft pads, bass pulses, and pentatonic plucks; Sound effects covers letters, deletion, the three tile states, invalid actions, coins, each lifeline, room actions, wins, and losses. Victory begins with a two-part rising “woo-hoo” synthesized from layered oscillators, then blends the bass lift/chord/sparkles into 18 quiet, randomized applause clusters behind the card for roughly 2.5 seconds. It uses no downloaded or copyrighted recording, respects the Sound toggle, and begins only after the first user gesture as required by mobile autoplay rules.
 - Dark and high-contrast modes are available. Dark mode preserves four visually distinct keyboard treatments: untested purple, Aligned green, Echoing orange, and Quiet charcoal, with the `●`, `◆`, and `×` markers retained.
+- Empty and unsubmitted letter tiles use a theme-aware clay gradient: pale purple in light mode and dark purple behind white letters in dark mode. This shared solo/online styling leaves scored and Peek tile colors intact.
 - The UI supplies visible keyboard color states, color-independent symbols, semantic buttons, ARIA labels, focus styles, first-visit help, and a skip-to-content link. Sense uses a centered popup with a purple outline, black text, a 60%-alpha white surface, and a green 44px-or-larger OK control; the same dialog is reused in multiplayer. The clue is never duplicated in the inline status area, and reopening Sense cannot move the board, keyboard, dock, or remaining lifeline prices.
 - The Settings sheet remains touch/wheel scrollable but hides its visual scrollbar for a cleaner popup edge.
 
@@ -166,6 +167,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `.gitignore` | Excludes Vercel's local project link, pulled environment files, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
+| `test-tile-contrast.js` | Browser regression for typed/empty tile contrast in both themes, shared solo/online tile styles, and preservation of scored/Peek backgrounds. Run with `npm run test:contrast`. |
 | `test-progression.js` / `test-engagement-browser.js` | Pure reward/deduplication/date/rank tests, editorial clue and sequence-hash regressions, plus focused phone saved-clue, free reopening, dock stability, victory, trio, mastery, Next-word, and persistence tests. |
 | `test-production-multiplayer.js` | Public-URL Playwright acceptance test using two isolated browser contexts for create/join/start, opponent attempt visibility, and synchronized VS round advancement. |
 | `THIRD_PARTY_LICENSES.md` | Attribution and licenses for dictionary, frequency-ranking, and clue source data. |
@@ -265,6 +267,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 16 dark-tile fix: `npm test`, `npm run build`, `npm run test:browser`, and `npm run test:contrast` passed against the local server on port 4267. The focused regression reproduced white-on-pale typed tiles at 1.08:1 before the CSS fix, then passed the 4.5:1 minimum against both gradient endpoints in light/dark themes. It types into the real solo board and checks style fixtures in both solo/online containers; it does not claim a new live multiplayer session test. A 390×844 dark-theme screenshot was visually inspected for readable letters and an unclipped keyboard/lifeline dock. Stylesheet cache version is `20260916.1`; unchanged JavaScript remains `20260905.1`.
+
 September 5 release verification: `npm test`, syntax/build checks, `test-browser.js`, and `test-engagement-browser.js` passed. Re-running the clue pipeline produced identical bank bytes. Focused QA verified corrected saved `dipped`, no second Sense charge, unchanged keyboard position, one 60-coin third-word bonus, persisted 700-coin final test wallet, mastery threshold crossing, personal-best feedback, Next-word state, six immediately visible result letters with reduced motion, and visible OK/no horizontal overflow at 390×844, 360×800, and 320×568. The full suite passed existing phone/desktop, Daily/Adventure result exits, dark keyboard, lifeline, navigation, and multiplayer-mock checks. Local QA for this turn uses `http://127.0.0.1:4267/` because other projects occupy 4173/4174; do not terminate those other servers.
 
 Production runtime `20260905.1` was verified on the primary Vercel URL after GitHub commit `7e2648e`; Vercel reported success and GitHub Pages run `33977677710` passed. The focused engagement suite also passed against the public Vercel URL. The expanded production multiplayer suite passed with two independent browser contexts: current-bank Sense purchase, same-clue free reopening after authoritative refresh, restored seats, 2,340ms opponent-attempt visibility, synchronized VS round advancement, and Co-op Skip reveal/OK-gated shared advancement (31,018ms total). Test saves belong only to isolated QA contexts, not the user's wallet. No full-match lifecycle or WebSocket behavior is claimed by these checks.
@@ -283,6 +287,7 @@ Browser checks require Playwright, Chrome/Chromium, and a running local server:
 ```powershell
 $env:CHROME_BIN='C:\Program Files\Google\Chrome\Application\chrome.exe'
 node test-browser.js
+npm run test:contrast
 ```
 
 Previously verified production baseline (August 31–September 2):
@@ -336,6 +341,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-16 — Readable dark-theme letter tiles
+
+- Replaced the hard-coded pale unsubmitted tile background with a theme-aware gradient. Dark mode now uses dark purple squares behind white letters, with theme-aware borders; light mode retains its existing appearance.
+- Kept the shared solo/online tile selector and low specificity so Aligned, Echoing, Quiet, and Peek backgrounds continue to override the base surface. No game logic, rewards, wallets, or vocabulary changed.
+- Added a regression test that failed on the original low-contrast styling and passes after the fix, reran the full browser/core suites and build, and versioned only the updated stylesheet for cache refresh.
 
 ### 2026-09-05 — Fairer clues and a stronger voluntary play loop
 
