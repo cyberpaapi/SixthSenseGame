@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Single-path keyboard input: duplicate-click regression reproduced before fix and passes locally; core, touch/Race, syntax and packaging checks passed; full browser passed; deployment verification pending.)
+Last verified: 2026-09-18 (Single-path keyboard input: duplicate-click regression reproduced before fix and passes locally; core, touch/Race, syntax and packaging checks passed; full browser passed; solo/Race duplicate-input regressions passed on both public sites.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -333,7 +333,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 duplicate-input correction (app 20260918.12): the new click-origin regression first failed on the prior release with `wwzxed` instead of `wzxed`: its pointer-up path entered W and its mouse-labelled click entered W again. The shared binder now activates only on click. Focused touch and Race suites, core, syntax and packaging passed locally; full-browser checks also passed; deployment verification is pending. Coverage retains repeated letters/Delete, held/edge touches, cancellation/drag-away, mouse/Space/semantic clicks and mid-poll target retention. Click-origin variation is an explicit browser fixture; no physical Safari reproduction is claimed.
+September 18 duplicate-input correction (app 20260918.12): the new click-origin regression first failed on the prior release with `wwzxed` instead of `wzxed`: its pointer-up path entered W and its mouse-labelled click entered W again. The shared binder now activates only on click. Focused touch and Race suites, core, syntax and packaging passed locally; full-browser checks also passed. Commit `b9358f7` deployed successfully to Vercel and GitHub Pages (workflow `35275951630`); both public sites passed the solo click-origin and Race touch/geometry suites. Coverage retains repeated letters/Delete, held/edge touches, cancellation/drag-away, mouse/Space/semantic clicks and mid-poll target retention. Click-origin variation is an explicit browser fixture; no physical Safari reproduction is claimed.
 
 September 18 renewed 500-coin reset (app 20260918.11, economy v9): core, focused migration/live-policy/cross-tab/offline, syntax and public-client packaging checks passed locally. Commit `201ad00` deployed successfully to Vercel and GitHub Pages (workflow `35275570862`). Four isolated public pages loaded the previous v8 build before deployment and automatically received the actual v9 policy without reload: 0 and 9,876 both became exactly 500 on each site, with progress/inventory intact. The full migration/earn/reload suite then passed against both public origins, including prior v8 wallets and preservation of subsequent earnings. This distinguishes already-open-client delivery from migration on refresh. Very old clients, offline devices and installed Android limits remain; there is no real-user wallet census.
 
