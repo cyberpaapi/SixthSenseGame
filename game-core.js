@@ -135,6 +135,14 @@
     return result;
   }
 
+  function remainingPeekPositions(history = [], revealed = []) {
+    const known = new Set(revealed.map(Number));
+    history.forEach(entry => (entry.score || []).forEach((status, position) => {
+      if (status === "exact") known.add(position);
+    }));
+    return Array.from({ length: WORD_LENGTH }, (_, position) => position).filter(position => !known.has(position));
+  }
+
   function validateHardMode(guess, history) {
     const fixed = Array(WORD_LENGTH).fill(null);
     const requiredCounts = Object.create(null);
@@ -259,7 +267,7 @@
 
   return {
     ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, MAX_COINS, LIFELINE_COSTS, LAST_CHANCE_COST, ADVENTURE_TOTAL,
-    scoreGuess, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
+    scoreGuess, remainingPeekPositions, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
     rewardForAttempts, pointsForAttempts, vsRewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
     adventureRoute, adventureProgress, adventureAnswer
   };

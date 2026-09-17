@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Economy-v5 reset: syntax/build, core/multiplayer/progression, full browser and focused wallet migration/persistence checks passed locally.)
+Last verified: 2026-09-18 (Reveal correction: syntax, core/multiplayer/progression, focused candidate/API/browser and full browser checks passed locally; economy-v5 reset checks are recorded below.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -113,7 +113,7 @@ Lifeline prices and behavior:
 | Lifeline | Cost | Current behavior |
 | --- | ---: | --- |
 | Sense | 30 | If stock is zero, one tap buys and consumes the token immediately and unlocks the clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered confirmable popup. |
-| Peek | 50 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a new unrevealed answer position until no useful positions remain. |
+| Peek | 50 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a position that is neither green in any earlier guess nor already revealed. Solo and authoritative multiplayer share the same rule; Peek disables when all positions are known, without spending another item or coins. Repeated letters at different unknown positions remain eligible. |
 | Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
 | Skip | 60 | Can be stocked, consumed, purchased again, and reused outside VS. It reveals the answer in a modal, awards no coins, and changes the word only after green OK. Solo modes route through the shared result card; Adventure advances the current rung; Race advances that player; Co-op advances the shared route. VS does not render or accept Skip. |
 
@@ -185,6 +185,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `.github/workflows/pages.yml` | Builds and deploys the static repository to GitHub Pages on each push to `main` or a manual dispatch. |
 | `.gitignore` | Excludes Vercel's local project link, pulled environment files, installed Node dependencies, and Python cache files created during vocabulary regeneration. |
 | `test-wallet-reset.js` | Browser checks for every legacy economy version, unchanged progress/inventory/cosmetics/claimed ads, current-wallet preservation and actual post-reset earnings across reload. |
+| `test-peek.js` / `test-peek-browser.js` | Shared candidate and authoritative VS/Race/Co-op checks plus solo/online UI fixtures for green-position exclusion, exhaustion and single-purchase/inventory consumption. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `test-tile-contrast.js` | Browser regression for typed/empty tile contrast in both themes, shared solo/online tile styles, and preservation of scored/Peek backgrounds. Run with `npm run test:contrast`. |
@@ -308,6 +309,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 18 Reveal correction (`20260918.2` core/app/multiplayer): syntax checks, `npm test`, `test-peek.js`, `test-peek-browser.js` and the full browser suite passed on port 4269. Deterministic tests cover greens from earlier rows, previous reveals, unknown duplicate-letter positions, server selection of the only remaining position, and exhausted requests without a database update in VS/Race/Co-op. Browser checks exercise solo and explicit three-mode online fixtures, one 50-coin purchase or one stored Peek, and disabled exhausted controls. The production multiplayer suite now also checks an actual server Peek result against the player's scored history.
+
 September 18 web reset (`app.js?v=20260918.1`): syntax/build, core/multiplayer/progression, full browser and `test-wallet-reset.js` passed on port 4269. The focused browser check covers missing and version-1/2/3/4 economy markers, zero and high balances, exact 250 reset, preservation of version-5 balances, saved puzzle/progress/inventory/cosmetics/statistics/claimed-ad history, a real first-try solve adding 140 coins, and reload without another reset. No backend room mutation or Android bundle change is needed for this web release.
 
 September 17 release preparation (`20260917.1`): core/multiplayer/progression, full browser, engagement, tile contrast, actual 88-second music playback/loop/lifecycle, result audio/avatar/confetti, banner geometry, mobile rewards, mocked purchase verification and all three Last Chance suites passed on port 4269. Updated stale seven-chance home-copy and 42-tile music assertions to the six-row contract. Visually inspected the 390×844 darker game background with readable letters and unclipped controls. Android sync, debug assembly and lint passed; Gradle deprecation/flatDir/SDK-tool warnings remain. Refreshed `release/SixthSense-v1.0.1-debug.apk` and `release/SixthSense-debug.apk`: 36,289,797 bytes, SHA-256 `B03DDD551EF61095EB0E02F387DE32C0F6DCE7A2E852DE24DA80AC141ACBDDB7`. This is a debug APK, not a newly signed Play bundle.
@@ -426,6 +429,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Reveal only unknown positions
+
+- Fixed multiplayer Peek selecting an already-green position. Extracted the existing solo exclusion rule into a shared core helper used by solo, the online UI and the authoritative server: all earlier exact positions and previous Peek positions are excluded.
+- Disable online Peek and guard its purchase path when nothing useful remains; the server rejects exhausted direct requests without updating lifeline state. Keep duplicate letters eligible at genuinely unknown positions.
+- Added deterministic candidate/API coverage, solo and three-mode browser fixtures, and a production Peek assertion. Versioned core/app/multiplayer scripts as 20260918.2. The economy-v5 reset and 50-coin Peek price remain unchanged. Installed Android bundles receive updated UI only in a future app update; the deployed API fixes candidate selection for their online requests too.
 
 ### 2026-09-18 — Publish the requested web wallet reset
 

@@ -88,6 +88,13 @@ async function submitWord(page, word) {
     await guestPage.waitForSelector(".attempt-patterns > span", { timeout: 5000 });
     const observerLatencyMs = Date.now() - observeStartedAt;
 
+    const peekResponse = hostPage.waitForResponse(response => response.url().includes("/api/multiplayer") && response.request().method() === "POST" && response.request().postDataJSON()?.action === "lifeline" && response.request().postDataJSON()?.kind === "peek");
+    await hostPage.click('[data-online-lifeline="peek"] button');
+    const peekResult = await (await peekResponse).json();
+    assert.equal(peekResult.effect.kind, "peek");
+    assert(peekResult.snapshot.me.attempts.every(attempt => attempt.score[peekResult.effect.position] !== "exact"), "production Reveal must never select an already-green position");
+    await hostPage.waitForFunction(() => !document.querySelector('[data-online-key="A"]')?.disabled);
+
     for (const word of guesses.slice(1)) {
       if (await hostPage.locator("#online-round-transition:not([hidden])").count() || await hostPage.locator("#last-chance-modal[open]").count()) break;
       await submitWord(hostPage, word);

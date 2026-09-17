@@ -513,7 +513,7 @@
       const price = item.querySelector(".lifeline-price");
       const stored = Math.max(0, Number(economy.inventory?.[kind]) || 0);
       const senseUnlocked = kind === "sense" && Boolean(effects.clue);
-      const exhausted = kind === "peek" && (effects.peeked || []).length >= Core.WORD_LENGTH;
+      const exhausted = kind === "peek" && Core.remainingPeekPositions(state.snapshot?.me?.attempts || [], (effects.peeked || []).map(entry => entry.position)).length === 0;
       const available = !exhausted;
       stock.hidden = !(stored > 0 || senseUnlocked);
       stock.querySelector("b").textContent = senseUnlocked ? "1" : stored;
@@ -662,6 +662,7 @@
     if (state.snapshot?.room.mode === "vs" && kind === "skip") return;
     if (state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
     const currentEffect = state.snapshot.me.lifelines || {};
+    if (kind === "peek" && !Core.remainingPeekPositions(state.snapshot.me.attempts || [], (currentEffect.peeked || []).map(entry => entry.position)).length) return;
     if (kind === "sense" && currentEffect.clue) {
       showLifelineEffect({ kind, clue: currentEffect.clue });
       return;

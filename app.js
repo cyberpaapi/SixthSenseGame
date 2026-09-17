@@ -701,10 +701,7 @@
   }
 
   function remainingPeekPositions() {
-    const exactPositions = new Set();
-    game.guesses.forEach(entry => entry.score.forEach((status, index) => { if (status === "exact") exactPositions.add(index); }));
-    return Array.from({ length: Core.WORD_LENGTH }, (_, index) => index)
-      .filter(index => !exactPositions.has(index) && !game.peekedPositions.includes(index));
+    return Core.remainingPeekPositions(game.guesses, game.peekedPositions);
   }
 
   function remainingClearLetters() {

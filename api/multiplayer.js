@@ -527,8 +527,7 @@ async function submitLifeline(sql, body) {
     lifelines.clue = ANSWER_CLUES.get(answer) || lifelines.clue || "A familiar six-letter word.";
     effect = { kind, clue: lifelines.clue };
   } else if (kind === "peek") {
-    const used = new Set((lifelines.peeked || []).map(entry => Number(entry.position)));
-    const candidates = Array.from({ length: Core.WORD_LENGTH }, (_, position) => position).filter(position => !used.has(position));
+    const candidates = Core.remainingPeekPositions(parseJson(me.attempts, []), (lifelines.peeked || []).map(entry => entry.position));
     if (!candidates.length) throw Object.assign(new Error("Every position is already revealed."), { status: 409 });
     const seed = crypto.createHash("sha256").update(`${answer}:${me.id}:${candidates.length}`).digest().readUInt32BE(0);
     const position = candidates[seed % candidates.length];
@@ -683,4 +682,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { roomGuessLimit, submitGuess, submitLastChance, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
