@@ -9,15 +9,31 @@
     "test:browser": "node test-browser.js",
     "test:engagement": "node test-engagement-browser.js",
     "test:contrast": "node test-tile-contrast.js",
-    "test:production-multiplayer": "node test-production-multiplayer.js"
+    "test:production-multiplayer": "node test-production-multiplayer.js",
+    "build:mobile": "node scripts/build-mobile.js",
+    "android:sync": "npm run build:mobile && cap sync android",
+    "android:open": "cap open android",
+    "test:mobile": "node test-mobile.js",
+    "test:purchases": "node test-play-purchase.js",
+    "test:last-chance": "node test-last-chance-server.js && node test-last-chance-mobile.js && node test-last-chance-online.js"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2"
+    "@capacitor/android": "8.5.1",
+    "@capacitor/app": "8.1.1",
+    "@capacitor/core": "8.5.1",
+    "@neondatabase/serverless": "^1.0.2",
+    "google-auth-library": "10.9.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.1",
     "playwright": "^1.55.0"
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   }
 }

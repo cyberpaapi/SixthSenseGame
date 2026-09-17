@@ -1,0 +1,51 @@
+"use strict";
+const assert = require("node:assert/strict");
+const { chromium } = require("playwright");
+(async () => {
+  const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN });
+  try {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", error => errors.push(error.message));
+    await page.addInitScript(() => {
+      localStorage.setItem("sixth-sense.visited.v1", "yes");
+      localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Music QA" }));
+      localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: true, effects: true }));
+    });
+    const root = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269";
+    await page.goto(root);
+    assert.equal(await page.locator("audio").count(), 0, "do not request the soundtrack before a gesture");
+    await page.click('[data-modal-open="settings-modal"]');
+    await page.waitForFunction(() => document.querySelector("#background-music")?.currentTime > .15);
+    await page.waitForFunction(() => Number.isFinite(document.querySelector("#background-music").duration));
+    const track = await page.locator("#background-music").evaluate(audio => ({ src: audio.currentSrc, duration: audio.duration, loop: audio.loop }));
+    assert.match(new URL(track.src).pathname, /tea-and-tangrams-loop\.mp3$/);
+    assert(Math.abs(track.duration - 88) < .1, `Music must restart at 1:28, not play the later tail: ${JSON.stringify(track)}`);
+    assert.equal(track.loop, true);
+    await page.click('label:has(#music-mode)');
+    const pausedAt = await page.locator("#background-music").evaluate(audio => audio.currentTime);
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator("#background-music").evaluate(audio => audio.paused), true);
+    assert.equal(await page.locator("#background-music").evaluate(audio => audio.currentTime), pausedAt);
+    await page.click('label:has(#music-mode)');
+    await page.waitForFunction(position => document.querySelector("#background-music").currentTime > position, pausedAt);
+    await page.evaluate(() => window.SixthSenseAppLifecycle.pause());
+    assert.equal(await page.locator("#background-music").evaluate(audio => audio.paused), true);
+    await page.evaluate(() => window.SixthSenseAudio.stopResult());
+    assert.equal(await page.locator("#background-music").evaluate(audio => audio.paused), true, "result cleanup cannot restart paused music");
+    await page.evaluate(() => window.SixthSenseAppLifecycle.resume());
+    await page.waitForFunction(() => window.SixthSenseAudio.state().musicRunning);
+    await page.locator("#background-music").evaluate(audio => { audio.currentTime = audio.duration - .25; });
+    await page.waitForFunction(() => document.querySelector("#background-music").currentTime < 2);
+    assert.equal(await page.locator("#background-music").evaluate(audio => audio.paused), false, "loop must keep playing after the end");
+    assert.equal(await page.locator("audio").count(), 1, "repeated start/mute must never stack music players");
+    await page.route("**/tea-and-tangrams-loop.mp3*", route => route.abort());
+    await page.reload();
+    await page.click('[data-start-mode="practice"]');
+    await page.waitForFunction(() => Boolean(document.querySelector("#background-music")?.error));
+    assert.equal(await page.evaluate(() => window.SixthSenseAudio.state().musicRunning), false);
+    assert.equal(await page.locator("#game-board .tile").count(), 36);
+    assert.deepEqual(errors, []);
+    console.log("Recorded music passed: gesture start, 88 s local loop, pause/resume position, end wrap, one player, background pause and nonblocking missing media.");
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

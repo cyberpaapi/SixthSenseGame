@@ -84,7 +84,7 @@ async function submitWord(page, word) {
     const observerLatencyMs = Date.now() - observeStartedAt;
 
     for (const word of guesses.slice(1)) {
-      if (await hostPage.locator("#online-round-transition:not([hidden])").count()) break;
+      if (await hostPage.locator("#online-round-transition:not([hidden])").count() || await hostPage.locator("#last-chance-modal[open]").count()) break;
       await submitWord(hostPage, word);
     }
 

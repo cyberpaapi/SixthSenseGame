@@ -53,6 +53,8 @@ const evidence = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, "..
         assert.match(await page.locator("#result-bonus").textContent(), /trio complete.*\+60/);
         for (const size of [{ width: 390, height: 844 }, { width: 360, height: 800 }, { width: 320, height: 568 }]) {
           await page.setViewportSize(size);
+          // Let resize/media-query updates reach a painted frame before measuring.
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           const layout = await page.evaluate(() => {
             const ok = document.querySelector("#result-primary").getBoundingClientRect();
             return { right: ok.right, bottom: ok.bottom, width: innerWidth, height: innerHeight, scroll: document.documentElement.scrollWidth };

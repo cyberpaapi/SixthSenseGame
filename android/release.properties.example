@@ -1,0 +1,10 @@
+# Copy to release.properties (ignored by git); AdMob identifiers are public IDs, not secrets.
+admobAppId=REPLACE_WITH_ADMOB_APP_ID
+bannerAdId=REPLACE_WITH_BANNER_UNIT_ID
+rewardedAdId=REPLACE_WITH_REWARDED_UNIT_ID
+verifyPurchaseUrl=https://sixth-sense-game.vercel.app/api/play-purchase
+# Internal builds keep release signing/optimization but use Google sample ads.
+# Rebuild with production after completing the checklist before public release.
+releaseChannel=internal
+# Set only after the production checklist and real-device/Play-track checks pass.
+releaseChecklistApproved=false

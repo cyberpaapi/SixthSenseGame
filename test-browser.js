@@ -67,7 +67,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(homeControlSizing.modeShelfHeight <= 250, "the phone mode launcher should remain compact");
     assert.equal(await page.locator("#mode-shelf-title").textContent(), "Pick your signal");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "0");
-    assert.match(await page.locator("#home-title").textContent(), /Seven chances/);
+    assert.match(await page.locator("#home-title").textContent(), /Six chances/);
     assert.equal(await page.locator(".mode-tile img").count(), 4);
     assert.match(await page.locator(".lobby-hero-art").getAttribute("src"), /lobby-observatory-v2\.webp$/);
     assert.match(await page.locator(".brand-wordmark img").getAttribute("src"), /logo-sixth-sense-clay-v1\.png$/);
@@ -80,8 +80,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.click('[data-start-mode="daily"]');
     assert.equal(await page.locator("#home-screen").isHidden(), true);
     assert.equal(await page.locator("#game-screen").isVisible(), true);
-    assert.equal(await page.locator("#game-board .board-row").count(), 7);
-    assert.equal(await page.locator("#game-board .tile").count(), 42);
+    assert.equal(await page.locator("#game-board .board-row").count(), 6);
+    assert.equal(await page.locator("#game-board .tile").count(), 36);
     assert.equal(await page.locator("#keyboard .key").count(), 27);
     assert.equal(await page.locator('[data-key="ENTER"]').count(), 0, "automatic submission must remove the onscreen Enter key");
     assert.equal(await page.locator(".game-card-head, #puzzle-label, #puzzle-heading, .mode-switch").count(), 0);
@@ -229,15 +229,17 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#result-share").count(), 0, "the completion card should stay focused on the result and OK action");
     assert(await page.locator("#celebration .confetti").count() >= 70, "completion should trigger a full confetti burst");
     assert.equal(await page.locator("#celebration .confetti.is-cannon").count(), 20, "the victory card should receive a delayed two-sided confetti cannon");
-    assert.equal(await page.locator("#result-confetti i").count(), 26, "the reward card should keep a visible confetti cascade above its backdrop");
-    assert.equal(await page.locator("#result-modal img[src*='result-signal-crest-v1.webp']").count(), 1, "the victory art should be purpose-made and optimized");
+    assert.equal(await page.locator("#result-confetti i").count(), 56, "the reward card should keep a staggered falling confetti shower above its backdrop");
+    assert.equal(await page.locator("#result-avatar").getAttribute("data-result-mood"), "happy", "wins should show the happy player avatar");
+    assert(await page.locator("#result-avatar").evaluate(element => element.classList.contains(`avatar-${document.body.dataset.playerAvatar}`)), "the result should use the selected player avatar");
     assert(await page.evaluate(() => document.querySelector("#result-modal").scrollWidth <= document.querySelector("#result-modal").clientWidth), "the result screen must not overflow horizontally");
     assert.equal(await page.locator("#stats-modal").getAttribute("open"), null, "ordinary Statistics must stay separate from the completion moment");
     assert.equal(await page.locator("#coin-count").textContent(), "250", "a two-attempt solve should award 120 coins after lifeline spending");
     assert.equal(await page.locator("#stat-coins").textContent(), "250");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "1");
     assert((await page.evaluate(() => window.SixthSenseAudio.state().scheduledEffects)) >= 9, "the solved row and victory moment should schedule layered completion audio");
-    assert.deepEqual(await page.evaluate(() => window.SixthSenseAudio.state().lastCelebration), { hoots: 2, claps: 18 }, "victory audio must include the celebratory two-part hoot and background applause sequence");
+    await page.waitForFunction(() => window.SixthSenseAudio.state().lastResult.status === "playing");
+    assert.deepEqual(await page.evaluate(() => window.SixthSenseAudio.state().lastResult.clips), ["applause", "blower"], "victory audio must play recorded applause and the party blower");
     await page.waitForTimeout(850);
     await page.screenshot({ path: path.join(evidenceDir, "victory-result-390x844.png"), fullPage: true });
     await page.click("#result-primary");
@@ -747,7 +749,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
 
     await repeatPage.click('[data-start-mode="practice"]');
     const lastChanceGame = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")));
-    const missCandidates = ["rattle", "raffle", "planet", "banner", "market", "school", "bridge", "coffee"].filter(word => word !== lastChanceGame.answer).slice(0, 7);
+    const missCandidates = ["rattle", "raffle", "planet", "banner", "market", "school", "bridge", "coffee"].filter(word => word !== lastChanceGame.answer).slice(0, 6);
     for (let guessIndex = 0; guessIndex < missCandidates.length; guessIndex += 1) {
       for (const letter of missCandidates[guessIndex]) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
       await repeatPage.waitForTimeout(1150);
@@ -756,12 +758,12 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await repeatPage.waitForSelector("#last-chance-modal[open]", { timeout: 4000 });
     const coinsBeforeLastChance = await repeatPage.evaluate(() => window.SixthSenseEconomy.state().coins);
     await repeatPage.click("#last-chance-buy");
-    assert.equal(await repeatPage.locator("#game-board .board-row").count(), 8, "buying Last Chance must add exactly one eighth row");
-    assert.equal(await repeatPage.evaluate(() => window.SixthSenseEconomy.state().coins), coinsBeforeLastChance - 80, "Last Chance must charge 80 coins once");
+    assert.equal(await repeatPage.locator("#game-board .board-row").count(), 7, "buying Last Chance must add exactly one seventh row");
+    assert.equal(await repeatPage.evaluate(() => window.SixthSenseEconomy.state().coins), coinsBeforeLastChance - 125, "Last Chance must charge 125 coins once");
     const lastChanceAnswer = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).answer);
     for (const letter of lastChanceAnswer) await repeatPage.click(`[data-key="${letter.toUpperCase()}"]`);
     await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
-    assert.equal(await repeatPage.locator("#result-attempts").textContent(), "Solved in 8", "the victory card must acknowledge an eighth-attempt solve");
+    assert.equal(await repeatPage.locator("#result-attempts").textContent(), "Solved in 7", "the victory card must acknowledge a seventh-attempt solve");
     await repeatPage.click("#result-primary");
     assert(await repeatPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "repeatable lifelines must not introduce horizontal overflow");
     await repeats.close();

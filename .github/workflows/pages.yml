@@ -25,10 +25,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Bundle only public client files
+        run: node scripts/build-mobile.js --web
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: www
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4

@@ -1,5 +1,7 @@
 # Sixth Sense
 
+Android source and AdMob/Google Play Billing integration are included. See [ANDROID_RELEASE.md](ANDROID_RELEASE.md) for build commands, account configuration and remaining publication checks. Debug uses test ads; a signed live release needs the owner's AdMob, Play and signing configuration.
+
 An original, mobile-first six-letter word deduction game with a tactile claymorphic interface.
 
 ## Play online
@@ -37,12 +39,12 @@ Then open `http://localhost:4173`.
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information
 - Sense clues appear in a centered confirmable popup and can be reopened anytime without another charge
-- A paid 80-coin Last Chance offers one eighth attempt after the standard seven are exhausted; the rewarded-ad alternative is visibly reserved for later integration
+- Six standard tries, then one Last Chance for 125 coins or an optional Android rewarded ad; an earned ad grants one extra try without spending coins. Online rules follow the authoritative server version.
 - Purposeful purchase, use, reveal, removal, wallet, and screen-entry motion with reduced-motion support
 - Optional hard mode
 - Dark and high-contrast themes
-- An original generative ambient soundtrack plus tactile gameplay effects, each with its own persistent toggle
-- A dedicated victory flow across every solo mode with performance copy, solved-word reveal, puzzle points, earned coins, full-screen and two-sided confetti, an original two-part celebratory hoot followed by background applause, and a clear green OK action; completed Daily saves reliably reopen the card
+- The user-supplied Tea and Tangrams soundtrack plus tactile gameplay effects, each with its own persistent toggle
+- A dedicated victory flow with the player's happy avatar wearing a party hat and an unfurling party blower, recorded crowd applause, solved-word reveal, puzzle points, earned coins, and a clear green OK action; solo and online success cards include a staggered falling-confetti shower that respects reduced motion; losses show a sad avatar and play a crowd “awww”; completed Daily saves reliably reopen the card
 - Statistics remain a separate, player-opened screen reached from Settings instead of occupying the header or interrupting every successful solve
 - Original generated 3D clay control sheet plus nine optimized transparent PNG icons
 - Nine free and nine coin-unlockable generated animal avatars, four premium avatar frames, and a persistent highlight-color picker
@@ -50,6 +52,8 @@ Then open `http://localhost:4173`.
 - Live Vercel/Neon room-code multiplayer for 2–8-player 3/5/10-word races, two-player point-based 3/5/9/Endless VS, and 2–4-player 3/5/10-word Co-op. VS awards solve coins at 60% of solo rates and removes Skip; Race and Co-op reveal skipped words before acknowledged progression
 - Mobile browser Back follows the in-app screen stack and asks before leaving an active solo or multiplayer game
 - Keyboard, touch, screen-reader labels, non-color symbols, and reduced-motion support
+
+The background music replacement is awaiting the user's Suno track. See [AUDIO_BRIEF.md](AUDIO_BRIEF.md) for the instrumental prompt and delivery notes. Result effects are bundled locally, with CC0 credits in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ## Verify
 

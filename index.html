@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260916.1">
+  <link rel="stylesheet" href="styles.css?v=20260917.1">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -57,7 +57,7 @@
       <img class="lobby-hero-art" src="assets/lobby-observatory-v2.webp" width="1600" height="800" alt="" aria-hidden="true">
       <div class="lobby-copy">
         <p class="eyebrow">Today’s signal is waiting</p>
-        <h1 id="home-title">Six letters.<br><span>Seven chances.</span></h1>
+        <h1 id="home-title">Six letters.<br><span>Six chances.</span></h1>
         <p>Follow the pattern, trust the echo, and open today’s word.</p>
         <button class="daily-quest" type="button" data-start-mode="daily">
           <img src="assets/mode-daily-v2.webp" width="512" height="512" alt="" aria-hidden="true">
@@ -144,7 +144,7 @@
       </div>
 
       <div class="board-wrap">
-        <div class="board" id="game-board" role="grid" aria-label="Seven rows of six-letter guesses"></div>
+        <div class="board" id="game-board" role="grid" aria-label="Six rows of six-letter guesses"></div>
       </div>
 
       <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
@@ -177,7 +177,7 @@
       <div class="online-play-layout">
         <div class="online-puzzle-column">
           <p class="online-live-status" id="online-live-status" aria-live="polite">Connecting to the room…</p>
-          <div class="board online-board" id="online-board" role="grid" aria-label="Online word board"></div>
+          <div class="board-wrap online-board-wrap"><div class="board online-board" id="online-board" role="grid" aria-label="Online word board"></div></div>
           <div class="keyboard online-keyboard" id="online-keyboard" aria-label="Online on-screen keyboard"></div>
           <section class="lifeline-dock online-lifeline-dock" aria-label="Multiplayer lifelines">
             <div class="lifeline-actions">
@@ -217,7 +217,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
         </button>
       </div>
-      <p>Uncover one common six-letter word in seven tries. Every guess must be a valid six-letter word.</p>
+      <p>Uncover one common six-letter word in six tries. Every guess must be a valid six-letter word.</p>
       <div class="example-row" aria-label="Example guess planet">
         <span class="demo-tile exact">P<small>●</small></span><span class="demo-tile">L</span><span class="demo-tile present">A<small>◆</small></span><span class="demo-tile">N</span><span class="demo-tile absent">E<small>×</small></span><span class="demo-tile">T</span>
       </div>
@@ -257,8 +257,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 3l8.5 7.5M5.5 9.5v10h13v-10M9.5 19.5v-6h5v6"></path></svg>
       </button>
       <div class="result-hero" aria-hidden="true">
-        <span class="result-halo"></span>
-        <img src="assets/result-signal-crest-v1.webp" width="640" height="640" alt="">
+        <span id="result-avatar" class="avatar-art avatar-fox" data-result-mood="happy"></span>
       </div>
       <p class="result-kicker" id="result-kicker">Puzzle complete</p>
       <h2 id="result-title">Signal found</h2>
@@ -281,6 +280,10 @@
       <div class="result-streak-reward" id="result-streak-reward" hidden>
         <img src="assets/decor-champion.webp" width="512" height="512" alt="" aria-hidden="true">
         <span><small>Seven-day bonus</small><strong>+300 coins</strong></span>
+      </div>
+      <div id="reward-ad-offer" class="reward-ad-offer" hidden>
+        <button type="button" id="reward-ad-button">Watch ad · 3× solve coins</button>
+        <small id="reward-ad-message" role="status"></small>
       </div>
       <div class="result-actions">
         <button class="result-next" id="result-next" type="button" hidden>Next word</button>
@@ -360,8 +363,16 @@
         <label class="setting-row"><span><strong>High contrast</strong><small>Brighter blue and orange feedback</small></span><input type="checkbox" id="contrast-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>Night clay</strong><small>Use the deep plum theme</small></span><input type="checkbox" id="dark-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>Music</strong><small>Original dreamy claybeat soundtrack</small></span><input type="checkbox" id="music-mode"><i aria-hidden="true"></i></label>
-        <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, reveals, and wins</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
+        <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, and crowd reactions</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
       </div>
+      <section id="mobile-store" class="mobile-store" hidden aria-label="Ads and purchases">
+        <button type="button" id="remove-ads-button" disabled>Remove banner ads</button>
+        <p id="store-message" role="status">One-time purchase. Optional rewarded ads remain available.</p>
+        <button type="button" id="restore-purchases-button">Restore purchases</button>
+        <button type="button" id="ad-privacy-options" hidden>Ad privacy choices</button>
+        <button type="button" data-open-privacy>Privacy policy</button>
+        <a href="mailto:aryanchandwani@gmail.com">Contact Sensei support</a>
+      </section>
       <button class="settings-stats-link" type="button" data-modal-open="stats-modal">
         <img src="assets/control-stats.png" width="256" height="256" alt="" aria-hidden="true">
         <span><strong>Statistics</strong><small>View your play history, streak, and guess rhythm</small></span>
@@ -470,7 +481,8 @@
 
   <dialog class="modal online-result-modal" id="online-result-modal" aria-labelledby="online-result-title" aria-describedby="online-result-copy">
     <div class="modal-sheet popup-sheet">
-      <div class="online-result-crest" aria-hidden="true"><img src="assets/result-signal-crest-v1.webp" width="640" height="640" alt=""></div>
+      <div class="result-confetti" aria-hidden="true"></div>
+      <div class="online-result-crest" aria-hidden="true"><span id="online-result-avatar" class="avatar-art avatar-fox" data-result-mood="happy"></span></div>
       <p class="eyebrow" id="online-result-kicker">Match complete</p>
       <h2 id="online-result-title">Victory!</h2>
       <p id="online-result-copy">You carried the strongest signal.</p>
@@ -493,21 +505,41 @@
     <div class="modal-sheet popup-sheet">
       <p class="eyebrow">One more signal</p>
       <h2 id="last-chance-title">Take a Last Chance?</h2>
-      <p id="last-chance-copy">Unlock one final attempt for 80 coins.</p>
+      <p id="last-chance-copy">Unlock one final attempt for 125 coins.</p>
       <div class="last-chance-actions">
-        <button class="popup-ok" id="last-chance-buy" type="button"><span class="coin-symbol" aria-hidden="true"></span> Continue · 80</button>
+        <button class="popup-ok" id="last-chance-buy" type="button"><span class="coin-symbol" aria-hidden="true"></span> Continue · 125</button>
         <button class="secondary-button" id="last-chance-decline" type="button">End this word</button>
-        <button class="secondary-button last-chance-ad" type="button" disabled>Watch an ad · Soon</button>
+        <button class="secondary-button last-chance-ad" id="last-chance-ad" type="button" hidden>Watch ad · +1 try</button>
       </div>
+      <p id="last-chance-ad-message" role="status" aria-live="polite"></p>
     </div>
   </dialog>
 
+  <dialog class="modal privacy-modal" id="privacy-modal" aria-label="Privacy policy">
+    <div class="modal-sheet popup-sheet">
+      <iframe data-privacy-document="privacy.html" title="Sixth Sense privacy policy" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      <button type="button" class="popup-ok modal-got-it">Close privacy policy</button>
+    </div>
+  </dialog>
+  <dialog class="modal" id="age-band-modal" aria-labelledby="age-band-title">
+    <div class="modal-sheet popup-sheet">
+      <h2 id="age-band-title">Before you play</h2>
+      <p>Choose your age group. We use it for privacy settings, and it stays on this device.</p>
+      <div class="age-band-options">
+        <button type="button" data-age-band="under13">Under 13</button>
+        <button type="button" data-age-band="13-15">13–15</button>
+        <button type="button" data-age-band="16-17">16–17</button>
+        <button type="button" data-age-band="18+">18 or older</button>
+      </div>
+    </div>
+  </dialog>
   <div class="celebration" id="celebration" aria-hidden="true"></div>
-  <script src="answer-bank.js?v=20260905.1"></script>
-  <script src="word-bank.js?v=20260905.1"></script>
-  <script src="game-core.js?v=20260905.1"></script>
-  <script src="progression.js?v=20260905.1"></script>
-  <script src="app.js?v=20260905.1"></script>
-  <script src="multiplayer.js?v=20260905.1"></script>
+  <script src="answer-bank.js?v=20260917.1"></script>
+  <script src="word-bank.js?v=20260917.1"></script>
+  <script src="game-core.js?v=20260917.1"></script>
+  <script src="progression.js?v=20260917.1"></script>
+  <script src="app.js?v=20260917.1"></script>
+  <script src="multiplayer.js?v=20260917.1"></script>
+  <script src="mobile.js?v=20260917.1"></script>
 </body>
 </html>

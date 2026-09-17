@@ -81,23 +81,23 @@
     Object.freeze(ANSWERS.filter(item => item.tier === tier))
   ])));
 
-  const MAX_GUESSES = 7;
+  const MAX_GUESSES = 6;
   const WORD_LENGTH = 6;
   const STARTING_COINS = 250;
   const MAX_COINS = 99999;
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
-  const LAST_CHANCE_COST = 80;
+  const LAST_CHANCE_COST = 125;
   const ADVENTURE_TOTAL = ANSWERS.length;
   const adventureRouteCache = new Map();
 
   function rewardForAttempts(attempts) {
-    const safeAttempts = Math.min(MAX_GUESSES, Math.max(1, Number(attempts) || MAX_GUESSES));
+    const safeAttempts = Math.min(MAX_GUESSES + 1, Math.max(1, Number(attempts) || (MAX_GUESSES + 1)));
     return (16 - (safeAttempts * 2)) * 10;
   }
 
   function pointsForAttempts(attempts) {
-    const safeAttempts = Math.min(MAX_GUESSES, Math.max(1, Number(attempts) || MAX_GUESSES));
-    return (MAX_GUESSES - safeAttempts + 1) * 100;
+    const safeAttempts = Math.min(MAX_GUESSES + 1, Math.max(1, Number(attempts) || (MAX_GUESSES + 1)));
+    return (MAX_GUESSES - safeAttempts + 2) * 100;
   }
 
   function vsRewardForAttempts(attempts) {

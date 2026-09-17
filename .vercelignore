@@ -1,0 +1,10 @@
+android/
+artwork-drafts/
+node_modules/
+www/
+release/
+*.jks
+*.keystore
+*.xlsx
+*.properties
+.env*

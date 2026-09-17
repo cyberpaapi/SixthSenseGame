@@ -14,6 +14,8 @@ const AVATARS = new Set(["fox", "owl", "axolotl", "panda", "tiger", "koala", "fr
 const DECORATIONS = new Set(["none", "aurora", "sunburst", "prism", "champion"]);
 let schemaPromise;
 
+function roomGuessLimit(room) { return Number(room.max_guesses) === 7 ? 7 : Core.MAX_GUESSES; }
+
 function database() {
   if (!process.env.DATABASE_URL) throw Object.assign(new Error("The multiplayer database is not connected yet."), { status: 503 });
   return neon(process.env.DATABASE_URL);
@@ -60,6 +62,7 @@ async function ensureSchema(sql) {
       UNIQUE(room_code, seat)
     )`;
     await sql`CREATE INDEX IF NOT EXISTS sixth_sense_players_room_idx ON sixth_sense_players(room_code)`;
+    await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS max_guesses integer NOT NULL DEFAULT 7`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS endless boolean NOT NULL DEFAULT false`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS current_round integer NOT NULL DEFAULT 0`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS last_round_winner_player_id uuid`;
@@ -177,6 +180,8 @@ async function snapshot(sql, room, me) {
   return {
     room: {
       code: room.code,
+      maxGuesses: roomGuessLimit(room),
+      lastChanceAds: true,
       mode: room.mode,
       difficulty: room.difficulty,
       wordCount: room.word_count,
@@ -192,6 +197,7 @@ async function snapshot(sql, room, me) {
       isHost: room.host_player_id === me.id,
       currentWordIndex: isSharedRoundMode(room.mode) ? room.current_round : own.current_word_index,
       attempts: parseJson(own.attempts, []),
+      failedBatches: Number(own.failed_batches) || 0,
       score: own.score,
       finished: own.finished,
       eliminated: own.eliminated,
@@ -213,8 +219,8 @@ async function createRoom(sql, body) {
   let code;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     code = roomCode();
-    const inserted = await sql`INSERT INTO sixth_sense_rooms (code, mode, difficulty, word_count, endless, capacity, host_player_id, expires_at)
-      VALUES (${code}, ${mode}, ${difficulty}, ${wordCount}, ${endless}, ${capacity}, ${playerId}, now() + (${ROOM_TTL_HOURS} || ' hours')::interval)
+    const inserted = await sql`INSERT INTO sixth_sense_rooms (code, mode, difficulty, word_count, endless, capacity, host_player_id, max_guesses, expires_at)
+      VALUES (${code}, ${mode}, ${difficulty}, ${wordCount}, ${endless}, ${capacity}, ${playerId}, ${Core.MAX_GUESSES}, now() + (${ROOM_TTL_HOURS} || ' hours')::interval)
       ON CONFLICT DO NOTHING RETURNING *`;
     if (inserted.length) break;
     code = null;
@@ -316,9 +322,9 @@ async function submitVsGuess(sql, { code, guess, actionId, me, room }) {
   attempts.push({ guess, score });
   const won = guess === answer;
   const hasExtraAttempt = Boolean(lifelines.extraAttempt);
-  const exhausted = !won && attempts.length >= Core.MAX_GUESSES + (hasExtraAttempt ? 1 : 0);
+  const exhausted = !won && attempts.length >= roomGuessLimit(room) + (hasExtraAttempt ? 1 : 0);
 
-  if (!won && attempts.length === Core.MAX_GUESSES && !hasExtraAttempt) {
+  if (!won && attempts.length === roomGuessLimit(room) && !hasExtraAttempt) {
     const pending = { ...lifelines, lastChancePending: true };
     const updated = await sql`UPDATE sixth_sense_players SET attempts=${JSON.stringify(attempts)}::jsonb, lifeline_state=${JSON.stringify(pending)}::jsonb,
         revision=revision+1, updated_at=now()
@@ -379,7 +385,7 @@ async function submitCoopGuess(sql, { code, guess, actionId, me, room }) {
   const won = guess === answer;
   const hasExtraAttempt = Boolean(lifelines.extraAttempt);
 
-  if (!won && attempts.length === Core.MAX_GUESSES && !hasExtraAttempt) {
+  if (!won && attempts.length === roomGuessLimit(room) && !hasExtraAttempt) {
     const pending = { ...lifelines, lastChancePending: true };
     const updated = await sql`UPDATE sixth_sense_players SET attempts=${JSON.stringify(attempts)}::jsonb, lifeline_state=${JSON.stringify(pending)}::jsonb,
         revision=revision+1, updated_at=now()
@@ -391,7 +397,7 @@ async function submitCoopGuess(sql, { code, guess, actionId, me, room }) {
   }
 
   if (!won) {
-    const exhausted = attempts.length >= Core.MAX_GUESSES + (hasExtraAttempt ? 1 : 0);
+    const exhausted = attempts.length >= roomGuessLimit(room) + (hasExtraAttempt ? 1 : 0);
     const updated = await sql`UPDATE sixth_sense_players SET attempts=${JSON.stringify(exhausted ? [] : attempts)}::jsonb,
         failed_batches=failed_batches + ${exhausted ? 1 : 0}, lifeline_state=${JSON.stringify(exhausted ? {} : lifelines)}::jsonb,
         revision=revision+1, updated_at=now()
@@ -428,6 +434,11 @@ async function submitGuess(sql, body) {
   const room = await getRoom(sql, code);
   if (room.status !== "running") throw Object.assign(new Error("The match is not accepting guesses."), { status: 409 });
   if (me.finished) throw Object.assign(new Error("Your run is already complete."), { status: 409 });
+  const active = activeAnswer(room, me);
+  const effects = parseJson(me.lifeline_state, {});
+  const currentEffects = Number(effects.round) === active.index ? effects : {};
+  if (currentEffects.lastChancePending || currentEffects.pendingSkip) throw Object.assign(new Error("Finish the open decision before guessing."), { status: 409 });
+  if (parseJson(me.attempts, []).length >= roomGuessLimit(room) + (currentEffects.extraAttempt ? 1 : 0)) throw Object.assign(new Error("No attempts remain for this word."), { status: 409 });
   if (!Core.isValidWord(guess)) throw Object.assign(new Error("That word is not in the accepted dictionary."), { status: 400 });
   if (room.mode === "vs") return submitVsGuess(sql, { code, guess, actionId, me, room });
   if (room.mode === "coop") return submitCoopGuess(sql, { code, guess, actionId, me, room });
@@ -441,7 +452,7 @@ async function submitGuess(sql, body) {
   const storedLifelines = parseJson(me.lifeline_state, {});
   const lifelines = Number(storedLifelines.round) === Number(me.current_word_index) ? storedLifelines : { round: Number(me.current_word_index), clue: "", peeked: [], eliminatedLetters: [] };
   const hasExtraAttempt = Boolean(lifelines.extraAttempt);
-  const exhausted = !won && attempts.length >= Core.MAX_GUESSES + (hasExtraAttempt ? 1 : 0);
+  const exhausted = !won && attempts.length >= roomGuessLimit(room) + (hasExtraAttempt ? 1 : 0);
   let nextIndex = me.current_word_index;
   let nextAttempts = attempts;
   let completedRounds = parseJson(me.completed_rounds, []);
@@ -455,7 +466,7 @@ async function submitGuess(sql, body) {
     nextAttempts = [];
     lifelineState = {};
     finished = nextIndex >= room.word_count;
-  } else if (!won && attempts.length === Core.MAX_GUESSES && !hasExtraAttempt) {
+  } else if (!won && attempts.length === roomGuessLimit(room) && !hasExtraAttempt) {
     lifelineState = { ...lifelines, lastChancePending: true };
   } else if (exhausted && room.mode === "race") {
     failedBatches += 1;
@@ -587,6 +598,7 @@ async function submitLastChance(sql, body) {
   if (room.status !== "running") throw Object.assign(new Error("The match is no longer active."), { status: 409 });
   const { index, answers } = activeAnswer(room, me);
   const lifelines = parseJson(me.lifeline_state, {});
+  if ((body.expectedRound !== undefined && Number(body.expectedRound) !== index) || (body.expectedFailedBatches !== undefined && Number(body.expectedFailedBatches) !== Number(me.failed_batches))) throw Object.assign(new Error("The word changed before the reward was collected."), { status: 409 });
   if (!lifelines.lastChancePending || Number(lifelines.round) !== index) throw Object.assign(new Error("Last Chance is not currently available."), { status: 409 });
 
   if (decision === "purchase") {
@@ -671,4 +683,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { roomGuessLimit, submitGuess, submitLastChance, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };

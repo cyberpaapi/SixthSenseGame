@@ -183,7 +183,7 @@
   if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION) stats.coins = Core.STARTING_COINS;
   stats.economyVersion = ECONOMY_VERSION;
   stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
-  stats.distribution = Array.from({ length: Core.MAX_GUESSES }, (_, index) => Number(stats.distribution?.[index]) || 0);
+  stats.distribution = Array.from({ length: Math.max(Core.MAX_GUESSES + 1, Math.min(8, stats.distribution?.length || 0)) }, (_, index) => Number(stats.distribution?.[index]) || 0);
   stats.inventory = Object.fromEntries(Object.keys(defaultInventory).map(kind => {
     const count = Number(stats.inventory?.[kind]);
     return [kind, Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0];
@@ -204,15 +204,26 @@
   saveJson(STORAGE.stats, stats);
   let inputLocked = false;
   let toastTimer = null;
+  const resultConfettiTimers = new Map();
   let audioContext = null;
   let audioUnlocked = false;
   let effectsGain = null;
   let musicGain = null;
-  let musicTimer = null;
-  let musicStep = 0;
-  let nextMusicAt = 0;
+  let musicElement = null;
+  let musicSuspended = false;
+  const MUSIC = { url: "assets/audio/tea-and-tangrams-loop.mp3?v=20260916.1", volume: .24, duckedVolume: .065 };
   let scheduledEffectCount = 0;
-  let lastCelebrationAudio = { hoots: 0, claps: 0 };
+  const RESULT_AUDIO = {
+    applause: { url: "assets/audio/win-applause.mp3", volume: .52 },
+    blower: { url: "assets/audio/win-party-blower.mp3", volume: .28 },
+    aww: { url: "assets/audio/loss-crowd-aww.mp3", volume: .56 }
+  };
+  const resultAudioBuffers = new Map();
+  const activeResultSources = new Set();
+  let resultAudioToken = 0;
+  let resultAudioTimer = null;
+  let resultAudioDucked = false;
+  let lastResultAudio = { outcome: null, clips: [], status: "idle" };
   let lastAdventureMapLevel = null;
   let adventurePageStart = 0;
   let selectedAdventureLevel = 0;
@@ -290,7 +301,8 @@
 
   function emptyGame(answer, gameMode) {
     const nextGame = {
-      version: 3,
+      version: 4,
+      maxGuesses: Core.MAX_GUESSES,
       mode: gameMode,
       date: Core.dateKey(),
       puzzleNumber: Core.dayNumber(),
@@ -326,11 +338,22 @@
     return nextGame;
   }
 
+  function restoreGame(base, saved) {
+    const restored = { ...base, ...saved, clue: base.clue, current: "" };
+    if (Number(saved.version) < 4) {
+      // Preserve already submitted guesses and an extra turn bought before the update.
+      restored.maxGuesses = Math.max(Core.MAX_GUESSES, saved.guesses.length, saved.extraAttemptPurchased ? 7 : 0);
+      restored.version = 4;
+    }
+    if (restored.status === "playing" && !restored.extraAttemptPurchased && restored.guesses.length >= restored.maxGuesses) restored.status = "last-chance";
+    return restored;
+  }
+
   function loadDailyGame() {
     const answer = Core.dailyAnswer();
     const saved = loadJson(STORAGE.daily, {});
     if (saved.date === Core.dateKey() && saved.answer === answer.word && Array.isArray(saved.guesses)) {
-      return { ...emptyGame(answer, "daily"), ...saved, clue: answer.clue, current: "" };
+      return restoreGame(emptyGame(answer, "daily"), saved);
     }
     return emptyGame(answer, "daily");
   }
@@ -339,7 +362,7 @@
     const saved = loadJson(STORAGE[gameMode], {});
     const adventureLevelMatches = gameMode !== "adventure" || Number(saved.adventureLevel) === stats.adventure.level;
     if (!forceNew && adventureLevelMatches && saved.mode === gameMode && saved.answer && saved.clue && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
-      return { ...emptyGame({ word: saved.answer, clue: saved.clue }, gameMode), ...saved, clue: ANSWER_CLUES.get(saved.answer) || saved.clue, current: "" };
+      return restoreGame(emptyGame({ word: saved.answer, clue: ANSWER_CLUES.get(saved.answer) || saved.clue }, gameMode), saved);
     }
     if (gameMode === "adventure") {
       const next = emptyGame(Core.adventureAnswer(stats.adventure.level, stats.adventure.seed), gameMode);
@@ -602,9 +625,10 @@
 
   function renderBoard() {
     els.board.innerHTML = "";
-    const rowCount = Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0);
+    const rowCount = (game.maxGuesses || Core.MAX_GUESSES) + (game.extraAttemptPurchased ? 1 : 0);
     els.board.setAttribute("aria-label", `${rowCount} rows of six-letter guesses`);
-    els.board.classList.toggle("has-extra-row", rowCount > Core.MAX_GUESSES);
+    els.board.classList.toggle("has-extra-row", Boolean(game.extraAttemptPurchased));
+    els.board.style.setProperty("--board-rows", rowCount);
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
       const row = document.createElement("div");
       row.className = "board-row";
@@ -816,9 +840,10 @@
   }
 
   function openLastChanceDialog() {
-    els.lastChanceCopy.textContent = `Unlock one final attempt for ${Core.LAST_CHANCE_COST} coins. The ad option is coming later.`;
+    els.lastChanceCopy.textContent = `Unlock one final attempt for ${Core.LAST_CHANCE_COST} coins.`;
     els.lastChanceBuy.innerHTML = `<span class="coin-symbol" aria-hidden="true"></span> Continue · ${Core.LAST_CHANCE_COST}`;
     if (!els.lastChanceDialog.open) els.lastChanceDialog.showModal();
+    document.dispatchEvent(new Event("sixth-sense-last-chance-rendered"));
     setTimeout(() => els.lastChanceBuy.focus({ preventScroll: true }), 50);
   }
 
@@ -897,8 +922,8 @@
     game.current = "";
     const won = guess === game.answer;
     if (won) game.status = "won";
-    else if (game.guesses.length >= Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0)) {
-      game.status = !game.extraAttemptPurchased && game.guesses.length === Core.MAX_GUESSES ? "last-chance" : "lost";
+    else if (game.guesses.length >= (game.maxGuesses || Core.MAX_GUESSES) + (game.extraAttemptPurchased ? 1 : 0)) {
+      game.status = !game.extraAttemptPurchased && game.guesses.length === (game.maxGuesses || Core.MAX_GUESSES) ? "last-chance" : "lost";
       game.lastChanceOffered = game.status === "last-chance";
     }
     saveGame();
@@ -960,7 +985,7 @@
       stats.played += 1;
       if (won) {
         stats.wins += 1;
-        stats.distribution[Math.min(Core.MAX_GUESSES, game.guesses.length) - 1] += 1;
+        stats.distribution[Math.min(stats.distribution.length, game.guesses.length) - 1] += 1;
         const yesterday = new Date();
         yesterday.setUTCDate(yesterday.getUTCDate() - 1);
         stats.currentStreak = stats.lastWinDate === Core.dateKey(yesterday) ? stats.currentStreak + 1 : 1;
@@ -992,22 +1017,24 @@
       const totalReward = reward + streakReward + (Number(game.trioReward) || 0);
       announce(totalReward ? `Solved in ${game.guesses.length} — +${totalReward} coins!` : "Beautiful intuition.");
       celebrate();
-      playEffect("win");
       try { navigator.vibrate?.([22, 34, 48]); } catch (_) { /* Haptics are an optional enhancement. */ }
     } else {
       announce(`The word was ${game.answer.toUpperCase()}.`);
-      playEffect("lose");
     }
     renderStats();
     updateResultControls();
     renderResult(won, reward, streakReward, points);
-    setTimeout(() => openCurrentResult(won), 680);
+    setTimeout(() => {
+      openCurrentResult(won);
+      playEffect(won ? "win" : "lose");
+    }, 680);
   }
 
   function openCurrentResult(won = game.status === "won") {
     renderResult(won, Number(game.solveReward) || 0, Number(game.streakReward) || 0, Number(game.solvePoints) || 0);
     if (!els.resultDialog.open) els.resultDialog.showModal();
     if (won) celebrateResultDialog();
+    else stopResultConfetti();
     els.resultPrimary.focus({ preventScroll: true });
   }
 
@@ -1205,8 +1232,9 @@
   function renderResult(won, reward = Number(game.solveReward) || 0, streakReward = Number(game.streakReward) || 0, points = Number(game.solvePoints) || 0) {
     const attempts = game.guesses.length;
     const performance = resultPerformance(Math.max(1, attempts));
-    const earned = won ? reward + streakReward + (Number(game.trioReward) || 0) : 0;
+    const earned = won ? reward + streakReward + (Number(game.trioReward) || 0) + (Number(stats.rewardedClaims?.[game.rewardClaimId]) || 0) : 0;
     els.resultDialog.classList.toggle("is-loss", !won);
+    renderResultAvatar(document.querySelector("#result-avatar"), won);
     els.resultKicker.textContent = game.skipped ? "Word revealed" : game.adventureReplay ? "Replay complete" : won ? "Puzzle complete" : "Signal ended";
     els.resultTitle.textContent = game.skipped ? "No reward this time" : won ? performance.title : "Signal missed";
     els.resultSummary.textContent = game.skipped ? "Take in the answer, then continue when you are ready." : won ? performance.summary : "The answer is yours now. Carry the pattern into the next word.";
@@ -1232,6 +1260,64 @@
     else if (won && game.trioCount > 0 && game.trioCount < 3) highlights.push(`Today's trio · ${game.trioCount}/3 words`);
     els.resultBonus.hidden = highlights.length === 0;
     els.resultBonus.textContent = highlights.join(" · ");
+    document.dispatchEvent(new Event("sixth-sense-result-rendered"));
+  }
+
+  function lastChanceOffer() {
+    if (currentScreen() === "online") return window.SixthSenseOnlineLastChance?.offer() || null;
+    if (currentScreen() !== "game" || game?.status !== "last-chance" || game.extraAttemptPurchased) return null;
+    if (!game.lastChanceClaimId) {
+      const next = { ...game, lastChanceClaimId: crypto.randomUUID() };
+      localStorage.setItem(STORAGE[mode], JSON.stringify(next));
+      game = next;
+    }
+    return { claimId: game.lastChanceClaimId, kind: "last-chance" };
+  }
+
+  async function applyLastChanceReceipt(receipt) {
+    if (receipt.kind === "last-chance-online") return window.SixthSenseOnlineLastChance.applyReceipt(receipt);
+    if (receipt.kind !== "last-chance" || !/^[a-zA-Z0-9-]{20,80}$/.test(receipt.claimId || "")) throw Error("Invalid Last Chance receipt.");
+    for (const name of ["daily", "practice", "sprint", "insight", "streak", "adventure"]) {
+      const saved = JSON.parse(localStorage.getItem(STORAGE[name]) || "null");
+      if (saved?.lastChanceClaimId !== receipt.claimId) continue;
+      if (saved.extraAttemptPurchased || saved.status !== "last-chance") return;
+      const next = { ...saved, extraAttemptPurchased: true, lastChanceOffered: true, status: "playing", lastChanceSource: "ad" };
+      // The entitlement and receipt identity persist together before native acknowledgement.
+      localStorage.setItem(STORAGE[name], JSON.stringify(next));
+      if (mode === name && game?.lastChanceClaimId === receipt.claimId) {
+        game = next;
+        if (currentScreen() === "game") { closeDialog(els.lastChanceDialog); renderAll(); playEffect("success"); }
+      }
+      return;
+    }
+    // A replaced/expired puzzle cannot transfer an extra turn to a different word.
+  }
+
+  function rewardOffer() {
+    if (!game || game.status !== "won" || game.skipped || game.adventureReplay || !(game.solveReward > 0)) return null;
+    if (!game.rewardClaimId) {
+      game.rewardClaimId = crypto.randomUUID();
+      // A reward must have a durable puzzle identity before opening an ad.
+      localStorage.setItem(STORAGE[mode], JSON.stringify(game));
+    }
+    return { claimId: game.rewardClaimId, coins: Math.min(280, 2 * game.solveReward), base: game.solveReward,
+      claimed: Object.hasOwn(stats.rewardedClaims || {}, game.rewardClaimId), room: Core.MAX_COINS - stats.coins };
+  }
+
+  function applyRewardReceipt(receipt) {
+    const id = receipt?.claimId;
+    const coins = Number(receipt?.coins);
+    if (!/^[a-zA-Z0-9-]{20,80}$/.test(id || "") || !Number.isInteger(coins) || coins < 1 || coins > 280) throw new Error("Invalid reward receipt.");
+    const ledger = stats.rewardedClaims && typeof stats.rewardedClaims === "object" ? stats.rewardedClaims : {};
+    if (Object.hasOwn(ledger, id)) return ledger[id];
+    const credited = Math.min(coins, Core.MAX_COINS - stats.coins);
+    const next = { ...stats, coins: stats.coins + credited, rewardedClaims: { ...ledger, [id]: credited } };
+    // Wallet and deduplication receipt share one atomic storage write. A crash cannot replay the credit.
+    localStorage.setItem(STORAGE.stats, JSON.stringify(next));
+    stats = next;
+    renderEconomy(); renderStats();
+    if (els.resultDialog.open) renderResult(game.status === "won");
+    return credited;
   }
 
   function renderProgression() {
@@ -1266,7 +1352,7 @@
 
   async function shareResult() {
     if (game.status === "playing") return;
-    const maximum = Core.MAX_GUESSES + (game.extraAttemptPurchased ? 1 : 0);
+    const maximum = (game.maxGuesses || Core.MAX_GUESSES) + (game.extraAttemptPurchased ? 1 : 0);
     const header = `Sixth Sense ${mode === "daily" ? `#${game.puzzleNumber}` : MODE_CONFIG[mode].label.replace(" Puzzle", "")} ${game.status === "won" ? `${game.guesses.length}/${maximum}` : `—/${maximum}`}`;
     const body = game.guesses.map(entry => entry.score.map(status => ({ exact: "●", present: "◆", absent: "·" }[status])).join("")).join("\n");
     const text = `${header}\n${body}\n\nFeel the word.`;
@@ -1344,21 +1430,41 @@
     setTimeout(() => { els.celebration.innerHTML = ""; }, 3600);
   }
 
-  function celebrateResultDialog() {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    els.resultConfetti.innerHTML = "";
-    const colors = ["#ff4f83", "#13ad79", "#ffbf2f", "#7754e8", "#22bde0"];
-    for (let index = 0; index < 26; index += 1) {
+  function stopResultConfetti(layer) {
+    const layers = layer ? [layer] : [...resultConfettiTimers.keys()];
+    layers.forEach(target => {
+      clearTimeout(resultConfettiTimers.get(target));
+      resultConfettiTimers.delete(target);
+      target.replaceChildren();
+    });
+  }
+
+  function celebrateResultDialog(dialog = els.resultDialog) {
+    const layer = dialog.querySelector(".result-confetti");
+    if (!layer) return;
+    stopResultConfetti(layer);
+    if (!dialog.open || document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["#ff4f83", "#13ad79", "#ffbf2f", "#7754e8", "#22bde0", "#ff7438"];
+    const fragment = document.createDocumentFragment();
+    layer.style.setProperty("--result-drop", `${layer.clientHeight + 40}px`);
+    for (let index = 0; index < 56; index += 1) {
       const piece = document.createElement("i");
-      piece.style.left = `${4 + Math.random() * 92}%`;
-      piece.style.background = colors[index % colors.length];
-      piece.style.setProperty("--result-drift", `${Math.random() * 90 - 45}px`);
-      piece.style.setProperty("--result-fall", `${1.35 + Math.random() * .75}s`);
-      piece.style.setProperty("--result-delay", `${Math.random() * .28}s`);
-      piece.style.setProperty("--result-rotate", `${360 + Math.random() * 520}deg`);
-      els.resultConfetti.appendChild(piece);
+      const paper = document.createElement("b");
+      piece.style.left = `${2 + (index % 14) * 7 + Math.random() * 3}%`;
+      piece.style.setProperty("--paper-color", colors[index % colors.length]);
+      piece.style.setProperty("--paper-width", `${5 + Math.random() * 4}px`);
+      piece.style.setProperty("--paper-height", `${8 + Math.random() * 7}px`);
+      piece.style.setProperty("--result-drift", `${Math.random() * 110 - 55}px`);
+      piece.style.setProperty("--result-fall", `${2.7 + Math.random() * .9}s`);
+      piece.style.setProperty("--result-delay", `${Math.floor(index / 14) * .4 + Math.random() * .15}s`);
+      piece.style.setProperty("--result-rotate", `${(index % 2 ? -1 : 1) * (180 + Math.random() * 360)}deg`);
+      piece.style.setProperty("--paper-flutter", `${.45 + Math.random() * .5}s`);
+      if (index % 5 === 0) paper.className = "is-round";
+      piece.appendChild(paper);
+      fragment.appendChild(piece);
     }
-    setTimeout(() => { els.resultConfetti.innerHTML = ""; }, 2500);
+    layer.appendChild(fragment);
+    resultConfettiTimers.set(layer, setTimeout(() => stopResultConfetti(layer), 5100));
   }
 
   function ensureAudio() {
@@ -1436,14 +1542,83 @@
     source.stop(start + duration + .02);
   }
 
-  function scheduleApplause(start, clapCount = 18) {
-    for (let index = 0; index < clapCount; index += 1) {
-      const at = start + index * .105 + Math.random() * .085;
-      const pan = index % 2 ? .46 : -.46;
-      scheduleNoise({ at, duration: .055 + Math.random() * .025, volume: .012 + Math.random() * .009, filter: 1250 + Math.random() * 1150 }, effectsGain);
-      scheduleNoise({ at: at + .018, duration: .04 + Math.random() * .018, volume: .007 + Math.random() * .006, filter: 2200 + Math.random() * 900 }, effectsGain);
-      scheduleTone({ at, frequency: 165 + Math.random() * 55, endFrequency: 120, duration: .045, volume: .0038, wave: "triangle", pan, filter: 520 }, effectsGain);
+  function loadResultAudio(name) {
+    if (resultAudioBuffers.has(name)) return resultAudioBuffers.get(name);
+    const context = ensureAudio();
+    if (!context) return Promise.resolve(null);
+    const pending = fetch(RESULT_AUDIO[name].url)
+      .then(response => { if (!response.ok) throw new Error("Result sound unavailable"); return response.arrayBuffer(); })
+      .then(bytes => context.decodeAudioData(bytes))
+      .catch(() => { resultAudioBuffers.delete(name); return null; });
+    resultAudioBuffers.set(name, pending);
+    return pending;
+  }
+
+  function setResultMusicDuck(ducked) {
+    resultAudioDucked = ducked;
+    if (!audioContext || !musicGain) return;
+    const now = audioContext.currentTime;
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setTargetAtTime(settings.music && !musicSuspended && !document.hidden ? (ducked ? MUSIC.duckedVolume : MUSIC.volume) : .0001, now, .12);
+  }
+
+  function stopResultAudio() {
+    resultAudioToken += 1;
+    clearTimeout(resultAudioTimer);
+    resultAudioTimer = null;
+    for (const source of activeResultSources) {
+      try { source.stop(); } catch (_) { /* A completed source may already be stopped. */ }
+      source.disconnect();
     }
+    activeResultSources.clear();
+    if (["loading", "playing"].includes(lastResultAudio.status)) lastResultAudio.status = "cancelled";
+    setResultMusicDuck(false);
+  }
+
+  async function playResultAudio(won) {
+    stopResultAudio();
+    if (!settings.effects || document.hidden) return;
+    const token = resultAudioToken;
+    const names = won ? ["applause", "blower"] : ["aww"];
+    lastResultAudio = { outcome: won ? "win" : "loss", clips: [], status: "loading" };
+    const buffers = await Promise.all(names.map(loadResultAudio));
+    if (token !== resultAudioToken || !settings.effects || document.hidden) return;
+    const context = ensureAudio();
+    if (!context) return;
+    if (context.state === "suspended") {
+      try { await context.resume(); } catch (_) { lastResultAudio.status = "unavailable"; return; }
+    }
+    if (token !== resultAudioToken || !settings.effects || document.hidden) return;
+    const start = context.currentTime + .025;
+    let endAfter = 0;
+    buffers.forEach((buffer, index) => {
+      if (!buffer) return;
+      const name = names[index];
+      const delay = name === "blower" ? .28 : 0;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      const at = start + delay;
+      gain.gain.setValueAtTime(.0001, at);
+      gain.gain.linearRampToValueAtTime(RESULT_AUDIO[name].volume, at + .035);
+      gain.gain.setValueAtTime(RESULT_AUDIO[name].volume, at + Math.max(.04, buffer.duration - .18));
+      gain.gain.linearRampToValueAtTime(.0001, at + buffer.duration);
+      source.connect(gain).connect(effectsGain);
+      source.onended = () => { activeResultSources.delete(source); source.disconnect(); gain.disconnect(); };
+      activeResultSources.add(source);
+      source.start(at);
+      lastResultAudio.clips.push(name);
+      endAfter = Math.max(endAfter, delay + buffer.duration);
+    });
+    lastResultAudio.status = endAfter ? "playing" : "unavailable";
+    if (!endAfter) return;
+    setResultMusicDuck(true);
+    resultAudioTimer = setTimeout(() => {
+      if (token !== resultAudioToken) return;
+      lastResultAudio.status = "finished";
+      setResultMusicDuck(false);
+      resultAudioTimer = null;
+    }, (endAfter + .06) * 1000);
   }
 
   function playEffect(name, detail = {}) {
@@ -1484,19 +1659,9 @@
     } else if (name === "skip") {
       [659, 494, 370].forEach((frequency, index) => later(index * .065, { frequency, endFrequency: frequency * .93, duration: .15, volume: .024, wave: "triangle", filter: 1900 }));
     } else if (name === "win") {
-      lastCelebrationAudio = { hoots: 2, claps: 18 };
-      tone({ frequency: 392, endFrequency: 698, duration: .3, volume: .046, wave: "sine", attack: .035, pan: -.12, filter: 1700 });
-      later(.17, { frequency: 523, endFrequency: 1047, duration: .38, volume: .05, wave: "sine", attack: .028, pan: .12, filter: 2400 });
-      later(.19, { frequency: 1047, endFrequency: 1568, duration: .32, volume: .014, wave: "triangle", attack: .025, pan: .22, filter: 3200 });
-      tone({ frequency: 196, endFrequency: 261.63, duration: .48, volume: .047, wave: "triangle", filter: 900 });
-      scheduleNoise({ at: now + .015, duration: .11, volume: .018, filter: 1500 }, effectsGain);
-      [523, 659, 784, 1047].forEach((frequency, index) => later(.035 + index * .085, { frequency, duration: .5, volume: .042 - index * .004, wave: index < 2 ? "triangle" : "sine", pan: index % 2 ? .28 : -.28, filter: 3300 }));
-      [1319, 1568, 2093, 2637].forEach((frequency, index) => later(.24 + index * .065, { frequency, duration: .28, volume: .014 - index * .0015, wave: "sine", pan: .48 - index * .32 }));
-      [784, 988, 1175].forEach((frequency, index) => later(.52 + index * .075, { frequency, duration: .38, volume: .022 - index * .003, wave: "triangle", pan: (index - 1) * .28, filter: 2800 }));
-      scheduleNoise({ at: now + .5, duration: .2, volume: .012, filter: 2300 }, effectsGain);
-      scheduleApplause(now + .72, lastCelebrationAudio.claps);
+      void playResultAudio(true);
     } else if (name === "lose") {
-      [330, 262, 196].forEach((frequency, index) => later(index * .12, { frequency, endFrequency: frequency * .9, duration: .28, volume: .029, wave: "triangle", filter: 1300 }));
+      void playResultAudio(false);
     } else if (name === "start" || name === "room" || name === "open") {
       tone({ frequency: name === "room" ? 392 : 440, endFrequency: name === "open" ? 520 : 660, duration: .15, volume: .025, wave: "sine" });
       later(.055, { frequency: name === "room" ? 587 : 784, duration: .18, volume: .017, wave: "triangle", filter: 2300 });
@@ -1506,44 +1671,31 @@
     }
   }
 
-  function scheduleMusicStep() {
-    const context = ensureAudio();
-    if (!context || !settings.music || document.hidden) return;
-    const progression = [
-      [261.63, 329.63, 392, 493.88],
-      [220, 261.63, 329.63, 392],
-      [174.61, 220, 261.63, 329.63],
-      [196, 246.94, 293.66, 392]
-    ];
-    while (nextMusicAt < context.currentTime + .7) {
-      const chord = progression[Math.floor(musicStep / 8) % progression.length];
-      const withinChord = musicStep % 8;
-      const arpIndex = [0, 2, 1, 3, 2, 1, 0, 2][withinChord];
-      scheduleTone({ frequency: chord[arpIndex] * 2, endFrequency: chord[arpIndex] * 2.015, duration: .34, volume: .011, wave: "triangle", attack: .018, pan: withinChord % 2 ? .22 : -.22, filter: 2300, at: nextMusicAt }, musicGain);
-      if (withinChord % 4 === 0) scheduleTone({ frequency: chord[0] / 2, endFrequency: chord[0] / 2.02, duration: .46, volume: .018, wave: "sine", attack: .012, filter: 520, at: nextMusicAt }, musicGain);
-      if (withinChord === 0) chord.forEach((frequency, index) => scheduleTone({ frequency, endFrequency: frequency * 1.004, duration: 3.15, volume: .0048, wave: "sine", attack: .34, pan: (index - 1.5) * .24, filter: 1500, at: nextMusicAt }, musicGain));
-      nextMusicAt += .42;
-      musicStep = (musicStep + 1) % 32;
-    }
-  }
-
   function startMusic() {
-    if (!settings.music || !audioUnlocked || document.hidden || musicTimer) return;
+    if (!settings.music || !audioUnlocked || musicSuspended || document.hidden) return;
     const context = ensureAudio();
     if (!context) return;
     if (context.state === "suspended") context.resume().catch(() => {});
+    if (!musicElement) {
+      musicElement = new Audio(MUSIC.url);
+      musicElement.id = "background-music";
+      musicElement.loop = true;
+      musicElement.preload = "auto";
+      musicElement.hidden = true;
+      document.body.appendChild(musicElement);
+      context.createMediaElementSource(musicElement).connect(musicGain);
+    }
     const now = context.currentTime;
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setValueAtTime(Math.max(.0001, musicGain.gain.value), now);
-    musicGain.gain.exponentialRampToValueAtTime(.82, now + .45);
-    nextMusicAt = now + .08;
-    scheduleMusicStep();
-    musicTimer = window.setInterval(scheduleMusicStep, 250);
+    musicGain.gain.exponentialRampToValueAtTime(resultAudioDucked ? MUSIC.duckedVolume : MUSIC.volume, now + .45);
+    // Stream the prepared loop; retain its position across mute/backgrounding.
+    // Rejected autoplay, interrupted loads and unavailable media never block play.
+    if (musicElement.paused) musicElement.play().catch(() => {});
   }
 
   function stopMusic() {
-    if (musicTimer) window.clearInterval(musicTimer);
-    musicTimer = null;
+    if (musicElement) musicElement.pause();
     if (!audioContext || !musicGain) return;
     const now = audioContext.currentTime;
     musicGain.gain.cancelScheduledValues(now);
@@ -1555,12 +1707,14 @@
     audioUnlocked = true;
     const context = ensureAudio();
     if (!context) return;
+    if (settings.effects) Object.keys(RESULT_AUDIO).forEach(name => { void loadResultAudio(name); });
     const begin = () => { if (settings.music) startMusic(); };
     if (context.state === "suspended") context.resume().then(begin).catch(() => {});
     else begin();
   }
 
   function syncAudioSettings() {
+    if (!settings.effects) stopResultAudio();
     if (effectsGain && audioContext) effectsGain.gain.setTargetAtTime(settings.effects ? .82 : .0001, audioContext.currentTime, .025);
     if (settings.music) startMusic();
     else stopMusic();
@@ -1570,6 +1724,21 @@
     if (!element) return;
     element.className = `avatar-art avatar-${avatar}`;
     element.dataset.decoration = decoration || "none";
+  }
+
+  function renderResultAvatar(element, won) {
+    if (!element) return;
+    decorateAvatar(element);
+    element.dataset.resultMood = won ? "happy" : "sad";
+    element.dataset.avatarTier = PREMIUM_AVATARS.includes(settings.avatar) ? "premium" : "base";
+    element.replaceChildren();
+    if (won) {
+      const party = document.createElement("span");
+      party.className = "result-party";
+      party.setAttribute("aria-hidden", "true");
+      party.innerHTML = '<span class="party-hat"><i></i><b></b></span><span class="party-blower"><i class="party-blower-mouthpiece"></i><span class="party-blower-paper"><i></i></span></span>';
+      element.appendChild(party);
+    }
   }
 
   function renderIdentityShop() {
@@ -1774,7 +1943,7 @@
     }));
     document.querySelectorAll(".modal-close, .modal-got-it").forEach(button => button.addEventListener("click", () => closeDialog(button.closest("dialog"))));
     document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("click", event => {
-      if (event.target !== dialog || dialog === els.usernameDialog) return;
+      if (event.target !== dialog || dialog === els.usernameDialog || dialog.id === "age-band-modal") return;
       if (dialog === els.resultDialog) exitResult();
       else closeDialog(dialog);
     }));
@@ -1793,20 +1962,28 @@
       if (["game", "online"].includes(document.body.dataset.screen)) event.preventDefault();
     }, { passive: false });
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stopMusic();
+      if (document.hidden) { stopMusic(); stopResultAudio(); stopResultConfetti(); }
       else if (audioUnlocked && settings.music) startMusic();
     });
     window.addEventListener("pageshow", () => {
       if (mode === "daily" && game.date !== Core.dateKey()) setMode("daily");
     });
     window.addEventListener("popstate", handleBrowserBack);
+    document.querySelectorAll("#result-modal, #online-result-modal").forEach(dialog => dialog.addEventListener("close", () => {
+      stopResultAudio();
+      stopResultConfetti(dialog.querySelector(".result-confetti"));
+    }));
+    window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", event => {
+      if (event.matches) stopResultConfetti();
+    });
   }
 
   function init() {
     window.SixthSenseAudio = {
       play: playEffect,
       unlock: unlockAudio,
-      state: () => ({ music: Boolean(settings.music), effects: Boolean(settings.effects), unlocked: audioUnlocked, musicRunning: Boolean(musicTimer), scheduledEffects: scheduledEffectCount, lastCelebration: { ...lastCelebrationAudio } })
+      state: () => ({ music: Boolean(settings.music), effects: Boolean(settings.effects), unlocked: audioUnlocked, musicRunning: Boolean(musicElement && !musicElement.paused && !musicElement.error), musicTrack: "Tea and Tangrams", musicPosition: musicElement?.currentTime || 0, scheduledEffects: scheduledEffectCount, lastResult: { ...lastResultAudio, clips: [...lastResultAudio.clips] }, activeResultClips: activeResultSources.size, musicDucked: resultAudioDucked }),
+      stopResult: stopResultAudio
     };
     window.SixthSenseAdventure = {
       state: () => ({ ...stats.adventure, ...Core.adventureProgress(stats.adventure.level) })
@@ -1834,7 +2011,21 @@
       spend: (amount, label = "Purchase") => spendAmount(Math.max(0, Math.floor(Number(amount) || 0)), label),
       credit: (amount, label = "Reward") => creditCoins(amount, label)
     };
-    window.SixthSenseDialogs = { showHint: showHintDialog };
+    window.SixthSenseDialogs = { showHint: showHintDialog, renderResultAvatar, celebrateResult: celebrateResultDialog };
+    window.SixthSenseRewards = { offer: rewardOffer, applyReceipt: applyRewardReceipt };
+    window.SixthSenseLastChance = { offer: lastChanceOffer, applyReceipt: applyLastChanceReceipt };
+    window.SixthSenseAppLifecycle = {
+      pause: () => { musicSuspended = true; stopMusic(); stopResultAudio(); stopResultConfetti(); },
+      resume: () => { musicSuspended = false; if (audioUnlocked && settings.music) startMusic(); },
+      back: () => {
+        if (currentScreen() === "online") {
+          pendingLeave = { target: "home", fromHistory: false, online: true };
+          document.dispatchEvent(new CustomEvent("sixth-sense-request-online-leave"));
+        } else if (currentScreen() === "game" && ["playing", "last-chance"].includes(game?.status)) requestSoloLeave(defaultLeaveTarget(), false);
+        else if (currentScreen() === "game" && mode === "adventure") openAdventureMap();
+        else showScreen("home");
+      }
+    };
     window.SixthSenseCelebration = celebrate;
     window.SixthSenseNavigation = {
       onlineEntered: () => pushScreenState("online"),

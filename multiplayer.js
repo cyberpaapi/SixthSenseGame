@@ -11,6 +11,8 @@
   const SETTINGS_KEY = "sixth-sense.settings.v1";
   const IDENTITY_KEY = "sixth-sense.online.identity.v1";
   const ACTIVE_ROOM_KEY = "sixth-sense.active-room.v1";
+  const LAST_CHANCE_AD_KEY = "sixth-sense.last-chance-online.v1";
+  const baseGuessLimit = () => Number(state.snapshot?.room.maxGuesses) || 7; // Older servers still enforce seven.
   const ONLINE_REWARDS_KEY = "sixth-sense.online-rewards.v1";
   const LENGTH_OPTIONS = Object.freeze({
     race: [{ value: "3", label: "Sprint", detail: "3" }, { value: "5", label: "Normal", detail: "5" }, { value: "10", label: "Marathon", detail: "10" }],
@@ -326,6 +328,7 @@
     const me = snapshot.me;
     const isCoop = snapshot.room.mode === "coop";
     const won = isCoop || winner?.id === me.id;
+    window.SixthSenseDialogs?.renderResultAvatar(document.querySelector("#online-result-avatar"), won);
     const progress = snapshot.room.mode === "vs" ? Number(me.score) || 0 : Math.min(Number(me.currentWordIndex) || 0, snapshot.room.wordCount);
     const points = progress * 100;
     state.finishedResultShown = true;
@@ -336,8 +339,9 @@
     if (!els.resultDialog.open) els.resultDialog.showModal();
     if (won) {
       window.SixthSenseCelebration?.();
+      window.SixthSenseDialogs?.celebrateResult(els.resultDialog);
       playAudio("win");
-    }
+    } else playAudio("lose");
     setTimeout(() => els.resultOk.focus({ preventScroll: true }), 60);
   }
 
@@ -385,8 +389,9 @@
     const attempts = currentAttempts();
     const peeked = new Map((state.snapshot?.me?.lifelines?.peeked || []).map(entry => [Number(entry.position), entry.letter]));
     els.board.innerHTML = "";
-    const maxGuesses = Core.MAX_GUESSES + (state.snapshot?.me?.lifelines?.extraAttempt ? 1 : 0);
-    els.board.classList.toggle("has-extra-row", maxGuesses > Core.MAX_GUESSES);
+    const maxGuesses = baseGuessLimit() + (state.snapshot?.me?.lifelines?.extraAttempt ? 1 : 0);
+    els.board.classList.toggle("has-extra-row", Boolean(state.snapshot?.me?.lifelines?.extraAttempt));
+    els.board.style.setProperty("--board-rows", maxGuesses);
     for (let rowIndex = 0; rowIndex < maxGuesses; rowIndex += 1) {
       const row = document.createElement("div");
       row.className = "board-row";
@@ -427,7 +432,7 @@
     const states = keyStates();
     const eliminated = new Set(state.snapshot?.me?.lifelines?.eliminatedLetters || []);
     const lifelines = state.snapshot?.me?.lifelines || {};
-    const maxGuesses = Core.MAX_GUESSES + (lifelines.extraAttempt ? 1 : 0);
+    const maxGuesses = baseGuessLimit() + (lifelines.extraAttempt ? 1 : 0);
     const canPlay = state.snapshot?.room.status === "running" && !state.snapshot.me.finished && !lifelines.lastChancePending && !lifelines.pendingSkip && currentAttempts().length < maxGuesses && !state.busy;
     els.keyboard.innerHTML = "";
     KEY_ROWS.forEach(keys => {
@@ -574,7 +579,9 @@
     }
     if (lifelines.lastChancePending && !els.lastChanceDialog.open) {
       els.lastChanceCopy.textContent = `Unlock one final attempt for ${Core.LAST_CHANCE_COST} coins. No coins are spent until you continue.`;
+      document.querySelector("#last-chance-buy").innerHTML = `<span class="coin-symbol" aria-hidden="true"></span> Continue · ${Core.LAST_CHANCE_COST}`;
       els.lastChanceDialog.showModal();
+      document.dispatchEvent(new Event("sixth-sense-last-chance-rendered"));
     }
   }
 
@@ -593,6 +600,39 @@
     } catch (error) { setPlayStatus(friendlyError(error)); }
     finally { state.busy = false; els.skipOk.disabled = false; renderKeyboard(); renderLifelines(); }
   }
+
+  function onlineLastChanceOffer() {
+    const snapshot = state.snapshot;
+    if (!snapshot?.room.lastChanceAds || !snapshot.me.lifelines?.lastChancePending || snapshot.room.status !== "running") return null;
+    const key = [state.roomCode, state.playerId, snapshot.me.currentWordIndex, snapshot.me.failedBatches || 0].join(":");
+    let claim = readJson(LAST_CHANCE_AD_KEY, {});
+    if (claim.key !== key) {
+      claim = { key, claimId: crypto.randomUUID(), roomCode: state.roomCode, playerId: state.playerId, round: snapshot.me.currentWordIndex, failedBatches: snapshot.me.failedBatches || 0 };
+      localStorage.setItem(LAST_CHANCE_AD_KEY, JSON.stringify(claim));
+    }
+    return { claimId: claim.claimId, kind: "last-chance-online" };
+  }
+
+  async function applyOnlineLastChanceReceipt(receipt) {
+    const claim = readJson(LAST_CHANCE_AD_KEY, {});
+    if (claim.claimId !== receipt.claimId) return;
+    if (!state.snapshot) throw Error("Reconnect to the room to collect your extra try.");
+    const me = state.snapshot.me;
+    if (claim.roomCode !== state.roomCode || claim.playerId !== state.playerId || claim.round !== me.currentWordIndex || claim.failedBatches !== (me.failedBatches || 0) || state.snapshot.room.status !== "running") return;
+    if (me.lifelines?.extraAttempt || !me.lifelines?.lastChancePending) return;
+    if (state.busy) throw Error("Wait for the room to finish updating.");
+    state.busy = true;
+    try {
+      // Reuse the authoritative unlock operation. The local wallet is unchanged;
+      // retries use the same action id, scoped by round and failed batch on the server.
+      const result = await api("last_chance", { roomCode: state.roomCode, resumeToken: state.token, decision: "purchase", actionId: claim.claimId, expectedRound: claim.round, expectedFailedBatches: claim.failedBatches });
+      state.snapshot = result.snapshot;
+      state.current = "";
+      state.renderedSnapshotSignature = "";
+      renderSnapshot(); schedulePoll(200);
+    } finally { state.busy = false; renderKeyboard(); renderLifelines(); }
+  }
+  window.SixthSenseOnlineLastChance = { offer: onlineLastChanceOffer, applyReceipt: applyOnlineLastChanceReceipt };
 
   async function resolveOnlineLastChance(purchase) {
     if (state.busy || !state.snapshot?.me?.lifelines?.lastChancePending) return;
@@ -706,7 +746,7 @@
       const completedWords = Math.min(isCoop ? snapshot.room.currentRound : player.currentWordIndex, snapshot.room.wordCount);
       const label = !isVs
         ? `${completedWords} / ${snapshot.room.wordCount} words`
-        : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${Core.MAX_GUESSES + (player.id === snapshot.me.id && snapshot.me.lifelines?.extraAttempt ? 1 : 0)} attempts`;
+        : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${baseGuessLimit() + (player.id === snapshot.me.id && snapshot.me.lifelines?.extraAttempt ? 1 : 0)} attempts`;
       copy.innerHTML = `<strong>${escapeHtml(player.name)}${player.id === snapshot.me.id ? " · You" : ""}</strong><small>${label}</small>`;
       if (isVs || isCoop) {
         if (isVs && !snapshot.room.endless) {

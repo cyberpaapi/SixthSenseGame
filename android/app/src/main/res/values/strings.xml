@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sixth Sense</string>
+    <string name="title_activity_main">Sixth Sense</string>
+    <string name="package_name">com.sensei.sixthsense</string>
+    <string name="custom_url_scheme">com.sensei.sixthsense</string>
+</resources>

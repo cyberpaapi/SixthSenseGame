@@ -1,6 +1,9 @@
 {
   "outputDirectory": ".",
   "functions": {
+    "api/play-purchase.js": {
+      "maxDuration": 30
+    },
     "api/multiplayer.js": {
       "maxDuration": 10
     }

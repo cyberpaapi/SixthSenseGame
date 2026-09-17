@@ -1,0 +1,119 @@
+apply plugin: 'com.android.application'
+
+def releaseSettings = new Properties()
+def releaseFile = rootProject.file('release.properties')
+if (releaseFile.exists()) releaseFile.withInputStream { releaseSettings.load(it) }
+def signingSettings = new Properties()
+def signingFile = rootProject.file('keystore.properties')
+if (signingFile.exists()) signingFile.withInputStream { signingSettings.load(it) }
+def setting = { name, fallback -> releaseSettings.getProperty(name, fallback) }
+def releaseChannel = providers.gradleProperty('releaseChannel').getOrElse(setting('releaseChannel', 'production'))
+def internalRelease = releaseChannel == 'internal'
+
+android {
+    namespace = "com.sensei.sixthsense"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.sensei.sixthsense"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 2
+        versionName "1.0.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildFeatures { buildConfig true }
+    signingConfigs {
+        release {
+            if (signingFile.exists()) {
+                storeFile rootProject.file(signingSettings['storeFile'])
+                storePassword signingSettings['storePassword']
+                keyAlias signingSettings['keyAlias']
+                keyPassword signingSettings['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders = [admobAppId: 'ca-app-pub-3940256099942544~3347511713']
+            buildConfigField 'String', 'BANNER_AD_ID', '"ca-app-pub-3940256099942544/6300978111"'
+            buildConfigField 'String', 'REWARDED_AD_ID', '"ca-app-pub-3940256099942544/5224354917"'
+            buildConfigField 'String', 'VERIFY_PURCHASE_URL', '"https://sixth-sense-game.vercel.app/api/play-purchase"'
+            buildConfigField 'String', 'REMOVE_ADS_PRODUCT', '"remove_banner_ads"'
+        }
+        release {
+            signingConfig signingConfigs.release
+            manifestPlaceholders = [admobAppId: internalRelease ? 'ca-app-pub-3940256099942544~3347511713' : setting('admobAppId', '')]
+            buildConfigField 'String', 'BANNER_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/6300978111' : setting('bannerAdId', '')) + '"'
+            buildConfigField 'String', 'REWARDED_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/5224354917' : setting('rewardedAdId', '')) + '"'
+            buildConfigField 'String', 'VERIFY_PURCHASE_URL', '"' + setting('verifyPurchaseUrl', '') + '"'
+            buildConfigField 'String', 'REMOVE_ADS_PRODUCT', '"remove_banner_ads"'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+    implementation 'com.android.billingclient:billing:8.3.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+tasks.register('validateReleaseSettings') {
+    doLast {
+        if (!(releaseChannel in ['internal', 'production'])) throw new GradleException('releaseChannel must be internal or production.')
+        ['admobAppId', 'bannerAdId', 'rewardedAdId', 'verifyPurchaseUrl'].each { key ->
+            def value = setting(key, '')
+            if (!value || value.contains('3940256099942544') || value.contains('REPLACE')) throw new GradleException("Set real ${key} in android/release.properties before release.")
+        }
+        if (!(setting('admobAppId', '') ==~ /ca-app-pub-\d{16}~\d{10}/)) throw new GradleException('Invalid AdMob application ID.')
+        ['bannerAdId', 'rewardedAdId'].each { key ->
+            if (!(setting(key, '') ==~ /ca-app-pub-\d{16}\/\d{10}/)) throw new GradleException("Invalid ${key}.")
+        }
+        if (!setting('verifyPurchaseUrl', '').startsWith('https://')) throw new GradleException('Purchase verification requires HTTPS.')
+        if (!internalRelease && setting('releaseChecklistApproved', '') != 'true') throw new GradleException('Complete ANDROID_RELEASE.md before approving a production release. Use releaseChannel=internal for Play testing.')
+        def injectedStore = providers.gradleProperty('android.injected.signing.store.file').orNull
+        if (injectedStore != null) {
+            if (!file(injectedStore).isFile()) throw new GradleException('The Android Studio upload keystore does not exist.')
+            ['store.password', 'key.alias', 'key.password'].each { field ->
+                if (!providers.gradleProperty('android.injected.signing.' + field).orNull) throw new GradleException('Complete the upload-key fields in Android Studio.')
+            }
+        } else if (!android.signingConfigs.release.isSigningReady() || !android.signingConfigs.release.storeFile?.isFile()) {
+            throw new GradleException('Use Android Studio Generate Signed App Bundle or APK, or configure android/keystore.properties.')
+        }
+        if (internalRelease) logger.lifecycle('INTERNAL TEST BUILD: Google sample ads enabled. Complete ANDROID_RELEASE.md and rebuild with releaseChannel=production before public release.')
+    }
+}
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach { dependsOn 'validateReleaseSettings' }
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

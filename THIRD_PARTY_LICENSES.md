@@ -1,4 +1,24 @@
-# Third-party data notices
+# Third-party data and audio notices
+
+## Bundled fonts and native dependencies
+
+DM Sans and Nunito are redistributed under the SIL Open Font License 1.1. Full copyright/license notices are in `assets/fonts/dmsans-OFL.txt` and `assets/fonts/nunito-OFL.txt`. `scripts/vendor-fonts.js` records retrieval from Google Fonts for offline use. Capacitor is MIT-licensed; native Google Ads, UMP and Play Billing SDKs are subject to their Google SDK terms. Lockfiles pin JavaScript dependencies.
+
+## User-supplied background music
+
+**Tea and Tangrams** was supplied by the project owner on September 10, 2026. The game bundles a trimmed, gain-adjusted 88-second MP3 with short endpoint fades as `assets/audio/tea-and-tangrams-loop.mp3`; the original recording and SHA-256 are documented in `AUDIO_BRIEF.md`. This track is not covered by the CC0 notices for the sound effects below. No independent license verification or third-party authorship claim is made here; retain the owner's source/export and commercial-use rights records for publishing.
+
+## Result sound effects
+
+The following Freesound recordings are released under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), permitting commercial use and modification. Source descriptions and licenses were checked on 2026-09-09. The locally bundled files are the public high-quality MP3 encodings; playback gain and short fades are applied in the game. No remote audio service is required at runtime.
+
+| Local file | Recording / creator | Source | Downloaded encoding |
+| --- | --- | --- | --- |
+| `assets/audio/win-applause.mp3` | Small applause / Breviceps | https://freesound.org/people/Breviceps/sounds/462362/ | https://cdn.freesound.org/previews/462/462362_9159316-hq.mp3 |
+| `assets/audio/loss-crowd-aww.mp3` | aww.wav / phmiller42 | https://freesound.org/people/phmiller42/sounds/124996/ | https://cdn.freesound.org/previews/124/124996_687791-hq.mp3 |
+| `assets/audio/win-party-blower.mp3` | Party horn.wav / audiosmedia | https://freesound.org/people/audiosmedia/sounds/170583/ | https://cdn.freesound.org/previews/170/170583_1146698-hq.mp3 |
+
+The loss source is described by its creator as a small audience pity moan. The three clips total approximately 186 KB. Credits are retained voluntarily despite CC0 not requiring attribution.
 
 ## ENABLE word list
 
