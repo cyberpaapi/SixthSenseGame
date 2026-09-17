@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Touch keyboard and vertical Race course: core, full browser, focused touch/Race/presence, native banner-layout, syntax and public-client packaging checks passed locally; public deployment verification pending.)
+Last verified: 2026-09-18 (Touch keyboard and vertical Race course: core, full browser, focused touch/Race/presence, native banner-layout, syntax and public-client packaging checks passed locally; both public sites passed touch/Race checks and the real Vercel Race join/rejoin suite passed.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -332,7 +332,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 touch keyboard/vertical Race course (app/styles/multiplayer/mobile 20260918.10): focused keyboard and two/eight-player Race touch/geometry, presence, native banner layout and core checks passed locally. Visually inspected the 390×844 eight-player side-course screenshot. Full browser, syntax and public-client packaging also passed; public deployment checks are pending. The pointer path covers held, cancelled, slightly moved and edge touches without duplicate compatibility clicks, and retains mouse/keyboard/assistive activation. Browser emulation does not establish physical Safari acceptance. Wallet generation remains 8/500; no native bundle is rebuilt.
+September 18 touch keyboard/vertical Race course (app/styles/multiplayer/mobile 20260918.10): focused keyboard and two/eight-player Race touch/geometry, presence, native banner layout and core checks passed locally. Visually inspected the 390×844 eight-player side-course screenshot. Full browser, syntax and public-client packaging also passed. Commit `42c7f6a` deployed successfully to Vercel and GitHub Pages (workflow `35275229095`). Both public sites passed the focused keyboard and two/eight-player Race layout suites with explicit UI fixtures. The separate real Vercel API/database Race suite passed running-room phone entry, keyboard input, roster/capacity and full-room same-seat progress recovery. Only isolated QA rooms were created. The pointer path covers held, cancelled, slightly moved and edge touches without duplicate compatibility clicks, and retains mouse/keyboard/assistive activation. Browser emulation does not establish physical Safari acceptance. Wallet generation remains 8/500; no native bundle is rebuilt.
 
 September 18 fresh 500-coin reset (`app.js?v=20260918.9`, economy v8): core/multiplayer/progression, full browser QA, focused legacy-wallet migration and live-policy checks, syntax and public-client packaging passed locally. All pre-v8 wallets (including the previous v7 reset) migrate to exactly 500; v8 balances and later earnings survive reload. Tests retain progress, inventory, cosmetics and reward claims. Commit `c71a683` deployed successfully to Vercel and GitHub Pages (workflow `35274463220`). Both public sites serve app/core 20260918.9 and resetVersion 8/startingCoins 500; the full focused migration/earn/reload browser test passed against both. These isolated saves verify delivery and behavior, not every real player’s device. Older 250-coin clients require refresh to load the new baseline; no native bundle or Play upload is included.
 
@@ -477,7 +477,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 - Responded to ignored/selected letter taps with a shared captured touch-release handler, explicit key/child selection and callout suppression, stable hit areas, retained solo keys and compatibility-click deduplication. Preserve mouse, physical keyboard and semantic activation; cancel dragged-away/interrupted touches.
 - Moved Race progress beside the board on all layouts, with everyone initially at the bottom and completed words moving tokens upward. Keep the keyboard/dock full width, preserve progress/room state and account for the course in web/native tile fitting.
-- Added focused touch and Race layout regressions, retained Away labels, and bumped the four affected client asset URLs. Local and deployment verification status is recorded above; no coin reset or native release accompanies this change.
+- Added focused touch and Race layout regressions, retained Away labels, and bumped the four affected client asset URLs. Local checks and public delivery/input/layout plus real-room regression results are recorded above; no coin reset or native release accompanies this change.
 
 ### 2026-09-18 — Fresh reset and starting balance of 500 coins
 
