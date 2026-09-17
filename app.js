@@ -25,8 +25,8 @@
   const AVATARS = [...BASE_AVATARS, ...PREMIUM_AVATARS];
   const DECORATIONS = ["none", "aurora", "sunburst", "prism", "champion"];
   const DAILY_STREAK_REWARD = 300;
-  const ECONOMY_VERSION = 6;
-  const WALLET_RESET_VERSION = 6;
+  const ECONOMY_VERSION = 7;
+  const WALLET_RESET_VERSION = 7;
   const ACCENTS = Object.freeze({ coral: "#ff4f83", mango: "#ff9f2f", sun: "#f3cf32", leaf: "#22b66f", aqua: "#08b9c8", sky: "#347cf4", violet: "#7c45e8", berry: "#d83cac" });
   const ADVENTURE_TIERS = Object.freeze({
     easy: { title: "Sky Garden", art: "assets/adventure-zone-sky-ladder-v1.webp", alt: "An endless golden ladder rising through the current Adventure zone" },
@@ -169,7 +169,8 @@
   if (hadSavedStats) {
     try {
       const storedStats = JSON.parse(storedStatsText) || {};
-      storedEconomyVersion = Math.max(1, Math.floor(Number(storedStats.economyVersion) || 1));
+      const version = Number(storedStats.economyVersion);
+      storedEconomyVersion = Number.isSafeInteger(version) && version > 0 ? version : 1;
     }
     catch (_) { storedEconomyVersion = 1; }
   }
@@ -181,7 +182,7 @@
   });
   stats.coins = Number.isFinite(Number(stats.coins)) ? clampCoinTotal(stats.coins) : Core.STARTING_COINS;
   if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION) stats.coins = Core.STARTING_COINS;
-  stats.economyVersion = ECONOMY_VERSION;
+  stats.economyVersion = Math.max(ECONOMY_VERSION, storedEconomyVersion);
   stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
   stats.distribution = Array.from({ length: Math.max(Core.MAX_GUESSES + 1, Math.min(8, stats.distribution?.length || 0)) }, (_, index) => Number(stats.distribution?.[index]) || 0);
   stats.inventory = Object.fromEntries(Object.keys(defaultInventory).map(kind => {
@@ -768,6 +769,36 @@
     els.coinWallet.setAttribute("aria-label", `${stats.coins} coin${stats.coins === 1 ? "" : "s"}`);
     els.statCoins.textContent = stats.coins;
     document.dispatchEvent(new CustomEvent("sixth-sense-economy-change", { detail: { coins: stats.coins, inventory: { ...stats.inventory } } }));
+  }
+
+  let walletResetCheckPending = false;
+  function applyWalletReset(version) {
+    if (!Number.isSafeInteger(version) || version < WALLET_RESET_VERSION || version < stats.economyVersion) return;
+    const saved = loadJson(STORAGE.stats, {});
+    const parsedVersion = Number(saved.economyVersion);
+    const savedVersion = Number.isSafeInteger(parsedVersion) && parsedVersion > 0 ? parsedVersion : 0;
+    if (stats.economyVersion === savedVersion && savedVersion >= version && stats.coins === clampCoinTotal(saved.coins)) return;
+    // Another updated tab may already have reset and earned/spent coins.
+    // Adopt that balance instead of replaying the same reset.
+    stats.coins = savedVersion >= version ? clampCoinTotal(saved.coins) : Core.STARTING_COINS;
+    stats.economyVersion = Math.max(version, savedVersion);
+    if (savedVersion < version) saveJson(STORAGE.stats, { ...saved, coins: stats.coins, economyVersion: stats.economyVersion });
+    renderEconomy();
+    renderLifelines();
+    if (els.profileDialog?.open) renderProfile();
+  }
+  async function checkWalletReset() {
+    if (walletResetCheckPending || document.hidden || window.Capacitor?.isNativePlatform?.()) return;
+    walletResetCheckPending = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(`economy.json?check=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+      if (!response.ok) return;
+      const policy = await response.json();
+      if (policy.startingCoins === Core.STARTING_COINS) applyWalletReset(policy.resetVersion);
+    } catch (_) { /* Offline play continues; check again on return or the next interval. */ }
+    finally { clearTimeout(timeout); walletResetCheckPending = false; }
   }
 
   function updateModeStatus() {
@@ -2058,4 +2089,13 @@
   }
 
   init();
+  void checkWalletReset();
+  setInterval(checkWalletReset, 30000);
+  window.addEventListener("online", checkWalletReset);
+  window.addEventListener("focus", checkWalletReset);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) void checkWalletReset(); });
+  window.addEventListener("storage", event => {
+    if (event.key !== STORAGE.stats || !event.newValue) return;
+    try { applyWalletReset(Math.max(stats.economyVersion, Number(JSON.parse(event.newValue).economyVersion) || 0)); } catch (_) { /* Ignore malformed saves. */ }
+  });
 })();
