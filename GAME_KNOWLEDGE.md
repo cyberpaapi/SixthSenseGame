@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Race late joins: focused server rules, core/multiplayer/progression and syntax passed locally; live deployment acceptance pending.)
+Last verified: 2026-09-18 (Race late joins: focused server rules, core/multiplayer/progression and syntax passed locally; live Vercel phone late-entry, progress preservation and concurrent capacity acceptance passed.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -325,7 +325,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 Race late joins: `test-race-join.js`, core/multiplayer/progression and syntax checks passed. Focused fixtures cover the mode/status matrix, first-word entry with no answer disclosure or room mutation, finished/expired/non-Race denial and a room finishing between initial read and insertion. `test-production-race-join.js` adds a real phone-browser late-join flow, unchanged existing progress, roster/input usability, duplicate-name rejection and two concurrent joins competing for the eighth seat; it awaits deployment. No database migration, room reset, wallet change or native bundle is needed.
+September 18 Race late joins: `test-race-join.js`, core/multiplayer/progression and syntax checks passed. Focused fixtures cover the mode/status matrix, first-word entry with no answer disclosure or room mutation, finished/expired/non-Race denial and a room finishing between initial read and insertion. `test-production-race-join.js` adds a real phone-browser late-join flow, unchanged existing progress, roster/input usability, duplicate-name rejection and two concurrent joins competing for the eighth seat; it passed against live Vercel after commit `2140462` deployed successfully. Pages workflow `35271958793` also succeeded; Pages uses the same Vercel room API. The live test confirmed exactly one accepted request and one full-room rejection when two users competed for the eighth seat. Only isolated QA rooms were created. No database migration, room reset, wallet change or native bundle is needed.
 
 September 18 rapid-touch follow-up (`20260918.6` stylesheet/multiplayer): focused Race checks now assert actual input from rapid touchscreen taps (AA and two Deletes), and a press/release across a forced opponent snapshot update. The old build failed the retained-touch-target regression; Chromium still retargeted that particular tap successfully, so no claim is made that it reproduced every reported lost touch. Updated build retains the pressed button and enters R exactly once. Presence fixtures, full browser, core/multiplayer/progression and syntax pass. The new input assertions use Playwright touchscreen events; CDP synthetic gestures alone did not emit compatibility clicks reliably and are used only for zoom/layout assertions. Physical Safari remains unverified. The full browser suite initially measured the solo dock during its entry transform (71.902px instead of the settled 72px height, about 1.32px top offset); its baseline now waits for finite game-screen animations to finish before comparing the Sense dialog layout.
 
@@ -460,7 +460,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ### 2026-09-18 — Allow players into running Race rooms
 
-- Opened running Race rooms to late entrants at word one of the existing server-selected route. Retained the eight-player cap, unique names, expiry/finished rejection and waiting-only entry for VS/Co-op. Rechecked the same condition within the locked SQL insertion and its error path. Added server rules and production concurrency/UI coverage.
+- Opened running Race rooms to late entrants at word one of the existing server-selected route. Retained the eight-player cap, unique names, expiry/finished rejection and waiting-only entry for VS/Co-op. Rechecked the same condition within the locked SQL insertion and its error path. Added server rules and production concurrency/UI coverage. Published and passed the live test, including simultaneous requests for the final seat; recorded deployment results in Verification.
 
 ### 2026-09-18 — Preserve rapid multiplayer keyboard touches
 
