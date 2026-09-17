@@ -15,7 +15,7 @@ const attempts = [{ guess: "rattle", score: Core.scoreGuess("rattle", "battle") 
         localStorage.setItem("sixth-sense.visited.v1", "yes");
         localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Reveal QA" }));
         localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 7, coins: 250, inventory: { peek: stocked ? 1 : 0 } }));
+        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 8, coins: 250, inventory: { peek: stocked ? 1 : 0 } }));
         localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 4, mode: "practice", answer: "battle", clue: "A fight.", status: "playing", guesses: attempts, maxGuesses: 6 }));
       }, { attempts, stocked });
       let requests = 0;
