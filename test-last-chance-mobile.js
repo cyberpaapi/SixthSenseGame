@@ -33,7 +33,7 @@ const { chromium } = require("playwright");
         localStorage.setItem("sixth-sense.visited.v1", "yes");
         localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Last Chance QA" }));
         localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ dark: true, music: false, effects: false }));
-        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 4, coins: 250 }));
+        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 5, coins: 250 }));
       }, outcome);
       await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269");
       assert.equal(await page.evaluate(() => window.SixthSenseCore.MAX_GUESSES), 6);

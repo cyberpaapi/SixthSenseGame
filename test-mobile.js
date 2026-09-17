@@ -36,7 +36,7 @@ assert.throws(() => purchaseApi.validateToken({ purchaseToken: "short" }));
         localStorage.setItem("sixth-sense.visited.v1", "yes");
         localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Mobile QA" }));
         localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 4, coins: 250, totalPoints: 0 }));
+        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 5, coins: 250, totalPoints: 0 }));
       }, outcome);
       await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269");
       await page.evaluate(() => {
