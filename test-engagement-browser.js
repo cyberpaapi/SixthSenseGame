@@ -19,7 +19,7 @@ const evidence = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, "..
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ClueTester" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ effects: false, music: false }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 5, coins: 250, totalPoints: 2900, fastestSolve: { word: "planet", ms: 60000 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 6, coins: 250, totalPoints: 2900, fastestSolve: { word: "planet", ms: 60000 } }));
     });
     for (const [index, word] of ["dipped", "rattle", "raffle"].entries()) {
       await page.evaluate(answer => localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({

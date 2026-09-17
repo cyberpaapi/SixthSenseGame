@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Multiplayer presence and solo-only Skip: local API/browser/core/mobile/layout/Last Chance checks and live Vercel two-client checks passed; Vercel and GitHub Pages serve the updated client.)
+Last verified: 2026-09-18 (Economy-v6 reset: focused wallet and full browser checks, core/multiplayer/progression and syntax passed locally; prior live multiplayer presence checks remain recorded below.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -92,7 +92,7 @@ Checkout first requires a JSON readiness response from the verification endpoint
 
 The local age-band screen collects no DOB: under-13 selections skip ad/billing initialization; under-18 selections use under-age-of-consent settings and PG ad content. UMP runs before ads, with privacy options when required. `privacy.html` is available offline from Settings. Native Back retains leave confirmation. Immersive fullscreen hides status/navigation bars, supports transient swipe reveal and returns after ads/resume; the game background extends behind the camera while CSS header padding protects controls. Side/bottom cutout and IME insets remain. The age question is neutral and no longer advertises ad exemptions; UMP does not determine age for the app. Solo assets/audio/fonts are bundled; multiplayer retains the existing HTTPS Vercel/Neon authority. Cloudflare is optional, not a dependency.
 
-Starting wallet: 250 coins. The wallet hard-caps at 99,999 across saved-state loading, solo rewards, Daily streak rewards, multiplayer credits, and refunds; a reward that crosses the ceiling grants only the remaining room. Economy version 5 resets every existing pre-version-5 saved wallet to exactly 250 once on its next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
+Starting wallet: 250 coins. The wallet hard-caps at 99,999 across saved-state loading, solo rewards, Daily streak rewards, multiplayer credits, and refunds; a reward that crosses the ceiling grants only the remaining room. Economy version 6 resets every existing pre-version-6 saved wallet to exactly 250 once on its next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
 
 | Attempts | Coins earned |
 | ---: | ---: |
@@ -117,7 +117,7 @@ Lifeline prices and behavior:
 | Clear | 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
 | Skip | 60 | Solo only: can be stocked, consumed, purchased and reused. Reveals the answer, awards no coins, advances only after green OK; Adventure advances the current rung. Hidden and server-rejected in VS, Race and Co-op. A multiplayer Skip already pending before this release may complete its existing confirmation so active rooms do not get stuck. |
 
-Inventory, coins, points, and economy version persist in `localStorage`. Coin totals are normalized into the inclusive 0–99,999 range whenever loaded or credited, so malformed/oversized saves and repeated rewards cannot create a sixth digit. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 5 performs the latest universal reset: every wallet saved under version 1, 2, 3, or 4 is assigned the same 250-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
+Inventory, coins, points, and economy version persist in `localStorage`. Coin totals are normalized into the inclusive 0–99,999 range whenever loaded or credited, so malformed/oversized saves and repeated rewards cannot create a sixth digit. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 6 performs the latest universal reset: every wallet saved under version 1, 2, 3, 4, or 5 is assigned the same 250-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
 ## Current experience and visual system
 
@@ -269,7 +269,7 @@ Game records include answer/clue, mode, date, puzzle number, guesses, current st
 
 New win records optionally include `solveTime`, `newBestTime`, `newBestAttempts`, `trioReward`, `trioCompleted`, `trioCount`, `mastery`, and `rankUp`. The existing `personalRecorded` guard controls trio/best updates; older completed records are not awarded retrospective trio bonuses. Statistics optionally include `dailyTrio: {date, words, claimed}`; missing or prior-day values normalize safely. Saved Daily/solo clues are refreshed from the current answer bank after spreading old save fields, so a stale clue cannot override current wording. Multiplayer seat snapshots similarly refresh an already-unlocked current-round clue server-side, without exposing clues to opponents or unpurchased seats.
 
-Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, persistent guess distribution (including historical seventh/eighth buckets), wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. Economy version 5 assigns all older saved wallets exactly 250 coins once while preserving every other stored field, including the prior rewarded-claim ledger. Version-5 balances then earn/spend and persist normally. The reset applies separately to each site/device when the updated client loads. Already-open older pages must refresh. Bundled Android installations do not download this web release; no Android update or Play upload is included in this web-only reset. New fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
+Statistics include Daily play/win/streak fields, the last rewarded seven-day milestone, persistent guess distribution (including historical seventh/eighth buckets), wallet, economy version, cumulative points, persistent lifeline inventory, Streak-mode run, best Streak-mode run, an Adventure seed/current level, the unique solved-answer list used for silent tier progression, total solves, best attempt count, and the fastest timed word. Economy version 6 assigns all older saved wallets exactly 250 coins once while preserving every other stored field, including the prior rewarded-claim ledger. Version-6 balances then earn/spend and persist normally. The reset applies separately to each site/device when the updated client loads. Already-open older pages must refresh. Bundled Android installations do not download this web release; no Android update or Play upload is included in this web-only reset. New fields use backward-compatible defaults. Settings include hard mode, contrast, dark mode, independently stored music/effects, selected animal and color, selected avatar decoration, and locally unlocked premium avatars/decorations. The former single `sound` preference still migrates safely.
 
 Online room rules and security:
 
@@ -318,6 +318,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 second requested web reset (`app.js?v=20260918.4`, economy v6): syntax, core/multiplayer/progression, full browser and focused `test-wallet-reset.js` passed on port 4269. The reset covers missing markers and versions 1–5, including a zero wallet and high balances, and preserves current v6 balances, progression, inventory, cosmetics, statistics, saved puzzles and rewarded-claim history. An actual first-try solve credits 140 coins after migration and survives another reload without a repeated reset. No room/API data or Android bundle is changed.
 
 September 18 presence production verification: commit `c8387e1` deployed successfully to Vercel and GitHub Pages (workflow `35269532877`); both serve `multiplayer.js?v=20260918.3` and the accessible alert element. Two isolated clients on Vercel passed authoritative refresh/seat restoration, free Sense reopening, Reveal candidate checks, six-row VS, synchronized VS advancement, Co-op Skip rejection, shared departure alerts/red avatars/return, quick-switch detection and duplicate/late departure replay with exactly two counted departures (21,329ms total; opponent attempt visibility 1,856ms). Visibility events were simulated in those browsers against the real API/database; this is not a physical-device switching test. Replaced reload `networkidle` waits with DOM-ready plus existing room-UI waits because ongoing multiplayer polling can prevent network silence. Existing rooms, scores and wallets were not reset; only isolated QA rooms were created. Old open tabs still need a refresh and old native installations still need an app update.
 
@@ -443,6 +445,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Reset current web wallets before continuing
+
+- Per the owner's renewed reset request, advanced economy/reset version from 5 to 6: every older wallet becomes 250 once on updated-client load, with all other progress intact. Updated the application cache URL and current-version test fixtures. Already-open tabs require refresh; this release cannot remotely rewrite a running old client's local wallet.
 
 ### 2026-09-18 — Multiplayer away alerts and solo-only Skip
 
