@@ -68,7 +68,7 @@ async function submitWord(page, word) {
     assert(await hostPage.evaluate(clue => window.SixthSenseCore.ANSWERS.some(entry => entry.clue === clue), purchasedClue), "server clue must belong to the current published bank");
     await hostPage.click("#hint-ok-button");
     const balanceAfterHint = await hostPage.locator("#coin-count").textContent();
-    await hostPage.reload({ waitUntil: "networkidle" });
+    await hostPage.reload({ waitUntil: "domcontentloaded" });
     await hostPage.waitForSelector("#online-screen:not([hidden])", { timeout: 10000 });
     await hostPage.click('[data-online-lifeline="sense"] button');
     await hostPage.waitForSelector("#hint-modal[open]");
@@ -79,7 +79,7 @@ async function submitWord(page, word) {
     assert.match(await hostPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
     assert.match(await guestPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`));
 
-    await guestPage.reload({ waitUntil: "networkidle" });
+    await guestPage.reload({ waitUntil: "domcontentloaded" });
     await guestPage.waitForSelector("#online-screen:not([hidden])", { timeout: 10000 });
     assert.match(await guestPage.locator("#online-versus-names").textContent(), new RegExp(`${hostName} 0VS0 ${guestName}`), "refresh must restore the same guest seat");
 

@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Multiplayer presence and solo-only Skip: syntax, core/multiplayer/progression, focused API/browser, full browser, mobile, banner geometry and Last Chance checks passed locally; production verification follows deployment.)
+Last verified: 2026-09-18 (Multiplayer presence and solo-only Skip: local API/browser/core/mobile/layout/Last Chance checks and live Vercel two-client checks passed; Vercel and GitHub Pages serve the updated client.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -319,6 +319,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 18 presence production verification: commit `c8387e1` deployed successfully to Vercel and GitHub Pages (workflow `35269532877`); both serve `multiplayer.js?v=20260918.3` and the accessible alert element. Two isolated clients on Vercel passed authoritative refresh/seat restoration, free Sense reopening, Reveal candidate checks, six-row VS, synchronized VS advancement, Co-op Skip rejection, shared departure alerts/red avatars/return, quick-switch detection and duplicate/late departure replay with exactly two counted departures (21,329ms total; opponent attempt visibility 1,856ms). Visibility events were simulated in those browsers against the real API/database; this is not a physical-device switching test. Replaced reload `networkidle` waits with DOM-ready plus existing room-UI waits because ongoing multiplayer polling can prevent network silence. Existing rooms, scores and wallets were not reset; only isolated QA rooms were created. Old open tabs still need a refresh and old native installations still need an app update.
+
 September 18 multiplayer presence (`20260918.3` styles/multiplayer/mobile): syntax, core/multiplayer/progression, `test-presence.js`, `test-presence-browser.js`, full browser, mobile, banner layout and all three Last Chance suites passed locally on port 4269. Explicit browser fixtures cover VS/Race/Co-op departure alerts, red avatars and Away labels, return, rewarded-ad/native exclusions, hidden Skip and no overflow with 44px keys at 320×568, 390×844, 844×360 and 866×294. API fixtures validate authentication/input checks and reject new Skip in all modes. The full browser suite passed on rerun after an initial existing 4-second UI wait timed out during parallel checks. New production tests cover actual two-client alerts, quick departures, duplicate/out-of-order delivery and server Skip rejection; live results will be recorded after deployment. No physical-device/native-ad lifecycle acceptance or new APK/AAB is claimed.
 
 September 18 Reveal correction (`20260918.2` core/app/multiplayer): syntax checks, `npm test`, `test-peek.js`, `test-peek-browser.js` and the full browser suite passed on port 4269. Deterministic tests cover greens from earlier rows, previous reveals, unknown duplicate-letter positions, server selection of the only remaining position, and exhausted requests without a database update in VS/Race/Co-op. Browser checks exercise solo and explicit three-mode online fixtures, one 50-coin purchase or one stored Peek, and disabled exhausted controls. The production multiplayer suite now also checks an actual server Peek result against the player's scored history.
@@ -443,6 +445,8 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 ## Change log and rationale
 
 ### 2026-09-18 — Multiplayer away alerts and solo-only Skip
+
+- Published and verified the feature on Vercel and GitHub Pages; hardened the live regression's reload readiness check for continuously polling rooms. Production results are recorded above.
 
 - Added authenticated durable screen-away signals, deduplicated departure counters, ordered status updates and keepalive/retry delivery. All updated room clients display an accessible departure alert, red avatar and Away label; normal styling returns on foreground. Rewarded ads are excluded.
 - Disabled new Skip use in VS/Race/Co-op on both UI and server, preserving active rooms and grandfathering only already-pending confirmations. Updated the explicit AGENTS.md product invariant.
