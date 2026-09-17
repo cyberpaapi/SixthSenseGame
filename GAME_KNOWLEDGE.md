@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Economy-v8 reset to 500: focused migration/live-policy, full browser, core/multiplayer/progression, syntax and public-client packaging checks passed locally; deployment verification pending.)
+Last verified: 2026-09-18 (Economy-v8 reset to 500: focused migration/live-policy, full browser, core/multiplayer/progression, syntax and public-client packaging checks passed locally; deployed wallet migration/earn/reload checks passed on both Vercel and GitHub Pages.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -331,7 +331,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 fresh 500-coin reset (`app.js?v=20260918.9`, economy v8): core/multiplayer/progression, full browser QA, focused legacy-wallet migration and live-policy checks, syntax and public-client packaging passed locally. All pre-v8 wallets (including the previous v7 reset) migrate to exactly 500; v8 balances and later earnings survive reload. Tests retain progress, inventory, cosmetics and reward claims. Public deployment verification is pending. Older 250-coin clients require refresh to load the new baseline; no native bundle or Play upload is included.
+September 18 fresh 500-coin reset (`app.js?v=20260918.9`, economy v8): core/multiplayer/progression, full browser QA, focused legacy-wallet migration and live-policy checks, syntax and public-client packaging passed locally. All pre-v8 wallets (including the previous v7 reset) migrate to exactly 500; v8 balances and later earnings survive reload. Tests retain progress, inventory, cosmetics and reward claims. Commit `c71a683` deployed successfully to Vercel and GitHub Pages (workflow `35274463220`). Both public sites serve app/core 20260918.9 and resetVersion 8/startingCoins 500; the full focused migration/earn/reload browser test passed against both. These isolated saves verify delivery and behavior, not every real player’s device. Older 250-coin clients require refresh to load the new baseline; no native bundle or Play upload is included.
 
 September 18 live wallet reset (`app.js?v=20260918.8`, economy v7): focused migration, `test-live-wallet-reset.js`, full browser, core/multiplayer/progression, syntax and public-client packaging passed locally. Both public sites were confirmed to have the previous v6 release before this change, so deployment alone was not evidence that old open tabs had reloaded. New tests cover a remote policy bump in two already-open updated tabs, exact 250, retained puzzle/progress/inventory, cross-tab earnings synchronization, no second reset after reward/reload, higher-generation preservation, offline retry, repair of a simulated pre-reset tab write, and an actual 30-second periodic policy check. No actual user-wallet census is available. The full browser suite initially sampled the Adventure home button during its entry transform; its geometry baseline now waits for finite Adventure-screen animations to finish before measuring touch targets. Commit `50bab2a` deployed successfully to Vercel and Pages (workflow `35273806722`). Both serve runtime 20260918.8 and resetVersion 7/startingCoins 250. Vercel policy response is no-store; Pages reports max-age=600, with client timestamp query/cache bypass retained. The full focused wallet migration/earn/reload suite passed against both public sites. This verifies the delivered build with isolated browser saves, not every real player’s device.
 
@@ -474,7 +474,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 - Per the owner’s request, advanced economy/reset version to 8 and changed the starting wallet and public reset policy to 500. Every older saved wallet resets once when the updated client loads, retaining other progress and normal subsequent earnings/spending.
 - Bumped both core/app asset URLs and updated current-version QA fixtures and expected balances. Prior open 250-coin clients must refresh; their policy checker intentionally requires a matching starting balance.
-- Local core, full browser, migration/live reset, syntax and packaging checks passed. Deployment verification is pending; real offline/open-old clients cannot be counted or remotely forced to update.
+- Local core, full browser, migration/live reset, syntax and packaging checks passed. The update and migration/earn/reload checks are verified live on both Vercel and GitHub Pages; real offline/open-old clients cannot be counted or remotely forced to update.
 
 ### 2026-09-18 — Fresh 250-coin reset with live policy checks
 
