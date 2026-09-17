@@ -669,35 +669,71 @@
     return states;
   }
 
+  // Touch release is captured on the original key; browser click remains for mouse/AT.
+  function bindKeyboardKey(button, activate) {
+    let press = null;
+    let lastTouchRelease = -Infinity;
+    button.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse" || button.disabled) return;
+      event.preventDefault();
+      press = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      button.setPointerCapture(event.pointerId);
+      button.classList.add("is-pressed");
+    });
+    button.addEventListener("pointerup", event => {
+      if (!press || press.id !== event.pointerId) return;
+      event.preventDefault();
+      const valid = Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 18;
+      lastTouchRelease = performance.now();
+      press = null;
+      button.classList.remove("is-pressed");
+      if (valid && !button.disabled) activate();
+    });
+    const cancel = () => { press = null; button.classList.remove("is-pressed"); };
+    button.addEventListener("pointercancel", cancel);
+    button.addEventListener("lostpointercapture", cancel);
+    button.addEventListener("contextmenu", event => event.preventDefault());
+    button.addEventListener("click", event => {
+      if (event.pointerType === "touch" || event.pointerType === "pen" || event.sourceCapabilities?.firesTouchEvents || (!event.pointerType && event.detail > 0 && performance.now() - lastTouchRelease < 800)) {
+        event.preventDefault();
+        return;
+      }
+      activate();
+    });
+  }
+  window.SixthSenseKeyboard = Object.freeze({ bind: bindKeyboardKey });
+
   function renderKeyboard() {
-    const states = keyStates();
-    els.keyboard.innerHTML = "";
-    KEY_ROWS.forEach(keys => {
-      const row = document.createElement("div");
-      row.className = "keyboard-row";
-      [...keys].forEach(rawKey => {
-        const key = typeof rawKey === "string" ? rawKey : rawKey;
-        const button = document.createElement("button");
-        const letter = key.length === 1 ? key.toLowerCase() : key;
-        const status = states[letter];
-        button.type = "button";
-        button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}`;
-        button.dataset.key = key;
-        const statusLabel = status ? { exact: "correct position", present: "in the word", absent: "not in the word" }[status] : "untested";
-        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}, ${statusLabel}`);
-        if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
-        else button.textContent = key;
-        if (status) {
-          const marker = document.createElement("small");
-          marker.className = "key-marker";
-          marker.textContent = MARKERS[status];
-          marker.setAttribute("aria-hidden", "true");
-          button.appendChild(marker);
-        }
-        button.addEventListener("click", () => handleKey(key));
-        row.appendChild(button);
+    if (!els.keyboard.firstElementChild) {
+      KEY_ROWS.forEach(keys => {
+        const row = document.createElement("div");
+        row.className = "keyboard-row";
+        [...keys].forEach(key => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.key = key;
+          bindKeyboardKey(button, () => handleKey(key));
+          row.appendChild(button);
+        });
+        els.keyboard.appendChild(row);
       });
-      els.keyboard.appendChild(row);
+    }
+    const states = keyStates();
+    els.keyboard.querySelectorAll("[data-key]").forEach(button => {
+      const key = button.dataset.key;
+      const status = states[key.toLowerCase()];
+      button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}`;
+      const statusLabel = status ? { exact: "correct position", present: "in the word", absent: "not in the word" }[status] : "untested";
+      button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}, ${statusLabel}`);
+      if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
+      else button.textContent = key;
+      if (status) {
+        const marker = document.createElement("small");
+        marker.className = "key-marker";
+        marker.textContent = MARKERS[status];
+        marker.setAttribute("aria-hidden", "true");
+        button.appendChild(marker);
+      }
     });
   }
 

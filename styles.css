@@ -694,7 +694,7 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
 .clue-copy { margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 1.35; }
 
 .keyboard { width:100%; min-width:0; max-width:620px; margin:16px auto 0; display:grid; gap:7px; }
-.keyboard { touch-action:none; -webkit-user-select:none; user-select:none; }
+.keyboard, .keyboard * { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
 .keyboard .key > * { pointer-events:none; }
 .keyboard-row { display: flex; justify-content: center; gap: 6px; }
 .keyboard-row:last-child { width:85%; margin-inline:auto; }
@@ -723,8 +723,8 @@ h3 { margin: 24px 0 12px; font-size: 17px; }
 .is-dark .keyboard-row:nth-child(3) .key:not(.exact):not(.present):not(.absent) { background: linear-gradient(145deg, #40256d, #2d194e); }
 .key.wide { flex: 1.55 1 0; font-size: 11px; letter-spacing: .04em; }
 .key svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.key:hover { transform: translateY(-1px); }
-.key:active { transform: scale(.92); box-shadow: var(--shadow-in); }
+.key:hover { filter:brightness(1.06); }
+.key:active, .key.is-pressed { box-shadow: var(--shadow-in); }
 .key.exact { background: var(--exact); color: #fff; }
 .key.present { background: var(--present); color: #fff; }
 .key.absent { background: var(--absent); color: #fff; opacity: .76; }
@@ -1579,3 +1579,24 @@ body:is(.is-native-app,.is-fitted-online)[data-screen="online"] .online-shell { 
 .avatar-art.is-away { filter:grayscale(1) sepia(1) saturate(8) hue-rotate(315deg); outline:2px solid #ff4b5c; outline-offset:2px; }
 .away-label { color:#dc2845; font-size:10px; }
 .is-dark .away-label { color:#ff8797; }
+
+/* Race climbs beside the board, preserving the full-width keyboard and dock. */
+.online-play-layout.has-race-course { grid-template-columns:minmax(0,1fr); }
+.online-board-wrap.has-race-course { position:relative; padding-right:78px; }
+.has-race-course.online-board-wrap .progress-panel { position:absolute; inset:0 0 0 auto; width:70px; height:100%; min-height:0; max-height:none; padding:4px; overflow:visible; border-radius:16px; order:0; }
+.has-race-course .progress-panel-head { display:none; }
+.has-race-course .player-progress-list.is-race { display:block; height:100%; margin:0; padding:0; overflow:visible; }
+.has-race-course .player-progress { display:none; }
+.has-race-course .race-course { width:100%; height:100%; min-height:0; margin:0; padding:0; }
+.has-race-course .race-course-rail { top:14px; bottom:14px; left:50%; right:auto; width:6px; height:auto; transform:translateX(-50%); background:linear-gradient(0deg,#16864b,#43e187); }
+.has-race-course .race-course-finish { top:0; left:50%; right:auto; width:40px; height:14px; transform:translateX(-50%); }
+.has-race-course .race-token { width:22px; transform:translate(-50%,-50%); }
+.has-race-course .race-token .avatar-art { width:22px; border-width:1px; }
+.has-race-course .race-token.is-self { z-index:3; }
+.has-race-course .race-token.is-self .avatar-art { outline:2px solid var(--accent); outline-offset:1px; }
+.has-race-course .race-token small { display:none; }
+@media (orientation:landscape) and (max-height:340px) {
+  .online-game-card:has(.has-race-course) .online-game-head { position:static; width:auto; }
+}
+
+.has-race-course .race-token:has(.is-away) small { display:block; top:12px; left:50%; transform:translateX(-50%); padding:1px 2px; border-radius:3px; background:#5b101d; color:white; font-size:7px; }

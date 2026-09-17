@@ -96,7 +96,8 @@
     const bounds = els.board.parentElement.getBoundingClientRect();
     if (!bounds.height || !bounds.width) return;
     const rows = els.board.children.length || Core.MAX_GUESSES;
-    const size = Math.floor(Math.min(52, (bounds.width - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+    const padding = parseFloat(getComputedStyle(els.board.parentElement).paddingRight) + parseFloat(getComputedStyle(els.board.parentElement).paddingLeft);
+    const size = Math.floor(Math.min(52, (bounds.width - padding - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
     els.board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
   }
   new ResizeObserver(fitOnlineBoard).observe(els.board.parentElement);
@@ -402,6 +403,13 @@
     if (signature === state.renderedSnapshotSignature) return false;
     state.renderedSnapshotSignature = signature;
     const room = snapshot.room;
+    const layout = els.screen.querySelector(".online-play-layout");
+    const wrap = els.board.parentElement;
+    const panel = els.progress.parentElement;
+    layout.classList.toggle("has-race-course", room.mode === "race");
+    wrap.classList.toggle("has-race-course", room.mode === "race");
+    const panelParent = room.mode === "race" ? wrap : layout;
+    if (panel.parentElement !== panelParent) panelParent.appendChild(panel);
     const sharedRound = ["vs", "coop"].includes(room.mode);
     const nextRound = sharedRound ? Number(room.currentRound) || 0 : snapshot.me.currentWordIndex;
     const roundAdvanced = sharedRound && state.activeRound !== null && nextRound > state.activeRound;
@@ -548,7 +556,7 @@
           const button = document.createElement("button");
           button.type = "button";
           button.dataset.onlineKey = key;
-          button.addEventListener("click", () => handleKey(key));
+          window.SixthSenseKeyboard.bind(button, () => handleKey(key));
           row.appendChild(button);
         });
         els.keyboard.appendChild(row);
@@ -578,7 +586,7 @@
   }
 
   function handleKey(key) {
-    if (els.screen.hidden || state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
+    if (els.screen.hidden || state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished || document.querySelector("dialog[open]") || state.snapshot.me.lifelines?.lastChancePending || state.snapshot.me.lifelines?.pendingSkip) return;
     if (key === "ENTER") return submitGuess();
     if (key === "BACK") {
       if (!state.current) return;
@@ -832,20 +840,22 @@
     if (snapshot.room.mode === "race") {
       const course = document.createElement("div");
       course.className = "race-course";
-      const courseHeight = Math.max(82, sorted.length * 10 + 46);
-      course.style.minHeight = `${courseHeight}px`;
+
       course.innerHTML = '<span class="race-course-rail" aria-hidden="true"></span><span class="race-course-finish" aria-label="Finish line"></span>';
-      sorted.forEach((player, lane) => {
+      [...snapshot.players].sort((a, b) => a.seat - b.seat).forEach((player, lane) => {
         const completed = Math.min(player.currentWordIndex, snapshot.room.wordCount);
         const progress = snapshot.room.wordCount ? (completed / snapshot.room.wordCount) * 100 : 0;
         const token = document.createElement("span");
-        token.className = "race-token";
-        token.style.left = `${Math.max(6, Math.min(91, 6 + progress * .85))}%`;
-        token.style.top = `${courseHeight / 2 - 17 + (lane - (sorted.length - 1) / 2) * 9}px`;
+        token.className = `race-token${player.id === snapshot.me.id ? " is-self" : ""}`;
+        token.dataset.playerId = player.id;
+        token.style.left = `${sorted.length === 1 ? 50 : 17 + lane * 66 / (sorted.length - 1)}%`;
+        token.style.top = `calc(14px + (100% - 28px) * ${1 - progress / 100})`;
         token.title = `${player.name}: ${completed} of ${snapshot.room.wordCount}${player.screenAway ? " · Away" : ""}`;
+        token.setAttribute("role", "img");
+        token.setAttribute("aria-label", token.title);
         const art = document.createElement("span");
         decorateAvatar(art, player);
-        token.append(art, Object.assign(document.createElement("small"), { textContent: `${player.screenAway ? "Away · " : ""}${player.name}` }));
+        token.append(art, Object.assign(document.createElement("small"), { textContent: player.screenAway ? "Away" : player.name }));
         course.appendChild(token);
       });
       els.progress.appendChild(course);
