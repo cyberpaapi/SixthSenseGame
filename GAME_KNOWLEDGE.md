@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Fresh economy-v9 500-coin reset: core, migration, live-policy/cross-tab/offline, syntax and public packaging checks passed locally; four old public-client test pages are held open across deployment.)
+Last verified: 2026-09-18 (Fresh economy-v9 500-coin reset: core, migration, live-policy/cross-tab/offline, syntax and public packaging checks passed locally; four old public-client pages reset automatically across actual deployment; public migration/earn/reload checks passed on both origins.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -333,7 +333,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 renewed 500-coin reset (app 20260918.11, economy v9): core, focused migration/live-policy/cross-tab/offline, syntax and public-client packaging checks passed locally. Four isolated public pages (zero and high balance per site) loaded the previous v8 build before deployment and are awaiting the actual v9 policy without reload. This distinguishes already-open-client delivery from migration on refresh. Very old clients, offline devices and installed Android limits remain; there is no real-user wallet census.
+September 18 renewed 500-coin reset (app 20260918.11, economy v9): core, focused migration/live-policy/cross-tab/offline, syntax and public-client packaging checks passed locally. Commit `201ad00` deployed successfully to Vercel and GitHub Pages (workflow `35275570862`). Four isolated public pages loaded the previous v8 build before deployment and automatically received the actual v9 policy without reload: 0 and 9,876 both became exactly 500 on each site, with progress/inventory intact. The full migration/earn/reload suite then passed against both public origins, including prior v8 wallets and preservation of subsequent earnings. This distinguishes already-open-client delivery from migration on refresh. Very old clients, offline devices and installed Android limits remain; there is no real-user wallet census.
 
 September 18 touch keyboard/vertical Race course (app/styles/multiplayer/mobile 20260918.10): focused keyboard and two/eight-player Race touch/geometry, presence, native banner layout and core checks passed locally. Visually inspected the 390×844 eight-player side-course screenshot. Full browser, syntax and public-client packaging also passed. Commit `42c7f6a` deployed successfully to Vercel and GitHub Pages (workflow `35275229095`). Both public sites passed the focused keyboard and two/eight-player Race layout suites with explicit UI fixtures. The separate real Vercel API/database Race suite passed running-room phone entry, keyboard input, roster/capacity and full-room same-seat progress recovery. Only isolated QA rooms were created. The pointer path covers held, cancelled, slightly moved and edge touches without duplicate compatibility clicks, and retains mouse/keyboard/assistive activation. Browser emulation does not establish physical Safari acceptance. Wallet generation remains 8/500; no native bundle is rebuilt.
 
