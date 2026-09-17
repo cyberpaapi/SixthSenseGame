@@ -29,6 +29,27 @@ const { canJoinRoom, joinRoom } = require("./api/multiplayer")._test;
   assert.deepEqual(joined.snapshot.me.attempts, []);
   assert.deepEqual(room, before, "joining must not restart the race or replace its route");
   assert(!JSON.stringify(joined).includes("planet"), "joining must not disclose the answer route");
+  const existing = { ...inserted, current_word_index: 1, attempts: [{ guess: "market", score: ["absent", "absent", "absent", "absent", "absent", "absent"] }], lifeline_state: { round: 1, eliminatedLetters: ["z"] }, score: 140 };
+  for (const mode of ["race", "vs", "coop"]) {
+    for (const status of ["running", "finished"]) {
+      const resumed = await joinRoom(async (strings, ...values) => {
+        const query = strings.join("?");
+        if (query.includes("SELECT * FROM sixth_sense_rooms")) return [{ ...room, mode, status, capacity: 2, current_round: 1 }];
+        if (query.includes("SELECT * FROM sixth_sense_players")) {
+          assert.equal(values[1], require("./api/multiplayer")._test.tokenHash("owner-key"));
+          return [existing];
+        }
+        if (query.includes("SELECT id, display_name")) return [existing];
+        throw Error("Returning owner must not insert or mutate a seat: " + query);
+      }, { roomCode: room.code, resumeToken: "owner-key", player: { name: "Different requested name" } });
+      assert.equal(resumed.playerId, existing.id);
+      assert.deepEqual(resumed.snapshot.me.attempts, existing.attempts);
+      assert.equal(resumed.snapshot.me.currentWordIndex, 1);
+      assert.deepEqual(resumed.snapshot.me.lifelines, existing.lifeline_state);
+      assert.equal(resumed.snapshot.players[0].name, existing.display_name);
+    }
+  }
+  await assert.rejects(joinRoom(async strings => strings.join("").includes("SELECT * FROM sixth_sense_rooms") ? [room] : [], { roomCode: room.code, resumeToken: "wrong-key", player: { name: "Late racer" } }), error => error.status === 401);
   for (const state of [{ mode: "race", status: "finished" }, { mode: "vs", status: "running" }, { mode: "coop", status: "running" }]) {
     await assert.rejects(joinRoom(async () => [{ ...room, ...state }], { roomCode: room.code, player: { name: "Late" } }), error => error.status === 409);
   }

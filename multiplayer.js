@@ -11,6 +11,7 @@
   const SETTINGS_KEY = "sixth-sense.settings.v1";
   const IDENTITY_KEY = "sixth-sense.online.identity.v1";
   const ACTIVE_ROOM_KEY = "sixth-sense.active-room.v1";
+  const ROOM_SEATS_KEY = "sixth-sense.room-seats.v1";
   const LAST_CHANCE_AD_KEY = "sixth-sense.last-chance-online.v1";
   const PRESENCE_KEY = "sixth-sense.presence.v1";
   const baseGuessLimit = () => Number(state.snapshot?.room.maxGuesses) || 7; // Older servers still enforce seven.
@@ -161,6 +162,28 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* Storage can be unavailable. */ }
   }
 
+  const roomSeats = readJson(ROOM_SEATS_KEY, {});
+  function validSeat(saved) {
+    return saved && /^[A-HJ-NP-Z2-9]{6}$/.test(saved.roomCode || "") && typeof saved.token === "string" && saved.token && typeof saved.playerId === "string" && saved.playerId;
+  }
+  function rememberSeat(saved) {
+    if (!validSeat(saved)) return;
+    Object.assign(roomSeats, readJson(ROOM_SEATS_KEY, {}));
+    roomSeats[saved.roomCode] = { roomCode: saved.roomCode, token: saved.token, playerId: saved.playerId, savedAt: Date.now() };
+    const recent = Object.values(roomSeats).filter(item => validSeat(item) && item.savedAt > Date.now() - 86400000)
+      .sort((a, b) => b.savedAt - a.savedAt).slice(0, 32);
+    for (const code of Object.keys(roomSeats)) delete roomSeats[code];
+    recent.forEach(item => { roomSeats[item.roomCode] = item; });
+    saveJson(ROOM_SEATS_KEY, roomSeats);
+  }
+  function savedSeat(code) {
+    Object.assign(roomSeats, readJson(ROOM_SEATS_KEY, {}));
+    const active = readJson(ACTIVE_ROOM_KEY, {});
+    if (validSeat(active) && active.roomCode === code) return active;
+    const remembered = roomSeats[code];
+    return validSeat(remembered) && remembered.savedAt > Date.now() - 86400000 ? remembered : null;
+  }
+
   function playAudio(name, detail) {
     window.SixthSenseAudio?.play(name, detail);
   }
@@ -211,7 +234,7 @@
       body: JSON.stringify({ action, ...payload })
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || `Room service returned ${response.status}.`);
+    if (!response.ok) throw Object.assign(new Error(data.error || `Room service returned ${response.status}.`), { status: response.status });
     return data;
   }
 
@@ -245,7 +268,7 @@
     if (code.length !== 6) return setLobbyMessage("Enter the six-character room code.", true);
     saveJson(IDENTITY_KEY, { name: player.name });
     setBusy(true, "Joining room…");
-    try { enterRoom(await api("join", { roomCode: code, player })); }
+    try { enterRoom(await api("join", { roomCode: code, player, resumeToken: savedSeat(code)?.token })); }
     catch (error) { setLobbyMessage(friendlyError(error), true); }
     finally { setBusy(false); }
   }
@@ -283,6 +306,7 @@
     state.finishedResultShown = false;
     state.renderedSnapshotSignature = "";
     localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ roomCode: state.roomCode, token: state.token, playerId: state.playerId }));
+    rememberSeat({ roomCode: state.roomCode, token: state.token, playerId: state.playerId });
     if (els.lobby.open) els.lobby.close();
     els.home.hidden = true;
     els.solo.hidden = true;
@@ -297,6 +321,7 @@
 
   function leaveRoom() {
     syncPresence(true);
+    rememberSeat({ roomCode: state.roomCode, token: state.token, playerId: state.playerId });
     clearTimeout(presence.timer);
     els.presenceAlert.hidden = true;
     clearTimeout(state.pollTimer);
@@ -324,7 +349,7 @@
     const mode = state.snapshot.room.mode;
     els.leaveKicker.textContent = "Leave this match?";
     els.leaveTitle.textContent = mode === "vs" ? "Leave VS room" : mode === "coop" ? "Leave co-op room" : "Leave race";
-    els.leaveCopy.textContent = "Your saved seat on this device will be cleared, so you can’t resume this match after leaving. The room stays open for the other players.";
+    els.leaveCopy.textContent = "Your progress stays saved. Enter this room code again in the same browser to return to your seat while the room is available. Other players can keep playing.";
     if (!els.leaveDialog.open) els.leaveDialog.showModal();
     setTimeout(() => els.leaveCancel.focus(), 60);
   }
@@ -337,12 +362,18 @@
   async function restoreActiveRoom() {
     let saved;
     try { saved = JSON.parse(localStorage.getItem(ACTIVE_ROOM_KEY)); } catch (_) { saved = null; }
-    if (!saved || !/^[A-HJ-NP-Z2-9]{6}$/.test(saved.roomCode || "") || !saved.token || !saved.playerId) return;
+    if (!validSeat(saved)) return;
+    rememberSeat(saved); // Migrate the old active-only save before any network request.
     try {
       const result = await api("snapshot", { roomCode: saved.roomCode, resumeToken: saved.token });
       enterRoom({ roomCode: saved.roomCode, resumeToken: saved.token, playerId: saved.playerId, snapshot: result.snapshot });
-    } catch (_) {
-      localStorage.removeItem(ACTIVE_ROOM_KEY);
+    } catch (error) {
+      if (error.status === 401 || error.status === 404) {
+        localStorage.removeItem(ACTIVE_ROOM_KEY);
+        Object.assign(roomSeats, readJson(ROOM_SEATS_KEY, {}));
+        delete roomSeats[saved.roomCode];
+        saveJson(ROOM_SEATS_KEY, roomSeats);
+      }
     }
   }
 

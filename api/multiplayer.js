@@ -247,8 +247,14 @@ async function createRoom(sql, body) {
 
 async function joinRoom(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
-  const player = cleanPlayer(body.player);
   const room = await getRoom(sql, code);
+  // An authenticated return uses the existing seat, even when the room is full
+  // or no longer accepts new players. A name alone never proves seat ownership.
+  if (body.resumeToken) {
+    const me = await authenticate(sql, code, body.resumeToken);
+    return { roomCode: code, resumeToken: body.resumeToken, playerId: me.id, snapshot: await snapshot(sql, room, me) };
+  }
+  const player = cleanPlayer(body.player);
   if (!canJoinRoom(room)) throw Object.assign(new Error(room.status === "finished" ? "That match has finished." : "That match has already started."), { status: 409 });
   const playerId = crypto.randomUUID();
   const resumeToken = token();

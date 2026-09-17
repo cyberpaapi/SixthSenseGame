@@ -51,6 +51,25 @@ const seat = player => ({ roomCode: player.roomCode, resumeToken: player.resumeT
     await page.waitForFunction(() => document.querySelectorAll(".race-token").length === 8);
     await page.locator('[data-online-key="R"]').tap();
     assert.equal((await page.locator("#online-board .board-row").first().innerText()).replace(/\s/g, ""), "R");
+    const lateSeat = { roomCode: saved.roomCode, resumeToken: saved.token };
+    const progressed = await ok("guess", { ...lateSeat, guess: "market", actionId: randomUUID() });
+    await page.click("#online-leave"); await page.click("#online-leave-confirm");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForSelector("#home-screen:not([hidden])");
+    await page.click('[data-open-online="race"]');
+    await page.fill("#online-join-code", host.roomCode);
+    await page.click("#online-join-room");
+    await page.waitForSelector('#online-screen:not([hidden]) [data-online-key="A"]:enabled');
+    const restored = await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.active-room.v1")));
+    assert.equal(restored.playerId, saved.playerId, "leave/reload/rejoin must reuse the original seat even in a full room");
+    const resumed = await ok("snapshot", lateSeat);
+    assert.equal(resumed.snapshot.me.currentWordIndex, progressed.snapshot.me.currentWordIndex);
+    assert.deepEqual(resumed.snapshot.me.attempts, progressed.snapshot.me.attempts);
+    assert.deepEqual(resumed.snapshot.me.lifelines, progressed.snapshot.me.lifelines);
+    assert.equal(resumed.snapshot.players.length, 8);
+    const impostor = await request("join", { roomCode: saved.roomCode, resumeToken: "incorrect-seat-key", player: { name: lateName } });
+    assert.equal(impostor.status, 401, "a username cannot authenticate a returning seat");
+    console.log("Live rejoin passed: leave/reload/code entry restores the original progress in a full room; incorrect seat keys are rejected.");
     console.log("Live Race late-join passed: phone joins running room at word one, existing progress preserved, playable keyboard, roster updates, duplicate-name denial and concurrent eight-seat cap.");
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
