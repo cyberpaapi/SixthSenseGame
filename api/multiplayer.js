@@ -249,14 +249,15 @@ async function joinRoom(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const player = cleanPlayer(body.player);
   const room = await getRoom(sql, code);
-  if (room.status !== "waiting") throw Object.assign(new Error("That match has already started."), { status: 409 });
+  if (!canJoinRoom(room)) throw Object.assign(new Error(room.status === "finished" ? "That match has finished." : "That match has already started."), { status: 409 });
   const playerId = crypto.randomUUID();
   const resumeToken = token();
   let inserted;
   for (let retry = 0; retry < 4 && !inserted?.length; retry += 1) {
     try {
       inserted = await sql`WITH locked_room AS (
-          SELECT code, capacity FROM sixth_sense_rooms WHERE code=${code} AND status='waiting' AND expires_at > now() FOR UPDATE
+          SELECT code, capacity FROM sixth_sense_rooms WHERE code=${code}
+            AND (status='waiting' OR (mode='race' AND status='running')) AND expires_at > now() FOR UPDATE
         ), next_seat AS (
           SELECT (COALESCE(MAX(seat),0) + 1)::int AS seat, COUNT(*)::int AS player_count
           FROM sixth_sense_players WHERE room_code=${code}
@@ -272,7 +273,7 @@ async function joinRoom(sql, body) {
   }
   if (!inserted?.length) {
     const currentRoom = await getRoom(sql, code);
-    if (currentRoom.status !== "waiting") throw Object.assign(new Error("That match has already started."), { status: 409 });
+    if (!canJoinRoom(currentRoom)) throw Object.assign(new Error(currentRoom.status === "finished" ? "That match has finished." : "That match has already started."), { status: 409 });
     const duplicate = await sql`SELECT 1 FROM sixth_sense_players WHERE room_code=${code} AND lower(display_name)=lower(${player.name}) LIMIT 1`;
     if (duplicate.length) throw Object.assign(new Error("That username is already taken in this room."), { status: 409 });
     const count = await sql`SELECT COUNT(*)::int AS count FROM sixth_sense_players WHERE room_code=${code}`;
@@ -281,6 +282,10 @@ async function joinRoom(sql, body) {
   }
   const refreshedRoom = await getRoom(sql, code);
   return { roomCode: code, resumeToken, playerId, snapshot: await snapshot(sql, refreshedRoom, inserted[0]) };
+}
+
+function canJoinRoom(room) {
+  return room.status === "waiting" || (room.mode === "race" && room.status === "running");
 }
 
 function chooseAnswers(difficulty, count) {
@@ -707,4 +712,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
