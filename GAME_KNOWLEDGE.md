@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Economy-v6 reset: focused wallet and full browser checks, core/multiplayer/progression and syntax passed locally; prior live multiplayer presence checks remain recorded below.)
+Last verified: 2026-09-18 (Race phone zoom correction: focused touch/layout, presence, native banner layout and core/multiplayer/progression checks passed locally; physical Safari behavior remains unverified. Prior wallet and live multiplayer checks are recorded below.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -187,6 +187,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `test-wallet-reset.js` | Browser checks for every legacy economy version, unchanged progress/inventory/cosmetics/claimed ads, current-wallet preservation and actual post-reset earnings across reload. |
 | `test-peek.js` / `test-peek-browser.js` | Shared candidate and authoritative VS/Race/Co-op checks plus solo/online UI fixtures for green-position exclusion, exhaustion and single-purchase/inventory consumption. |
 | `test-presence.js` / `test-presence-browser.js` | Presence input/authentication checks, all-mode Skip rejection, explicit client fixtures for screen events/ad exclusion/red avatars/return and phone geometry; production coverage lives in test-production-multiplayer.js. |
+| `test-race-mobile.js` | Touch-enabled Chromium Race fixtures with two/eight players: lobby input readability, repeated taps/pinch, viewport scale, portrait/landscape fit and normal home zoom. Does not emulate Safari's input-focus zoom heuristic. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
 | `test-tile-contrast.js` | Browser regression for typed/empty tile contrast in both themes, shared solo/online tile styles, and preservation of scored/Peek backgrounds. Run with `npm run test:contrast`. |
@@ -225,6 +226,8 @@ During active VS/Race/Co-op matches, updated clients report document visibility/
 Skip is disabled for every new multiplayer request, including requests from an old tab. Already-pending pre-release Skip confirmations are retained solely to avoid stranding active players. No room, score, puzzle, wallet or inventory reset accompanies this change.
 
 Existing open Vercel/GitHub tabs must refresh to report/show screen status; old clients cannot retroactively detect switches. Existing Android installations require an app update for native detection. Detection is best-effort: OS suspension, offline/closed clients or modified clients can prevent reporting, and an actual switch/call/lock is not proof of cheating. We do not inspect the destination app/site, penalize players or claim to detect second devices. Room-linked presence events cascade away when room/player records are cleaned up; privacy.html describes the data. Phone web multiplayer now shares the fitted-board CSS with native layouts, keeping controls and the non-layout-changing alert within the viewport.
+
+Multiplayer name/room-code inputs explicitly render at 16px instead of inheriting the name label's 11px size. The existing gameplay-only gesture restriction also applies to nested progress-panel/list/course scroll regions, where the body's gesture rule alone is insufficient (see [touch-action gesture boundaries](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/touch-action)). Pan gestures remain available; home/settings browser zoom and the unrestricted viewport meta tag are preserved. This addresses plausible focus/gesture zoom triggers found while investigating the phone Race report; no physical Safari reproduction is claimed.
 
 ## Data and selection
 
@@ -319,7 +322,9 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 second requested web reset (`app.js?v=20260918.4`, economy v6): syntax, core/multiplayer/progression, full browser and focused `test-wallet-reset.js` passed on port 4269. The reset covers missing markers and versions 1–5, including a zero wallet and high balances, and preserves current v6 balances, progression, inventory, cosmetics, statistics, saved puzzles and rewarded-claim history. An actual first-try solve credits 140 coins after migration and survives another reload without a repeated reset. No room/API data or Android bundle is changed.
+September 18 Race phone zoom correction (`styles.css?v=20260918.5`): `test-race-mobile.js` reproduces the undersized name-input regression against the pre-fix Vercel build and passes locally. Touch-enabled Chromium with explicit two/eight-player API fixtures passes double taps over avatars, tiles and keyboard, a pinch gesture over the progress panel, viewport scale 1, no document overflow and 44px keys at 320×568, 390×844 and 844×360. Home gesture/viewport accessibility assertions pass. Presence browser, native banner-layout and core/multiplayer/progression checks also pass. The reported zoom itself did not reproduce in desktop Chromium's phone simulation; physical iPhone/Safari testing remains outstanding. No economy-version change, room mutation or native bundle is part of this correction.
+
+September 18 second requested web reset (`app.js?v=20260918.4`, economy v6): syntax, core/multiplayer/progression, full browser and focused `test-wallet-reset.js` passed on port 4269. The reset covers missing markers and versions 1–5, including a zero wallet and high balances, and preserves current v6 balances, progression, inventory, cosmetics, statistics, saved puzzles and rewarded-claim history. An actual first-try solve credits 140 coins after migration and survives another reload without a repeated reset. No room/API data or Android bundle is changed. Commit `594faca` subsequently deployed successfully to Vercel and Pages (workflow `35270057394`); the focused wallet suite passed against both public sites.
 
 September 18 presence production verification: commit `c8387e1` deployed successfully to Vercel and GitHub Pages (workflow `35269532877`); both serve `multiplayer.js?v=20260918.3` and the accessible alert element. Two isolated clients on Vercel passed authoritative refresh/seat restoration, free Sense reopening, Reveal candidate checks, six-row VS, synchronized VS advancement, Co-op Skip rejection, shared departure alerts/red avatars/return, quick-switch detection and duplicate/late departure replay with exactly two counted departures (21,329ms total; opponent attempt visibility 1,856ms). Visibility events were simulated in those browsers against the real API/database; this is not a physical-device switching test. Replaced reload `networkidle` waits with DOM-ready plus existing room-UI waits because ongoing multiplayer polling can prevent network silence. Existing rooms, scores and wallets were not reset; only isolated QA rooms were created. Old open tabs still need a refresh and old native installations still need an app update.
 
@@ -445,6 +450,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Phone Race zoom correction
+
+- Set multiplayer text inputs to 16px and extend gameplay gesture restrictions through the Race panel's nested scroll boundaries. Preserve home/settings zoom, panning, keyboard touch targets, the economy-v6 reset and all multiplayer behavior. Added a focused touch-enabled phone regression and versioned the stylesheet for refreshed web clients.
 
 ### 2026-09-18 — Reset current web wallets before continuing
 
