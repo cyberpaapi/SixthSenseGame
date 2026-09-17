@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Room rejoin recovery: focused server/browser, Race touch, presence, core/multiplayer/progression and syntax checks passed locally; live rejoin acceptance pending.)
+Last verified: 2026-09-18 (Room rejoin recovery: focused server/browser, Race touch, presence, core/multiplayer/progression and syntax checks passed locally; live Vercel full-room leave/reload/rejoin and invalid-key rejection passed.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -328,7 +328,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 room rejoin recovery (`multiplayer.js?v=20260918.7`): server rules cover authenticated restoration across modes/running/finished states, retained attempts/lifelines/identity and rejection of incorrect tokens without mutation. `test-room-rejoin-browser.js` verifies migration from an active-only save before a simulated 503, retention through transient failure, leave/reload/other-room/rejoin and exact seat, word-two, scored row and Clear restoration. Race touch and presence suites, core/multiplayer/progression and syntax pass. The live Race test now exercises leave/reload/rejoin at eight seats and incorrect-key rejection; deployment results will follow. No wallet reset or native bundle is included.
+September 18 room rejoin recovery (`multiplayer.js?v=20260918.7`): server rules cover authenticated restoration across modes/running/finished states, retained attempts/lifelines/identity and rejection of incorrect tokens without mutation. `test-room-rejoin-browser.js` verifies migration from an active-only save before a simulated 503, retention through transient failure, leave/reload/other-room/rejoin and exact seat, word-two, scored row and Clear restoration. Race touch and presence suites, core/multiplayer/progression and syntax pass. The expanded live Race suite passed after commit `8c783c4` deployed to Vercel; Pages workflow `35272633602` also succeeded. The live phone flow left/reloaded/rejoined an eight-seat room with the same player ID, word index, submitted guesses and lifelines, with no additional seat; an incorrect key returned 401. Existing late-entry, duplicate-name and concurrent-capacity checks passed too. No wallet reset or native bundle is included.
 
 September 18 Race late joins: `test-race-join.js`, core/multiplayer/progression and syntax checks passed. Focused fixtures cover the mode/status matrix, first-word entry with no answer disclosure or room mutation, finished/expired/non-Race denial and a room finishing between initial read and insertion. `test-production-race-join.js` adds a real phone-browser late-join flow, unchanged existing progress, roster/input usability, duplicate-name rejection and two concurrent joins competing for the eighth seat; it passed against live Vercel after commit `2140462` deployed successfully. Pages workflow `35271958793` also succeeded; Pages uses the same Vercel room API. The live test confirmed exactly one accepted request and one full-room rejection when two users competed for the eighth seat. Only isolated QA rooms were created. No database migration, room reset, wallet change or native bundle is needed.
 
@@ -465,7 +465,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ### 2026-09-18 — Restore returning players to their existing room seats
 
-- Replaced destructive leave-key deletion with recent-room credential history and authenticated join resumption. Preserve the original seat/progress and reject name-only impersonation. Keep the active-room marker separate so leaving stays on home after reload; retain keys on temporary network failure. Updated leave/privacy copy, cache version and recovery regressions.
+- Replaced destructive leave-key deletion with recent-room credential history and authenticated join resumption. Preserve the original seat/progress and reject name-only impersonation. Keep the active-room marker separate so leaving stays on home after reload; retain keys on temporary network failure. Updated leave/privacy copy, cache version and recovery regressions. Published and verified same-seat recovery in a full live Race room; results are recorded above.
 
 ### 2026-09-18 — Allow players into running Race rooms
 
