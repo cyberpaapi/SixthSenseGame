@@ -508,36 +508,41 @@
   }
 
   function renderKeyboard() {
+    // Keep touch targets mounted while opponent/presence polls update the room.
+    if (!els.keyboard.firstElementChild) {
+      KEY_ROWS.forEach(keys => {
+        const row = document.createElement("div");
+        row.className = "keyboard-row";
+        [...keys].forEach(key => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.onlineKey = key;
+          button.addEventListener("click", () => handleKey(key));
+          row.appendChild(button);
+        });
+        els.keyboard.appendChild(row);
+      });
+    }
     const states = keyStates();
     const eliminated = new Set(state.snapshot?.me?.lifelines?.eliminatedLetters || []);
     const lifelines = state.snapshot?.me?.lifelines || {};
     const maxGuesses = baseGuessLimit() + (lifelines.extraAttempt ? 1 : 0);
     const canPlay = state.snapshot?.room.status === "running" && !state.snapshot.me.finished && !lifelines.lastChancePending && !lifelines.pendingSkip && currentAttempts().length < maxGuesses && !state.busy;
-    els.keyboard.innerHTML = "";
-    KEY_ROWS.forEach(keys => {
-      const row = document.createElement("div");
-      row.className = "keyboard-row";
-      [...keys].forEach(key => {
-        const button = document.createElement("button");
-        const letter = key.length === 1 ? key.toLowerCase() : key;
-        const status = states[letter];
-        button.type = "button";
-        button.disabled = !canPlay || (key.length === 1 && eliminated.has(letter));
-        button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}${eliminated.has(letter) ? " is-eliminated" : ""}`;
-        button.dataset.onlineKey = key;
-        button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}${status ? `, ${status}` : ""}`);
-        if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
-        else button.textContent = key;
-        if (status) {
-          const marker = document.createElement("small");
-          marker.className = "key-marker";
-          marker.textContent = MARKERS[status];
-          button.appendChild(marker);
-        }
-        button.addEventListener("click", () => handleKey(key));
-        row.appendChild(button);
-      });
-      els.keyboard.appendChild(row);
+    els.keyboard.querySelectorAll("[data-online-key]").forEach(button => {
+      const key = button.dataset.onlineKey;
+      const letter = key.length === 1 ? key.toLowerCase() : key;
+      const status = states[letter];
+      button.disabled = !canPlay || (key.length === 1 && eliminated.has(letter));
+      button.className = `key${key.length > 1 ? " wide" : ""}${status ? ` ${status}` : ""}${eliminated.has(letter) ? " is-eliminated" : ""}`;
+      button.setAttribute("aria-label", key === "BACK" ? "Delete letter" : `Letter ${key}${status ? `, ${status}` : ""}`);
+      if (key === "BACK") button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5H9l-6 7 6 7h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM11 9l6 6M17 9l-6 6"></path></svg>';
+      else button.textContent = key;
+      if (status) {
+        const marker = document.createElement("small");
+        marker.className = "key-marker";
+        marker.textContent = MARKERS[status];
+        button.appendChild(marker);
+      }
     });
   }
 

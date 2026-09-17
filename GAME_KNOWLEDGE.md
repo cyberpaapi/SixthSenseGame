@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Race phone zoom correction: focused touch/layout, presence, native banner layout and core/multiplayer/progression checks passed locally; physical Safari behavior remains unverified. Prior wallet and live multiplayer checks are recorded below.)
+Last verified: 2026-09-18 (Rapid touch input: repeated letters/Delete, stable keys through an opponent update, zoom/layout, full browser, presence and core/multiplayer/progression checks passed locally; physical Safari remains unverified.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -229,6 +229,8 @@ Existing open Vercel/GitHub tabs must refresh to report/show screen status; old 
 
 Multiplayer name/room-code inputs explicitly render at 16px instead of inheriting the name label's 11px size. The existing gameplay-only gesture restriction also applies to nested progress-panel/list/course scroll regions, where the body's gesture rule alone is insufficient (see [touch-action gesture boundaries](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/touch-action)). Pan gestures remain available; home/settings browser zoom and the unrestricted viewport meta tag are preserved. This addresses plausible focus/gesture zoom triggers found while investigating the phone Race report; no physical Safari reproduction is claimed.
 
+The onscreen keyboard specifically uses `touch-action:none` and disables text selection; its marker/icon children do not intercept hit testing. Multiplayer builds its semantic keyboard buttons once and updates their disabled/color/label states in place, retaining touch targets and focus when other players or presence polls change the snapshot. Ordinary click activation remains shared by touch, mouse and assistive technology, with no separate touch handler that could double-enter a letter. Home/settings zoom remains available.
+
 ## Data and selection
 
 - Answer pool: exactly 10,187 unique, clueable, answer-safe six-letter words.
@@ -321,6 +323,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 rapid-touch follow-up (`20260918.6` stylesheet/multiplayer): focused Race checks now assert actual input from rapid touchscreen taps (AA and two Deletes), and a press/release across a forced opponent snapshot update. The old build failed the retained-touch-target regression; Chromium still retargeted that particular tap successfully, so no claim is made that it reproduced every reported lost touch. Updated build retains the pressed button and enters R exactly once. Presence fixtures, full browser, core/multiplayer/progression and syntax pass. The new input assertions use Playwright touchscreen events; CDP synthetic gestures alone did not emit compatibility clicks reliably and are used only for zoom/layout assertions. Physical Safari remains unverified. The full browser suite initially measured the solo dock during its entry transform (71.902px instead of the settled 72px height, about 1.32px top offset); its baseline now waits for finite game-screen animations to finish before comparing the Sense dialog layout.
 
 September 18 Race phone zoom correction (`styles.css?v=20260918.5`): `test-race-mobile.js` reproduces the undersized name-input regression against the pre-fix Vercel build and passes locally. Touch-enabled Chromium with explicit two/eight-player API fixtures passes double taps over avatars, tiles and keyboard, a pinch gesture over the progress panel, viewport scale 1, no document overflow and 44px keys at 320×568, 390×844 and 844×360. Home gesture/viewport accessibility assertions pass. Presence browser, native banner-layout and core/multiplayer/progression checks also pass. The reported zoom itself did not reproduce in desktop Chromium's phone simulation; physical iPhone/Safari testing remains outstanding. No economy-version change, room mutation or native bundle is part of this correction.
 
@@ -450,6 +454,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Preserve rapid multiplayer keyboard touches
+
+- Following the clarification that double taps zoomed and letter touches failed, restricted gestures directly on the onscreen keyboards and retained multiplayer key buttons across snapshot updates. Preserved semantic click/keyboard activation, disabled states and color-independent markers. Added repeated-letter/Delete and mid-touch opponent-update assertions; bumped only stylesheet/multiplayer cache URLs.
 
 ### 2026-09-18 — Phone Race zoom correction
 

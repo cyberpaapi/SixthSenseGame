@@ -122,6 +122,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "game screen must not scroll vertically");
     await page.screenshot({ path: path.join(evidenceDir, "mobile-inventory-390x844.png"), fullPage: true });
 
+    await page.evaluate(() => Promise.allSettled(document.querySelector("#game-screen").getAnimations({ subtree: true })
+      .filter(animation => animation.effect.getComputedTiming().iterations !== Infinity).map(animation => animation.finished)));
     const lifelineLayoutBeforeHint = await page.evaluate(() => {
       const dock = document.querySelector("#game-screen .lifeline-dock").getBoundingClientRect();
       const prices = [...document.querySelectorAll("#game-screen .lifeline-price:not([hidden])")].map(element => element.getBoundingClientRect());

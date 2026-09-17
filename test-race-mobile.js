@@ -23,7 +23,31 @@ const { chromium } = require("playwright");
       }
       await page.click("#online-create-room");
       await page.waitForSelector(".race-token");
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       const cdp = await page.context().newCDPSession(page);
+      const tapKey = async (key, tapCount = 1) => {
+        const box = await page.locator(`[data-online-key="${key}"]`).boundingBox();
+        for (let tap = 0; tap < tapCount; tap++) {
+          await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+        }
+        await page.waitForTimeout(100);
+      };
+      const typed = () => page.locator("#online-board .board-row").first().innerText().then(text => text.replace(/\s/g, ""));
+      await tapKey("A", 2);
+      assert.equal(await typed(), "AA", "two quick touches must enter both letters exactly once");
+      await tapKey("BACK", 2);
+      assert.equal(await typed(), "", "two quick delete touches must both work");
+      const pressedKey = await page.locator('[data-online-key="R"]').elementHandle();
+      const pressedBox = await pressedKey.boundingBox();
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: pressedBox.x + pressedBox.width / 2, y: pressedBox.y + pressedBox.height / 2 }] });
+      players[1].name = "Updated opponent"; snapshot.room.revision++;
+      await page.evaluate(() => window.dispatchEvent(new Event("online")));
+      await page.waitForSelector('.race-token[title^="Updated opponent"]');
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await page.waitForTimeout(100);
+      assert.equal(await typed(), "R", "an opponent update between touch-down and touch-up must not swallow the letter");
+      assert(await pressedKey.evaluate(el => el.isConnected), "polling must retain the pressed key");
+      await tapKey("BACK");
       for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 844, height: 360 }]) {
         await page.setViewportSize(viewport);
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
