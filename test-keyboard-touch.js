@@ -14,6 +14,19 @@ const { chromium } = require("playwright");
     await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269");
     await page.click('[data-start-mode="practice"]');
     const typed = () => page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).current);
+    // Some browsers label the compatibility click as mouse or omit its origin.
+    // Replay those real touch clicks with that metadata before the key listener.
+    await page.evaluate(() => {
+      window.qaClickTypes = ["mouse", "", "touch", "pen", ""];
+      document.querySelector("#keyboard").addEventListener("click", event => {
+        if (!event.isTrusted || !window.qaClickTypes.length) return;
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.target.dispatchEvent(new PointerEvent("click", {
+          bubbles: true, pointerType: window.qaClickTypes.shift(), detail: 1
+        }));
+      }, { capture: true });
+    });
     for (const key of "WZXED") {
       const b = await page.locator(`[data-key="${key}"]`).boundingBox();
       await page.touchscreen.tap(b.x + 1, b.y + b.height / 2);
@@ -27,8 +40,6 @@ const { chromium } = require("playwright");
     await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: point.x + 5, y: point.y + 4 }] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     assert.equal(await typed(), "wzxe", "held/slightly moving Delete activates once");
-    await page.locator('[data-key="BACK"]').dispatchEvent("click", { detail: 1 });
-    assert.equal(await typed(), "wzxe", "legacy compatibility click must not double-delete");
     assert.equal(await page.evaluate(() => String(getSelection())), "", "holding a key must not select its text");
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });

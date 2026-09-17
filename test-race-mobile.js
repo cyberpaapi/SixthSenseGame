@@ -24,6 +24,13 @@ const { chromium } = require("playwright");
       await page.click("#online-create-room");
       await page.waitForSelector(".race-token");
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await page.evaluate(() => {
+        document.querySelector("#online-keyboard").addEventListener("click", event => {
+          if (!event.isTrusted || event.pointerType !== "touch") return;
+          event.stopImmediatePropagation();
+          event.target.dispatchEvent(new PointerEvent("click", { bubbles: true, pointerType: "mouse", detail: 1 }));
+        }, { capture: true });
+      });
       const cdp = await page.context().newCDPSession(page);
       const tapKey = async (key, tapCount = 1) => {
         const box = await page.locator(`[data-online-key="${key}"]`).boundingBox();

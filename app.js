@@ -669,32 +669,33 @@
     return states;
   }
 
-  // Touch release is captured on the original key; browser click remains for mouse/AT.
+  // Click is the only activation path, regardless of browser pointer metadata.
   function bindKeyboardKey(button, activate) {
     let press = null;
-    let lastTouchRelease = -Infinity;
+    let cancelledPointerClick = false;
     button.addEventListener("pointerdown", event => {
+      cancelledPointerClick = false;
       if (event.pointerType === "mouse" || button.disabled) return;
-      event.preventDefault();
       press = { id: event.pointerId, x: event.clientX, y: event.clientY };
       button.setPointerCapture(event.pointerId);
       button.classList.add("is-pressed");
     });
     button.addEventListener("pointerup", event => {
       if (!press || press.id !== event.pointerId) return;
-      event.preventDefault();
-      const valid = Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 18;
-      lastTouchRelease = performance.now();
+      cancelledPointerClick = Math.hypot(event.clientX - press.x, event.clientY - press.y) > 18;
       press = null;
       button.classList.remove("is-pressed");
-      if (valid && !button.disabled) activate();
     });
-    const cancel = () => { press = null; button.classList.remove("is-pressed"); };
+    const cancel = () => {
+      if (press) cancelledPointerClick = true;
+      press = null;
+      button.classList.remove("is-pressed");
+    };
     button.addEventListener("pointercancel", cancel);
     button.addEventListener("lostpointercapture", cancel);
     button.addEventListener("contextmenu", event => event.preventDefault());
     button.addEventListener("click", event => {
-      if (event.pointerType === "touch" || event.pointerType === "pen" || event.sourceCapabilities?.firesTouchEvents || (!event.pointerType && event.detail > 0 && performance.now() - lastTouchRelease < 800)) {
+      if (button.disabled || (cancelledPointerClick && event.detail > 0)) {
         event.preventDefault();
         return;
       }

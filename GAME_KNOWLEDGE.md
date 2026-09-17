@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Fresh economy-v9 500-coin reset: core, migration, live-policy/cross-tab/offline, syntax and public packaging checks passed locally; four old public-client pages reset automatically across actual deployment; public migration/earn/reload checks passed on both origins.)
+Last verified: 2026-09-18 (Single-path keyboard input: duplicate-click regression reproduced before fix and passes locally; core, touch/Race, syntax and packaging checks passed; full browser passed; deployment verification pending.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -193,7 +193,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `test-presence.js` / `test-presence-browser.js` | Presence input/authentication checks, all-mode Skip rejection, explicit client fixtures for screen events/ad exclusion/red avatars/return and phone geometry; production coverage lives in test-production-multiplayer.js. |
 | `test-room-rejoin-browser.js` | Explicit browser fixtures for active-key migration, transient-error retention, bounded room history use and leave/reload/other-room/rejoin restoration. |
 | `test-race-join.js` / `test-production-race-join.js` | Server late-entry rules and live Race join/progress preservation/duplicate-name/concurrent-capacity/browser acceptance. |
-| `test-keyboard-touch.js` | Phone touch checks for reported WZXED edge taps, held/moving release, cancellation/drag-away, compatibility-click deduplication, mouse and accessible keyboard activation. |
+| `test-keyboard-touch.js` | Phone touch checks for reported WZXED edge taps, held/moving release, cancellation/drag-away, browser click-origin variations (mouse/empty/touch/pen), mouse and accessible keyboard activation. |
 | `test-race-mobile.js` | Touch-enabled Chromium Race fixtures with two/eight players: lobby input readability, repeated/edge taps, retained targets across polling, equal bottom starts and upward progress, side-course geometry, recovered small-phone tile area, pinch/scale, portrait/landscape fit and normal home zoom. Does not emulate Safari's input-focus zoom heuristic. |
 | `test-core.js` | Node assertions for data shape/counts, RATTLE/RAFFLE coverage, scoring, hard mode, dates, attempts, costs, and rewards. |
 | `test-browser.js` | Playwright end-to-end QA for onboarding, modes, lifelines, coins, repeated use, keyboard states, solving, logo settings, themes, screenshots, and overflow. |
@@ -236,7 +236,7 @@ Existing open Vercel/GitHub tabs must refresh to report/show screen status; old 
 
 Multiplayer name/room-code inputs explicitly render at 16px instead of inheriting the name label's 11px size. The existing gameplay-only gesture restriction also applies to nested progress-panel/list/course scroll regions, where the body's gesture rule alone is insufficient (see [touch-action gesture boundaries](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/touch-action)). Pan gestures remain available; home/settings browser zoom and the unrestricted viewport meta tag are preserved. This addresses plausible focus/gesture zoom triggers found while investigating the phone Race report; no physical Safari reproduction is claimed.
 
-The onscreen keyboard specifically uses `touch-action:none` and disables text selection; its marker/icon children do not intercept hit testing. Solo and multiplayer build semantic keyboard buttons once and update color/label states in place; online also updates disabled state. Touch/pen uses captured pointer release with an 18px movement tolerance, cancellation and compatibility-click suppression. Mouse and detail-zero semantic/assistive clicks still work. Selection, callouts and tap highlight are disabled directly on keys/children, and key feedback no longer transforms/shrinks the hit area. Multiplayer also guards input while a decision dialog is open. The shared binder is exposed by app.js as SixthSenseKeyboard. Home/settings zoom remains available.
+The onscreen keyboard specifically uses `touch-action:none` and disables text selection; its marker/icon children do not intercept hit testing. Solo and multiplayer build semantic keyboard buttons once and update color/label states in place; online also updates disabled state. Click is now the sole activation path for touch, pen, mouse and semantic/assistive input. Pointer capture retains the original touch target; pointer release only tracks the 18px drag-away/cancellation threshold and never enters a letter. No pointer-type inference or timed click suppression is used, so a browser labelling a touch compatibility click as mouse cannot double-enter. Detail-zero semantic/assistive clicks remain available. Selection, callouts and tap highlight are disabled directly on keys/children, and key feedback no longer transforms/shrinks the hit area. Multiplayer also guards input while a decision dialog is open. The shared binder is exposed by app.js as SixthSenseKeyboard. Home/settings zoom remains available.
 
 ## Data and selection
 
@@ -332,6 +332,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 duplicate-input correction (app 20260918.12): the new click-origin regression first failed on the prior release with `wwzxed` instead of `wzxed`: its pointer-up path entered W and its mouse-labelled click entered W again. The shared binder now activates only on click. Focused touch and Race suites, core, syntax and packaging passed locally; full-browser checks also passed; deployment verification is pending. Coverage retains repeated letters/Delete, held/edge touches, cancellation/drag-away, mouse/Space/semantic clicks and mid-poll target retention. Click-origin variation is an explicit browser fixture; no physical Safari reproduction is claimed.
 
 September 18 renewed 500-coin reset (app 20260918.11, economy v9): core, focused migration/live-policy/cross-tab/offline, syntax and public-client packaging checks passed locally. Commit `201ad00` deployed successfully to Vercel and GitHub Pages (workflow `35275570862`). Four isolated public pages loaded the previous v8 build before deployment and automatically received the actual v9 policy without reload: 0 and 9,876 both became exactly 500 on each site, with progress/inventory intact. The full migration/earn/reload suite then passed against both public origins, including prior v8 wallets and preservation of subsequent earnings. This distinguishes already-open-client delivery from migration on refresh. Very old clients, offline devices and installed Android limits remain; there is no real-user wallet census.
 
@@ -475,6 +477,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Remove the second keyboard activation path
+
+- Fixed the reported double letters introduced by the touch-release path: mouse-labelled compatibility clicks could bypass its origin filter. Enter letters only from click; keep pointer capture solely for press feedback and cancelling interrupted/dragged-away touches. Preserve stable key nodes, selection prevention and the vertical Race layout.
+- Added click-origin regressions for solo and Race, including a demonstrated before-fix duplicate. Versioned app.js for refreshed clients. Economy generation 9/500 and all room state remain unchanged; no native bundle is rebuilt.
 
 ### 2026-09-18 — Reissue 500 coins and verify actual open-page delivery
 
