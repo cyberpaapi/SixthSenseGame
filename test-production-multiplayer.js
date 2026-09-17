@@ -16,7 +16,10 @@ async function seedIdentity(page, name, avatar, accent) {
 }
 
 async function submitWord(page, word) {
+  const submitted = page.waitForResponse(response => response.url().includes("/api/multiplayer") && response.request().method() === "POST" && response.request().postDataJSON()?.action === "guess");
   for (const letter of word) await page.click(`[data-online-key="${letter.toUpperCase()}"]`);
+  assert.equal((await submitted).status(), 200, "the server must accept the submitted guess");
+  await page.waitForFunction(() => document.querySelector("#last-chance-modal[open]") || !document.querySelector("#online-round-transition")?.hidden || !document.querySelector('[data-online-key="A"]')?.disabled);
 }
 
 (async () => {
@@ -55,6 +58,8 @@ async function submitWord(page, word) {
       guestPage.waitForFunction(() => !document.querySelector('[data-online-key="A"]')?.disabled, null, { timeout: 10000 })
     ]);
     assert.equal(await hostPage.locator('[data-online-lifeline="sense"] button').isEnabled(), true, "VS lifelines must be live before the first attempt");
+    assert.equal(await hostPage.locator("#online-board .tile").count(), 36, "new production rooms must use six standard rows");
+    assert.equal(await guestPage.locator("#online-board .tile").count(), 36, "both seats must receive the six-try room limit");
     assert.equal(await hostPage.locator('[data-online-lifeline="skip"]').isHidden(), true, "VS must not expose Skip");
 
     await hostPage.click('[data-online-lifeline="sense"] button');

@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-17
 
-Last verified: 2026-09-17 (Local core, browser, contrast, music, result effects, monetization/Last Chance fixtures, Android debug assembly and lint passed; production verification for runtime 20260917.1 pending.)
+Last verified: 2026-09-17 (Local suites and Android debug assembly/lint passed; runtime 20260917.1 deployed to Vercel/Pages with verified music, contrast and two-client live multiplayer.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -213,7 +213,7 @@ Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-c
 
 Last Chance native receipts carry kind `last-chance` or `last-chance-online` and no coin amount. Solo claim identity and the earned extra-turn flag share one atomic puzzle save before native acknowledgement; an old receipt cannot unlock a different puzzle. Online claim identity is saved at `sixth-sense.last-chance-online.v1`, scoped to room/player/round/failed batch. The existing authoritative unlock API is retried with one action UUID; network failure retains the native receipt without another ad. No local room simulation or answer disclosure is introduced. Server handlers reject guesses while a decision is pending or the attempt limit is exhausted.
 
-The backend migration retains seven as `max_guesses` for existing rooms and inserts six for new rooms. Snapshots expose `maxGuesses` and `lastChanceAds`; clients use legacy seven/no ad when these are absent. These backend changes are local and require deployment; the current live API is not claimed updated. Native earned callbacks and the existing device-local wallet remain client-side trust boundaries, with no AdMob server-side verification.
+The backend migration retains seven as `max_guesses` for existing rooms and inserts six for new rooms. Snapshots expose `maxGuesses` and `lastChanceAds`; clients use legacy seven/no ad when these are absent. The matching client/backend were deployed to Vercel on September 17. Native earned callbacks and the existing device-local wallet remain client-side trust boundaries, with no AdMob server-side verification.
 
 ## Data and selection
 
@@ -307,7 +307,9 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 17 release preparation (`20260917.1`): core/multiplayer/progression, full browser, engagement, tile contrast, actual 88-second music playback/loop/lifecycle, result audio/avatar/confetti, banner geometry, mobile rewards, mocked purchase verification and all three Last Chance suites passed on port 4269. Updated stale seven-chance home-copy and 42-tile music assertions to the six-row contract. Visually inspected the 390×844 darker game background with readable letters and unclipped controls. Android sync, debug assembly and lint passed; Gradle deprecation/flatDir/SDK-tool warnings remain. Refreshed `release/SixthSense-v1.0.1-debug.apk` and `release/SixthSense-debug.apk`: 36,289,797 bytes, SHA-256 `B03DDD551EF61095EB0E02F387DE32C0F6DCE7A2E852DE24DA80AC141ACBDDB7`. This is a debug APK, not a newly signed Play bundle. Production deployment is pending this source push.
+September 17 release preparation (`20260917.1`): core/multiplayer/progression, full browser, engagement, tile contrast, actual 88-second music playback/loop/lifecycle, result audio/avatar/confetti, banner geometry, mobile rewards, mocked purchase verification and all three Last Chance suites passed on port 4269. Updated stale seven-chance home-copy and 42-tile music assertions to the six-row contract. Visually inspected the 390×844 darker game background with readable letters and unclipped controls. Android sync, debug assembly and lint passed; Gradle deprecation/flatDir/SDK-tool warnings remain. Refreshed `release/SixthSense-v1.0.1-debug.apk` and `release/SixthSense-debug.apk`: 36,289,797 bytes, SHA-256 `B03DDD551EF61095EB0E02F387DE32C0F6DCE7A2E852DE24DA80AC141ACBDDB7`. This is a debug APK, not a newly signed Play bundle.
+
+September 17 production verification: source commit `08dff3e` deployed successfully to Vercel and GitHub Pages (workflow `35257375748`). Both serve runtime 20260917.1 and the soundtrack. Vercel audio/sad-avatar/font assets match source hashes; runtime scripts/styles match source after newline normalization. Live music playback/88-second wrap and tile contrast suites passed. Two isolated production clients verified six-row new rooms, hint purchase/free reopening after refresh, guest-seat restoration, 2,060ms opponent-attempt visibility, six-miss Last Chance decline, synchronized VS advancement and Co-op Skip/OK-gated advancement (18,909ms total). The test now waits for each authoritative guess response before attempting the next word; its initial run raced the sixth-guess response. Privacy returns HTTP 200; purchase readiness returns the expected 503/available=false without configured Play credentials. No live paid purchase, production AdMob serving or Play upload is claimed.
 
 September 16 Last Chance native verification: the isolated API 36 emulator loaded a Google sample rewarded ad from Last Chance; its earned callback granted the seventh row without spending coins. The entitlement survived restart/update. Status/navigation bars were hidden again after the ad. The camera-safe fullscreen WebView measured 412×843 with document height 843; the background extended behind the cutout without a white top strip. No AndroidRuntime crash was observed. Online earned-receipt retry/storage-failure scenarios use explicit test fixtures, not live AdMob or a physical device. No new signed AAB or Play upload was performed.
 
@@ -403,7 +405,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 - The user rejected the CSS party accessories and requested rendered transparent sheets. Four generated sources in `artwork-drafts/party-sheets/` cover all 18 avatars in extended/rolled blower poses, but contain baked checkerboards. Genuine alpha cleanup, cell packing/alignment, and runtime replacement remain pending; a local cleanup permission question is awaiting the user's reply. Exact prompts and source status are recorded in that folder's README.
 
-- Android source, test-ad SDK integration, rewarded solve bonuses and banner-removal billing/verification are implemented locally. Live AdMob serving/verification, Play product/pricing, server credentials/deployment, store graphics and real-device/account release checks remain outstanding. A signed sample-ad internal-test AAB exists, but this is not yet a production-ready Play release; `ANDROID_RELEASE.md` lists the remaining steps.
+- Android source, test-ad SDK integration, rewarded solve bonuses and banner-removal billing/verification are implemented. The verification endpoint and privacy page are deployed, but `/api/play-purchase` correctly returns 503/available=false until Play server credentials are configured. Live AdMob serving/verification, Play product/pricing, app-ads.txt verification, store graphics and real-device/account release checks remain outstanding. A signed sample-ad internal-test AAB exists, but this is not yet a production-ready Play release; `ANDROID_RELEASE.md` lists the remaining steps.
 
 - Clue validation catches structural leaks/patterns and the explicit regression list, not every semantic mistake. Rare-word/sense quality still benefits from human editing; the content audit does not claim a complete manual review.
 - Trio, mastery, and personal bests currently apply to solo play; multiplayer retains its existing independent coin/round rewards. Local progress is not cheat-resistant and should not be used for real-money entitlements. There is no telemetry or evidence yet that these changes improve retention; they provide clearer short goals and competence feedback, not a promised addiction outcome.
@@ -413,7 +415,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Production multiplayer uses 900ms bounded polling rather than WebSockets/SSE. It is playable and production-tested, but is not yet a push-realtime architecture.
 - Online rooms expire after 24 hours and currently have no Force End or Play Again command. Players can leave and create a new room instead.
 - Planned monetization is intentionally not active: the first three multiplayer match starts per player should be free, after which starting another match should require coins or an optional rewarded ad. This needs account/server-authoritative entitlement counters, ad-provider integration, consent/privacy handling, and abuse protection before implementation; do not enforce it from local storage.
-- Rewarded Last Chance is implemented for Android. Online availability and six-try new rooms require deploying this matching backend; old servers remain compatible at seven tries with no online ad option. Real production ads, SSV, and physical-device acceptance remain unverified.
+- Rewarded Last Chance is implemented for Android with the matching backend deployed. Old servers remain compatible at seven tries with no online ad option. Real production ads, SSV, and physical-device acceptance remain unverified.
 - Coins/cosmetics remain device-local and are not sold for money. Before selling them, use authenticated server-side ownership and purchase validation. The separate paid banner-removal entitlement uses server-verified Google Play ownership.
 - The dictionary is deliberately broad but is not a promise to contain every historical, regional, inflected, or specialist six-letter form.
 - Generated raster assets make the repository larger than a code-only static game; preserve optimized WebP versions where they exist.
@@ -421,6 +423,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-17 — Verify the published build
+
+- Recorded successful Vercel/Pages deployment and live asset/music/theme/multiplayer checks, including new-room six-row assertions. Fixed the production test's asynchronous guess timing without altering deployed gameplay.
+- Updated backend and Android release handoffs to distinguish the deployed multiplayer/privacy/purchase endpoint from still-unconfigured paid purchase credentials and the older signed Play bundle.
 
 ### 2026-09-17 — Publish the current game and deepen dark backgrounds
 
