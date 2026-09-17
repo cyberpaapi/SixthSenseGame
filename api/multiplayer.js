@@ -69,6 +69,13 @@ async function ensureSchema(sql) {
     await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS score integer NOT NULL DEFAULT 0`;
     await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS decoration text NOT NULL DEFAULT 'none'`;
     await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS lifeline_state jsonb NOT NULL DEFAULT '{}'::jsonb`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS screen_away boolean NOT NULL DEFAULT false`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS away_count integer NOT NULL DEFAULT 0`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS presence_sequence bigint NOT NULL DEFAULT 0`;
+    await sql`CREATE TABLE IF NOT EXISTS sixth_sense_presence_events (
+      event_id uuid PRIMARY KEY, player_id uuid NOT NULL REFERENCES sixth_sense_players(id) ON DELETE CASCADE,
+      sequence bigint NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(player_id, sequence)
+    )`;
     await sql`ALTER TABLE sixth_sense_rooms DROP CONSTRAINT IF EXISTS sixth_sense_rooms_word_count_check`;
     await sql`ALTER TABLE sixth_sense_rooms DROP CONSTRAINT IF EXISTS sixth_sense_rooms_mode_check`;
     await sql`ALTER TABLE sixth_sense_rooms DROP CONSTRAINT IF EXISTS sixth_sense_rooms_mode_v2_check`;
@@ -148,13 +155,15 @@ async function authenticate(sql, code, resumeToken) {
 }
 
 async function snapshot(sql, room, me) {
-  const players = await sql`SELECT id, display_name, avatar, accent, decoration, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated, lifeline_state
+  const players = await sql`SELECT id, display_name, avatar, accent, decoration, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated, lifeline_state, screen_away, away_count, presence_sequence
     FROM sixth_sense_players WHERE room_code=${room.code} ORDER BY seat`;
   const normalized = players.map(player => {
     const attempts = parseJson(player.attempts, []);
     return {
       id: player.id,
       name: player.display_name,
+      screenAway: room.status === "running" && Boolean(player.screen_away),
+      awayCount: Number(player.away_count) || 0,
       avatar: player.avatar,
       accent: player.accent,
       accentHex: ACCENTS[player.accent] || ACCENTS.coral,
@@ -182,6 +191,7 @@ async function snapshot(sql, room, me) {
       code: room.code,
       maxGuesses: roomGuessLimit(room),
       lastChanceAds: true,
+      presenceEnabled: true,
       mode: room.mode,
       difficulty: room.difficulty,
       wordCount: room.word_count,
@@ -194,6 +204,8 @@ async function snapshot(sql, room, me) {
     },
     me: {
       id: me.id,
+      presenceSequence: Number(own.presence_sequence) || 0,
+      screenAway: Boolean(own.screen_away),
       isHost: room.host_player_id === me.id,
       currentWordIndex: isSharedRoundMode(room.mode) ? room.current_round : own.current_word_index,
       attempts: parseJson(own.attempts, []),
@@ -511,16 +523,7 @@ async function submitLifeline(sql, body) {
   const lifelines = Number(priorState.round) === index ? priorState : { round: index, clue: "", peeked: [], eliminatedLetters: [] };
   if (lifelines.lastChancePending || lifelines.pendingSkip) throw Object.assign(new Error("Finish the open decision before using another lifeline."), { status: 409 });
 
-  if (kind === "skip" && room.mode === "vs") throw Object.assign(new Error("Skip is not available in VS."), { status: 409 });
-
-  if (kind === "skip") {
-    const pending = { ...lifelines, pendingSkip: true, skippedAnswer: answer };
-    const updated = await sql`UPDATE sixth_sense_players SET lifeline_state=${JSON.stringify(pending)}::jsonb,
-        revision=revision+1, updated_at=now()
-      WHERE id=${me.id} AND revision=${me.revision} RETURNING *`;
-    if (!updated.length) throw Object.assign(new Error("The word changed while Skip was used."), { status: 409 });
-    return storeAction(sql, actionId, code, me.id, { effect: { kind, answer, pending: true }, snapshot: await snapshot(sql, room, updated[0]) });
-  }
+  if (kind === "skip") throw Object.assign(new Error("Skip is disabled in multiplayer. Refresh the game to update your controls."), { status: 409 });
 
   let effect;
   if (kind === "sense") {
@@ -645,6 +648,27 @@ async function updateIdentity(sql, body) {
   return { snapshot: await snapshot(sql, room, updated[0]) };
 }
 
+async function updatePresence(sql, body) {
+  if (typeof body.away !== "boolean" || !Number.isSafeInteger(body.sequence) || body.sequence < 1 || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(body.eventId || "")) throw Object.assign(new Error("Invalid screen status."), { status: 400 });
+  const code = String(body.roomCode || "").toUpperCase();
+  const me = await authenticate(sql, code, body.resumeToken);
+  const room = await getRoom(sql, code);
+  if (room.status !== "running") return { accepted: false };
+  // Count each departure once even if a quick return arrives first. Sequence
+  // ordering prevents a delayed departure from turning a returned player red.
+  // Keep gameplay revision unchanged so presence cannot cancel a valid guess.
+  await sql`WITH departure AS (
+      INSERT INTO sixth_sense_presence_events (event_id, player_id, sequence)
+      SELECT ${body.eventId}::uuid, ${me.id}::uuid, ${body.sequence}::bigint WHERE ${body.away}
+      ON CONFLICT DO NOTHING RETURNING event_id
+    ) UPDATE sixth_sense_players SET
+      away_count=away_count+(SELECT count(*)::integer FROM departure),
+      screen_away=CASE WHEN ${body.sequence}::bigint > presence_sequence THEN ${body.away} ELSE screen_away END,
+      presence_sequence=GREATEST(presence_sequence, ${body.sequence}::bigint)
+    WHERE id=${me.id}`;
+  return { accepted: true };
+}
+
 async function getSnapshot(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const me = await authenticate(sql, code, body.resumeToken);
@@ -672,6 +696,7 @@ async function handler(request, response) {
     else if (body.action === "advance_skip") result = await advanceSkip(sql, body);
     else if (body.action === "last_chance") result = await submitLastChance(sql, body);
     else if (body.action === "identity") result = await updateIdentity(sql, body);
+    else if (body.action === "presence") result = await updatePresence(sql, body);
     else if (body.action === "snapshot") result = await getSnapshot(sql, body);
     else throw Object.assign(new Error("Unknown multiplayer action."), { status: 400 });
     return response.status(200).json(result);
@@ -682,4 +707,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };

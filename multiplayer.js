@@ -12,6 +12,7 @@
   const IDENTITY_KEY = "sixth-sense.online.identity.v1";
   const ACTIVE_ROOM_KEY = "sixth-sense.active-room.v1";
   const LAST_CHANCE_AD_KEY = "sixth-sense.last-chance-online.v1";
+  const PRESENCE_KEY = "sixth-sense.presence.v1";
   const baseGuessLimit = () => Number(state.snapshot?.room.maxGuesses) || 7; // Older servers still enforce seven.
   const ONLINE_REWARDS_KEY = "sixth-sense.online-rewards.v1";
   const LENGTH_OPTIONS = Object.freeze({
@@ -43,6 +44,7 @@
     roomCode: document.querySelector("#online-room-code"),
     roomState: document.querySelector("#online-room-state"),
     status: document.querySelector("#online-live-status"),
+    presenceAlert: document.querySelector("#online-presence-alert"),
     roundTransition: document.querySelector("#online-round-transition"),
     roundKicker: document.querySelector("#online-round-kicker"),
     roundTitle: document.querySelector("#online-round-title"),
@@ -85,6 +87,71 @@
     lastRoundCoinReward: 0
   };
 
+  const presence = { seen: new Map(), pending: new Map(), sequence: 0, lastAway: false, nativeActive: true, adActive: false, pageLeaving: false, timer: null };
+  function fitOnlineBoard() {
+    const fitted = !window.Capacitor?.isNativePlatform?.() && !els.screen.hidden && matchMedia("(max-width:850px), (max-height:600px)").matches;
+    document.body.classList.toggle("is-fitted-online", fitted);
+    if (!fitted) return;
+    const bounds = els.board.parentElement.getBoundingClientRect();
+    if (!bounds.height || !bounds.width) return;
+    const rows = els.board.children.length || Core.MAX_GUESSES;
+    const size = Math.floor(Math.min(52, (bounds.width - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+    els.board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
+  }
+  new ResizeObserver(fitOnlineBoard).observe(els.board.parentElement);
+  new MutationObserver(fitOnlineBoard).observe(els.board, { childList: true });
+  window.addEventListener("resize", fitOnlineBoard);
+
+  function flushPresence() {
+    for (const [id, event] of presence.pending) {
+      if (event.sending) continue;
+      event.sending = true;
+      fetch(`${API_BASE}/api/multiplayer`, {
+        method: "POST", headers: { "content-type": "application/json" },
+        keepalive: true, body: JSON.stringify(event.body)
+      }).then(response => {
+        if (!response.ok) throw Error("Screen status unavailable");
+        presence.pending.delete(id);
+        if (!els.screen.hidden && !document.hidden) schedulePoll(0);
+      }).catch(() => { event.sending = false; });
+    }
+  }
+
+  function syncPresence(forceAway = false) {
+    if (!state.snapshot?.room.presenceEnabled || state.snapshot.room.status !== "running" || els.screen.hidden) return;
+    presence.sequence = Math.max(presence.sequence, Number(state.snapshot.me.presenceSequence) || 0);
+    const away = forceAway || (!presence.adActive && (document.hidden || !presence.nativeActive || presence.pageLeaving));
+    if (away !== presence.lastAway) {
+      presence.lastAway = away;
+      const saved = readJson(PRESENCE_KEY, {});
+      if (saved.roomCode === state.roomCode && saved.playerId === state.playerId) presence.sequence = Math.max(presence.sequence, Number(saved.sequence) || 0);
+      presence.sequence++;
+      saveJson(PRESENCE_KEY, { roomCode: state.roomCode, playerId: state.playerId, sequence: presence.sequence });
+      const eventId = crypto.randomUUID();
+      presence.pending.set(eventId, { sending: false, body: {
+        action: "presence", roomCode: state.roomCode, resumeToken: state.token,
+        away, sequence: presence.sequence, eventId
+      } });
+    }
+    flushPresence();
+  }
+
+  function renderPresenceAlerts(snapshot) {
+    const departed = [];
+    for (const player of snapshot.players) {
+      const count = Number(player.awayCount) || 0;
+      const previous = presence.seen.get(player.id);
+      if (previous !== undefined && count > previous) departed.push(player.name);
+      presence.seen.set(player.id, Math.max(previous || 0, count));
+    }
+    if (departed.length && snapshot.room.status === "running") {
+      els.presenceAlert.textContent = `${departed.join(", ")} left the game screen.`;
+      els.presenceAlert.hidden = false;
+      clearTimeout(presence.timer);
+      presence.timer = setTimeout(() => { els.presenceAlert.hidden = true; }, 6500);
+    }
+  }
+
   function readJson(key, fallback) {
     try { return { ...fallback, ...(JSON.parse(localStorage.getItem(key)) || {}) }; }
     catch (_) { return { ...fallback }; }
@@ -105,7 +172,7 @@
   }
 
   function decorateAvatar(element, player) {
-    element.className = `avatar-art avatar-${player.avatar}`;
+    element.className = `avatar-art avatar-${player.avatar}${player.screenAway ? " is-away" : ""}`;
     element.dataset.decoration = player.decoration || "none";
   }
 
@@ -201,6 +268,12 @@
   }
 
   function enterRoom(result) {
+    presence.seen = new Map(result.snapshot.players.map(player => [player.id, Number(player.awayCount) || 0]));
+    presence.pending.clear();
+    presence.sequence = Number(result.snapshot.me.presenceSequence) || 0;
+    presence.lastAway = Boolean(result.snapshot.me.screenAway);
+    clearTimeout(presence.timer);
+    els.presenceAlert.hidden = true;
     state.roomCode = result.roomCode;
     state.token = result.resumeToken;
     state.playerId = result.playerId;
@@ -223,6 +296,9 @@
   }
 
   function leaveRoom() {
+    syncPresence(true);
+    clearTimeout(presence.timer);
+    els.presenceAlert.hidden = true;
     clearTimeout(state.pollTimer);
     state.pollTimer = null;
     state.snapshot = null;
@@ -234,6 +310,7 @@
     if (els.skipDialog.open) els.skipDialog.close();
     if (els.lastChanceDialog.open) els.lastChanceDialog.close();
     els.screen.hidden = true;
+    document.body.classList.remove("is-fitted-online");
     els.home.hidden = false;
     els.solo.hidden = true;
     document.body.dataset.screen = "home";
@@ -288,6 +365,8 @@
   function renderSnapshot() {
     const snapshot = state.snapshot;
     if (!snapshot) return;
+    syncPresence();
+    renderPresenceAlerts(snapshot);
     const signature = snapshotSignature(snapshot);
     if (signature === state.renderedSnapshotSignature) return false;
     state.renderedSnapshotSignature = signature;
@@ -506,7 +585,7 @@
     const names = { sense: "Sense", peek: "Peek", clear: "Clear", skip: "Skip" };
     els.lifelines.forEach(item => {
       const kind = item.dataset.onlineLifeline;
-      item.hidden = state.snapshot?.room.mode === "vs" && kind === "skip";
+      item.hidden = kind === "skip";
       if (item.hidden) return;
       const button = item.querySelector("button");
       const stock = item.querySelector(".lifeline-stock");
@@ -659,7 +738,7 @@
 
   async function useLifeline(item) {
     const kind = item.dataset.onlineLifeline;
-    if (state.snapshot?.room.mode === "vs" && kind === "skip") return;
+    if (kind === "skip") return;
     if (state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
     const currentEffect = state.snapshot.me.lifelines || {};
     if (kind === "peek" && !Core.remainingPeekPositions(state.snapshot.me.attempts || [], (currentEffect.peeked || []).map(entry => entry.position)).length) return;
@@ -727,10 +806,10 @@
         token.className = "race-token";
         token.style.left = `${Math.max(6, Math.min(91, 6 + progress * .85))}%`;
         token.style.top = `${courseHeight / 2 - 17 + (lane - (sorted.length - 1) / 2) * 9}px`;
-        token.title = `${player.name}: ${completed} of ${snapshot.room.wordCount}`;
+        token.title = `${player.name}: ${completed} of ${snapshot.room.wordCount}${player.screenAway ? " · Away" : ""}`;
         const art = document.createElement("span");
         decorateAvatar(art, player);
-        token.append(art, Object.assign(document.createElement("small"), { textContent: player.name }));
+        token.append(art, Object.assign(document.createElement("small"), { textContent: `${player.screenAway ? "Away · " : ""}${player.name}` }));
         course.appendChild(token);
       });
       els.progress.appendChild(course);
@@ -738,6 +817,7 @@
     sorted.forEach((player, rank) => {
       const card = document.createElement("article");
       card.className = `player-progress${player.id === snapshot.me.id ? " is-self" : ""}`;
+      card.dataset.playerId = player.id;
       card.style.setProperty("--accent", player.accentHex);
       const avatar = document.createElement("span");
       decorateAvatar(avatar, player);
@@ -748,7 +828,7 @@
       const label = !isVs
         ? `${completedWords} / ${snapshot.room.wordCount} words`
         : `${Number(player.score) || 0} ${Number(player.score) === 1 ? "point" : "points"} · ${player.attempts.length} / ${baseGuessLimit() + (player.id === snapshot.me.id && snapshot.me.lifelines?.extraAttempt ? 1 : 0)} attempts`;
-      copy.innerHTML = `<strong>${escapeHtml(player.name)}${player.id === snapshot.me.id ? " · You" : ""}</strong><small>${label}</small>`;
+      copy.innerHTML = `<strong>${escapeHtml(player.name)}${player.id === snapshot.me.id ? " · You" : ""}</strong><small>${player.screenAway ? '<b class="away-label">Away · </b>' : ""}${label}</small>`;
       if (isVs || isCoop) {
         if (isVs && !snapshot.room.endless) {
           const track = document.createElement("span");
@@ -828,8 +908,12 @@
     else if (event.key === "Backspace" || event.key === "Delete") handleKey("BACK");
     else if (/^[a-zA-Z]$/.test(event.key)) handleKey(event.key.toUpperCase());
   });
-  window.addEventListener("online", () => { if (!els.screen.hidden) schedulePoll(0); });
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && !els.screen.hidden) schedulePoll(0); });
+  window.addEventListener("online", () => { syncPresence(); if (!els.screen.hidden) schedulePoll(0); });
+  document.addEventListener("visibilitychange", () => { syncPresence(); if (!document.hidden && !els.screen.hidden) schedulePoll(0); });
+  window.addEventListener("pagehide", () => { presence.pageLeaving = true; syncPresence(); });
+  window.addEventListener("pageshow", () => { presence.pageLeaving = false; syncPresence(); });
+  document.addEventListener("sixth-sense-native-active", event => { presence.nativeActive = Boolean(event.detail); syncPresence(); });
+  document.addEventListener("sixth-sense-ad-active", event => { presence.adActive = Boolean(event.detail); syncPresence(); });
   els.skipOk.addEventListener("click", confirmOnlineSkip);
   els.skipDialog.addEventListener("cancel", event => event.preventDefault());
   restoreActiveRoom();

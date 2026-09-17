@@ -1484,78 +1484,78 @@ body[data-screen="game"],body[data-screen="online"] { touch-action:pan-x pan-y; 
 
 .reward-ad-offer { margin:10px 0; }
 /* The native ad sits outside the WebView, below these lifeline docks. */
-body.is-native-app:is([data-screen="game"], [data-screen="online"]) { height:100dvh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-.is-native-app .topbar { flex:0 0 auto; padding-top:calc(6px + var(--native-safe-top,0px))!important; }
-body.is-native-app[data-screen="game"] .game-card { padding-block:8px; justify-content:flex-start; }
-.is-native-app .board-wrap { flex:1 1 0; min-height:0; width:100%; align-items:center; }
-.is-native-app .board { --tile-size:var(--native-tile-size,32px)!important; flex:none; gap:4px!important; }
-.is-native-app .board-row { gap:4px!important; }
-.is-native-app .board .tile { font-size:clamp(14px,calc(var(--native-tile-size,32px) * .55),28px); border-radius:8px; }
-.is-native-app .board .tile small { right:2px; bottom:1px; font-size:7px; }
-.is-native-app .keyboard { flex:0 0 auto; margin-top:8px; gap:4px; }
-.is-native-app .keyboard .key { height:44px; }
-.is-native-app .lifeline-dock { flex:0 0 auto; margin-top:6px; margin-bottom:4px; }
-.is-native-app .lifeline-item { min-height:64px; }
-.is-native-app .lifeline-button { width:44px; height:44px; flex-basis:44px; }
-.is-native-app .lifeline-button img { width:36px; height:36px; }
-body.is-native-app[data-screen="game"] .game-hud { flex:0 0 24px; min-height:24px; padding-bottom:4px; }
-body.is-native-app[data-screen="game"] .message-space { flex:0 0 24px; min-height:24px; height:24px; }
-body.is-native-app[data-screen="online"] .online-shell { flex:1 1 0; min-height:0; margin-block:0; padding-bottom:0; }
-.is-native-app .online-game-card { height:100%; min-height:0; display:flex; flex-direction:column; padding-block:8px; }
-.is-native-app .online-game-head { flex:0 0 auto; padding-bottom:6px; }
-.is-native-app .online-play-layout { flex:1 1 0; min-height:0; padding-top:6px; gap:6px; }
-.is-native-app .online-puzzle-column { min-height:0; }
-.is-native-app .online-live-status { flex:0 0 24px; }
-.is-native-app .progress-panel { min-height:0; overflow:auto; }
-.is-native-app .online-start { flex:0 0 auto; min-height:44px; margin-top:4px; }
+body:is(.is-native-app,.is-fitted-online):is([data-screen="game"], [data-screen="online"]) { height:100dvh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+:is(.is-native-app,.is-fitted-online) .topbar { flex:0 0 auto; padding-top:calc(6px + var(--native-safe-top,0px))!important; }
+body:is(.is-native-app,.is-fitted-online)[data-screen="game"] .game-card { padding-block:8px; justify-content:flex-start; }
+:is(.is-native-app,.is-fitted-online) .board-wrap { flex:1 1 0; min-height:0; width:100%; align-items:center; }
+:is(.is-native-app,.is-fitted-online) .board { --tile-size:var(--native-tile-size,32px)!important; flex:none; gap:4px!important; }
+:is(.is-native-app,.is-fitted-online) .board-row { gap:4px!important; }
+:is(.is-native-app,.is-fitted-online) .board .tile { font-size:clamp(14px,calc(var(--native-tile-size,32px) * .55),28px); border-radius:8px; }
+:is(.is-native-app,.is-fitted-online) .board .tile small { right:2px; bottom:1px; font-size:7px; }
+:is(.is-native-app,.is-fitted-online) .keyboard { flex:0 0 auto; margin-top:8px; gap:4px; }
+:is(.is-native-app,.is-fitted-online) .keyboard .key { height:44px; }
+:is(.is-native-app,.is-fitted-online) .lifeline-dock { flex:0 0 auto; margin-top:6px; margin-bottom:4px; }
+:is(.is-native-app,.is-fitted-online) .lifeline-item { min-height:64px; }
+:is(.is-native-app,.is-fitted-online) .lifeline-button { width:44px; height:44px; flex-basis:44px; }
+:is(.is-native-app,.is-fitted-online) .lifeline-button img { width:36px; height:36px; }
+body:is(.is-native-app,.is-fitted-online)[data-screen="game"] .game-hud { flex:0 0 24px; min-height:24px; padding-bottom:4px; }
+body:is(.is-native-app,.is-fitted-online)[data-screen="game"] .message-space { flex:0 0 24px; min-height:24px; height:24px; }
+body:is(.is-native-app,.is-fitted-online)[data-screen="online"] .online-shell { flex:1 1 0; min-height:0; margin-block:0; padding-bottom:0; }
+:is(.is-native-app,.is-fitted-online) .online-game-card { height:100%; min-height:0; display:flex; flex-direction:column; padding-block:8px; }
+:is(.is-native-app,.is-fitted-online) .online-game-head { flex:0 0 auto; padding-bottom:6px; }
+:is(.is-native-app,.is-fitted-online) .online-play-layout { flex:1 1 0; min-height:0; padding-top:6px; gap:6px; }
+:is(.is-native-app,.is-fitted-online) .online-puzzle-column { min-height:0; }
+:is(.is-native-app,.is-fitted-online) .online-live-status { flex:0 0 24px; }
+:is(.is-native-app,.is-fitted-online) .progress-panel { min-height:0; overflow:auto; }
+:is(.is-native-app,.is-fitted-online) .online-start { flex:0 0 auto; min-height:44px; margin-top:4px; }
 @media (max-width:850px) {
-  .is-native-app .online-play-layout { display:flex; flex-direction:column; }
-  .is-native-app .online-puzzle-column { flex:1 1 0; }
-  .is-native-app .progress-panel { flex:0 0 auto; max-height:110px; padding:6px; }
-  .is-native-app .progress-panel-head { display:none; }
-  .is-native-app .player-progress-list { display:flex; overflow-x:auto; margin-top:0; gap:6px; }
-  .is-native-app .race-course { min-height:66px; margin-block:0; }
-  .is-native-app .player-progress { padding:4px; }
+  :is(.is-native-app,.is-fitted-online) .online-play-layout { display:flex; flex-direction:column; }
+  :is(.is-native-app,.is-fitted-online) .online-puzzle-column { flex:1 1 0; }
+  :is(.is-native-app,.is-fitted-online) .progress-panel { flex:0 0 auto; max-height:110px; padding:6px; }
+  :is(.is-native-app,.is-fitted-online) .progress-panel-head { display:none; }
+  :is(.is-native-app,.is-fitted-online) .player-progress-list { display:flex; overflow-x:auto; margin-top:0; gap:6px; }
+  :is(.is-native-app,.is-fitted-online) .race-course { min-height:66px; margin-block:0; }
+  :is(.is-native-app,.is-fitted-online) .player-progress { padding:4px; }
 }
 @media (max-height:600px) {
-  body.is-native-app:is([data-screen="game"], [data-screen="online"]) .topbar { min-height:50px; padding-block:3px; }
-  .is-native-app .progress-panel { max-height:72px; }
-  .is-native-app .online-game-head h1 { font-size:16px; }
-  .is-native-app .online-game-head { gap:5px; }
-  .is-native-app .online-leave { min-height:44px; }
-  .is-native-app .online-live-status { flex-basis:20px; min-height:20px; height:20px; margin-bottom:0; }
-  .is-native-app .keyboard { margin-top:4px; }
-  .is-native-app .lifeline-dock { margin-top:4px; margin-bottom:0; }
+  body:is(.is-native-app,.is-fitted-online):is([data-screen="game"], [data-screen="online"]) .topbar { min-height:50px; padding-block:3px; }
+  :is(.is-native-app,.is-fitted-online) .progress-panel { max-height:72px; }
+  :is(.is-native-app,.is-fitted-online) .online-game-head h1 { font-size:16px; }
+  :is(.is-native-app,.is-fitted-online) .online-game-head { gap:5px; }
+  :is(.is-native-app,.is-fitted-online) .online-leave { min-height:44px; }
+  :is(.is-native-app,.is-fitted-online) .online-live-status { flex-basis:20px; min-height:20px; height:20px; margin-bottom:0; }
+  :is(.is-native-app,.is-fitted-online) .keyboard { margin-top:4px; }
+  :is(.is-native-app,.is-fitted-online) .lifeline-dock { margin-top:4px; margin-bottom:0; }
 }
 .reward-ad-offer button, .mobile-store button, .age-band-options button { min-height:44px; width:100%; padding:10px 14px; border:2px solid #9467ef; border-radius:14px; background:#f5edff; color:#44216e; font:800 14px "Nunito",sans-serif; cursor:pointer; }
 .reward-ad-offer small { display:block; font-size:11px; margin-top:5px; color:var(--ink-soft); }
 @media (orientation:landscape) and (max-height:600px) {
-  body.is-native-app[data-screen="game"] .game-card { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); grid-template-rows:24px minmax(0,1fr) 66px; column-gap:16px; padding:6px 12px; }
-  .is-native-app .game-card .game-hud { grid-column:1; grid-row:1; }
-  .is-native-app .game-card .message-space { grid-column:1; grid-row:1; }
-  .is-native-app .game-card .board-wrap { grid-column:1; grid-row:2 / 4; height:100%; }
-  .is-native-app .game-card .keyboard { grid-column:2; grid-row:1 / 3; align-self:end; }
-  .is-native-app .game-card .lifeline-dock { grid-column:2; grid-row:3; }
-  .is-native-app .online-play-layout { display:grid; grid-template-columns:minmax(0,1fr) 150px; }
-  .is-native-app .progress-panel { order:0; max-height:none; }
-  .is-native-app .player-progress-list { flex-direction:column; }
-  .is-native-app .online-puzzle-column { display:grid; grid-template-columns:minmax(0,.7fr) minmax(0,1.5fr); grid-template-rows:20px minmax(0,1fr) 64px; column-gap:10px; }
-  .is-native-app .online-live-status { grid-column:1; grid-row:1; font-size:9px; }
-  .is-native-app .online-board-wrap { grid-column:1; grid-row:2 / 4; height:100%; }
-  .is-native-app .online-keyboard { grid-column:2; grid-row:1 / 3; align-self:end; }
-  .is-native-app .online-lifeline-dock { grid-column:2; grid-row:3; }
-  .is-native-app .online-start { grid-column:1; grid-row:2; z-index:1; }
-  .is-native-app .online-game-card { padding-block:4px; }
-  .is-native-app .online-game-head { padding-bottom:2px; }
+  body:is(.is-native-app,.is-fitted-online)[data-screen="game"] .game-card { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); grid-template-rows:24px minmax(0,1fr) 66px; column-gap:16px; padding:6px 12px; }
+  :is(.is-native-app,.is-fitted-online) .game-card .game-hud { grid-column:1; grid-row:1; }
+  :is(.is-native-app,.is-fitted-online) .game-card .message-space { grid-column:1; grid-row:1; }
+  :is(.is-native-app,.is-fitted-online) .game-card .board-wrap { grid-column:1; grid-row:2 / 4; height:100%; }
+  :is(.is-native-app,.is-fitted-online) .game-card .keyboard { grid-column:2; grid-row:1 / 3; align-self:end; }
+  :is(.is-native-app,.is-fitted-online) .game-card .lifeline-dock { grid-column:2; grid-row:3; }
+  :is(.is-native-app,.is-fitted-online) .online-play-layout { display:grid; grid-template-columns:minmax(0,1fr) 150px; }
+  :is(.is-native-app,.is-fitted-online) .progress-panel { order:0; max-height:none; }
+  :is(.is-native-app,.is-fitted-online) .player-progress-list { flex-direction:column; }
+  :is(.is-native-app,.is-fitted-online) .online-puzzle-column { display:grid; grid-template-columns:minmax(0,.7fr) minmax(0,1.5fr); grid-template-rows:20px minmax(0,1fr) 64px; column-gap:10px; }
+  :is(.is-native-app,.is-fitted-online) .online-live-status { grid-column:1; grid-row:1; font-size:9px; }
+  :is(.is-native-app,.is-fitted-online) .online-board-wrap { grid-column:1; grid-row:2 / 4; height:100%; }
+  :is(.is-native-app,.is-fitted-online) .online-keyboard { grid-column:2; grid-row:1 / 3; align-self:end; }
+  :is(.is-native-app,.is-fitted-online) .online-lifeline-dock { grid-column:2; grid-row:3; }
+  :is(.is-native-app,.is-fitted-online) .online-start { grid-column:1; grid-row:2; z-index:1; }
+  :is(.is-native-app,.is-fitted-online) .online-game-card { padding-block:4px; }
+  :is(.is-native-app,.is-fitted-online) .online-game-head { padding-bottom:2px; }
 }
 .mobile-store { margin-top:18px; display:grid; gap:8px; }
 @media (orientation:landscape) and (max-height:340px) {
-  .is-native-app .online-game-head { position:absolute; top:6px; right:12px; width:220px; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr); z-index:1; }
-  .is-native-app .online-game-head h1 { font-size:12px; }
-  .is-native-app .online-room-chip { min-width:0; }
-  .is-native-app .online-room-chip strong { font-size:11px; }
-  .is-native-app .online-play-layout { grid-template-columns:minmax(0,1fr) 220px; padding-top:0; }
-  .is-native-app .progress-panel { padding-top:70px; }
+  :is(.is-native-app,.is-fitted-online) .online-game-head { position:absolute; top:6px; right:12px; width:220px; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr); z-index:1; }
+  :is(.is-native-app,.is-fitted-online) .online-game-head h1 { font-size:12px; }
+  :is(.is-native-app,.is-fitted-online) .online-room-chip { min-width:0; }
+  :is(.is-native-app,.is-fitted-online) .online-room-chip strong { font-size:11px; }
+  :is(.is-native-app,.is-fitted-online) .online-play-layout { grid-template-columns:minmax(0,1fr) 220px; padding-top:0; }
+  :is(.is-native-app,.is-fitted-online) .progress-panel { padding-top:70px; }
 }
 .mobile-store[hidden], .reward-ad-offer[hidden] { display:none; }
 .mobile-store p, .mobile-store a { font-size:12px; }
@@ -1564,8 +1564,14 @@ body.is-native-app[data-screen="online"] .online-shell { flex:1 1 0; min-height:
 .privacy-modal { width:min(800px,calc(100% - 20px)); }
 .privacy-modal iframe { width:100%; height:65dvh; border:0; background:#fff8ff; border-radius:14px; }
 @media (max-height:700px) {
-  .is-native-app .result-sheet:has(#reward-ad-offer:not([hidden])) { padding-top:12px; padding-bottom:12px; }
-  .is-native-app .result-sheet:has(#reward-ad-offer:not([hidden])) .result-hero { height:80px; padding-top:8px; }
-  .is-native-app .result-sheet:has(#reward-ad-offer:not([hidden])) .result-summary { display:none; }
-  .is-native-app .result-sheet:has(#reward-ad-offer:not([hidden])) .result-progress { margin-top:8px; }
+  :is(.is-native-app,.is-fitted-online) .result-sheet:has(#reward-ad-offer:not([hidden])) { padding-top:12px; padding-bottom:12px; }
+  :is(.is-native-app,.is-fitted-online) .result-sheet:has(#reward-ad-offer:not([hidden])) .result-hero { height:80px; padding-top:8px; }
+  :is(.is-native-app,.is-fitted-online) .result-sheet:has(#reward-ad-offer:not([hidden])) .result-summary { display:none; }
+  :is(.is-native-app,.is-fitted-online) .result-sheet:has(#reward-ad-offer:not([hidden])) .result-progress { margin-top:8px; }
 }
+
+/* Screen status stays outside layout so phone boards never shift. */
+.presence-alert { position:fixed; z-index:80; top:calc(var(--native-safe-top, env(safe-area-inset-top, 0px)) + 72px); left:12px; right:12px; max-width:520px; margin:0 auto; padding:10px 14px; border:2px solid #ff7474; border-radius:14px; background:#5b101df2; color:#fff; box-shadow:0 6px 20px #0005; font-size:13px; font-weight:800; pointer-events:none; }
+.avatar-art.is-away { filter:grayscale(1) sepia(1) saturate(8) hue-rotate(315deg); outline:2px solid #ff4b5c; outline-offset:2px; }
+.away-label { color:#dc2845; font-size:10px; }
+.is-dark .away-label { color:#ff8797; }

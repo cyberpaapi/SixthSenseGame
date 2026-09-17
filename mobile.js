@@ -17,6 +17,13 @@
   document.body.classList.add("is-native-app");
   document.querySelector("#mobile-store").hidden = false;
 
+  let adCloseTimer;
+  function signalRewardAd(active) {
+    clearTimeout(adCloseTimer);
+    const notify = () => document.dispatchEvent(new CustomEvent("sixth-sense-ad-active", { detail: active }));
+    if (active) notify(); else adCloseTimer = setTimeout(notify, 500); // Allow native foreground callbacks to settle.
+  }
+
   function render() {
     purchase.textContent = state.owned ? "Banner ads removed ✓" : state.price ? `Remove banner ads · ${state.price}` : "Remove banner ads · unavailable";
     purchase.disabled = state.owned || !state.eligible || !state.price || state.purchaseBusy;
@@ -94,12 +101,13 @@
         state = await native.prepareReward();
         lastChanceFeedback = "Loading an ad. Tap again when it is ready.";
       } else {
+        signalRewardAd(true);
         state = await native.showReward(offer);
         if (state.pendingReward?.claimId) await recover();
         else lastChanceFeedback = "Ad closed before a reward was earned. No coins were spent.";
       }
     } catch (error) { lastChanceFeedback = error.message || "Ad unavailable. No coins were spent."; }
-    finally { busy = false; window.SixthSenseAppLifecycle.resume(); render(); }
+    finally { busy = false; signalRewardAd(false); window.SixthSenseAppLifecycle.resume(); render(); }
   });
   document.addEventListener("sixth-sense-last-chance-rendered", () => { lastChanceFeedback = ""; render(); if (!busy) recover(); });
   reward.addEventListener("click", async () => {
@@ -113,11 +121,12 @@
     }
     busy = true; rewardFeedback = ""; render(); window.SixthSenseAppLifecycle.pause();
     try {
+      signalRewardAd(true);
       state = await native.showReward({ claimId: offer.claimId, coins: offer.coins });
       await recover();
       if (!window.SixthSenseRewards.offer()?.claimed) rewardFeedback = "Ad closed before a reward was earned. Your original coins are unchanged.";
     } catch (error) { rewardFeedback = error.message || "Ad unavailable. Your original coins are unchanged."; }
-    finally { busy = false; window.SixthSenseAppLifecycle.resume(); render(); }
+    finally { busy = false; signalRewardAd(false); window.SixthSenseAppLifecycle.resume(); render(); }
   });
   purchase.addEventListener("click", async () => {
     try { await native.purchaseRemoveAds(); } catch (error) { storeMessage.textContent = error.message; }
@@ -137,6 +146,7 @@
   new MutationObserver(updateBanner).observe(document.body, { attributes: true, attributeFilter: ["data-screen", "open"], subtree: true });
   document.addEventListener("visibilitychange", updateBanner);
   app.addListener("appStateChange", ({ isActive }) => {
+    document.dispatchEvent(new CustomEvent("sixth-sense-native-active", { detail: isActive }));
     if (isActive) { if (!busy) window.SixthSenseAppLifecycle.resume(); native.getState().then(next => { state = next; render(); recover(); }); }
     else window.SixthSenseAppLifecycle.pause();
   });

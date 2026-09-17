@@ -18,7 +18,7 @@ Preserve these product invariants unless the user explicitly changes them:
 - The answer pool contains every clueable answer-safe word. The Normal tier is usage-threshold based (Zipf 2.75, currently 4,058 words), followed by Hard (Zipf 2.0–2.74) and Extreme; accepted guesses remain substantially broader.
 - Multiplayer must use the authoritative room API and durable database. Never replace it with localStorage, BroadcastChannel, or another same-browser simulation, and never expose answer words or database credentials to the client.
 - The game screen must not page-scroll or overflow at supported phone sizes.
-- Sense is unlocked once per puzzle and can then be reopened freely. Peek and Clear use persistent inventory and can be purchased and used repeatedly while useful. Skip follows the same inventory rule outside VS, where it is intentionally unavailable.
+- Sense is unlocked once per puzzle and can then be reopened freely. Peek and Clear use persistent inventory and can be purchased and used repeatedly while useful. Skip follows the same inventory rule in solo only; it is disabled in all multiplayer modes. Existing pending multiplayer Skips from before this change can finish their confirmation.
 - Accessibility, keyboard input, touch targets, color-independent markers, and reduced-motion behavior must be preserved.
 
 Use GitHub repository `cyberpaapi/SixthSenseGame` as the source of truth. Preserve unrelated user work, run the documented checks, commit only intended files, and keep secrets out of the static client.

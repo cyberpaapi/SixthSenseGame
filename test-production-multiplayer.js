@@ -129,20 +129,44 @@ async function submitWord(page, word) {
     await hostPage.waitForSelector("#online-start:not([hidden])", { timeout: 5000 });
     await hostPage.click("#online-start");
     await Promise.all([
-      hostPage.waitForFunction(() => !document.querySelector('[data-online-lifeline="skip"] button')?.disabled, null, { timeout: 10000 }),
+      hostPage.waitForFunction(() => !document.querySelector('[data-online-lifeline="sense"] button')?.disabled, null, { timeout: 10000 }),
       guestPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 1"), null, { timeout: 10000 })
     ]);
-    await hostPage.click('[data-online-lifeline="skip"] button');
-    await hostPage.waitForSelector("#online-skip-result-modal[open]", { timeout: 10000 });
-    assert.equal(await hostPage.locator("#online-skip-revealed-word span").count(), 6, "Co-op Skip must reveal all six answer letters");
-    assert.match(await guestPage.locator("#online-live-status").textContent(), /Shared word 1/, "Co-op must not advance before the skipper acknowledges the answer");
-    await hostPage.click("#online-skip-result-ok");
-    await Promise.all([
-      hostPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 2"), null, { timeout: 10000 }),
-      guestPage.waitForFunction(() => document.querySelector("#online-live-status")?.textContent.includes("Shared word 2"), null, { timeout: 10000 })
-    ]);
+    assert.equal(await hostPage.locator('[data-online-lifeline="skip"]').isHidden(), true, "Co-op Skip is disabled");
+    assert.equal(await guestPage.locator('[data-online-lifeline="skip"]').isHidden(), true);
+    const deniedSkip = await hostPage.evaluate(async () => {
+      const seat = JSON.parse(localStorage.getItem("sixth-sense.active-room.v1"));
+      const response = await fetch("/api/multiplayer", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "lifeline", kind: "skip", roomCode: seat.roomCode, resumeToken: seat.token, actionId: crypto.randomUUID() }) });
+      return { status: response.status, body: await response.json() };
+    });
+    assert.equal(deniedSkip.status, 409);
+    assert.match(deniedSkip.body.error, /Skip is disabled/);
+    const presenceRequests = [];
+    hostPage.on("request", request => { if (request.method() === "POST" && request.url().includes("/api/multiplayer")) { const body = request.postDataJSON(); if (body.action === "presence") presenceRequests.push(body); } });
+    const hostId = await hostPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.active-room.v1")).playerId);
+    await hostPage.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, get: () => true }); document.dispatchEvent(new Event("visibilitychange")); });
+    await guestPage.waitForSelector('.player-progress[data-player-id="' + hostId + '"] .is-away', { timeout: 10000 });
+    assert.match(await guestPage.locator("#online-presence-alert").textContent(), new RegExp(hostName));
+    await hostPage.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, get: () => false }); document.dispatchEvent(new Event("visibilitychange")); });
+    await guestPage.waitForFunction(id => !document.querySelector('.player-progress[data-player-id="' + id + '"] .is-away'), hostId);
+    await guestPage.evaluate(() => { document.querySelector("#online-presence-alert").hidden = true; });
+    await hostPage.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => true }); document.dispatchEvent(new Event("visibilitychange"));
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => false }); document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await guestPage.waitForSelector("#online-presence-alert:not([hidden])", { timeout: 10000 });
+    await guestPage.waitForFunction(id => !document.querySelector('.player-progress[data-player-id="' + id + '"] .is-away'), hostId);
+    const delivered = await hostPage.evaluate(async departure => {
+      const options = body => ({ method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const retry = await fetch("/api/multiplayer", options(departure));
+      if (!retry.ok) throw Error("presence retry failed");
+      const response = await fetch("/api/multiplayer", options({ action: "snapshot", roomCode: departure.roomCode, resumeToken: departure.resumeToken }));
+      return (await response.json()).snapshot;
+    }, presenceRequests.find(request => request.away));
+    assert.equal(delivered.players.find(player => player.id === hostId).awayCount, 2, "duplicate departures must not create duplicate alerts");
+    assert.equal(delivered.me.screenAway, false, "delayed departure retry must not mark a returned player away");
 
-    console.log(`Production multiplayer QA passed: VS room ${roomCode}, Co-op room ${coopCode}, two isolated clients, current-bank hint purchase/free reopening after refresh, live attempt visibility (${observerLatencyMs}ms), synchronized VS transition, and acknowledged shared Co-op advancement (${Date.now() - startedAt}ms total).`);
+    console.log(`Production multiplayer QA passed: VS room ${roomCode}, Co-op room ${coopCode}, two isolated clients, current-bank hint purchase/free reopening after refresh, live attempt visibility (${observerLatencyMs}ms), synchronized VS transition, Co-op Skip removal, shared away alerts/red avatars/return and quick-switch detection (${Date.now() - startedAt}ms total).`);
   } finally {
     await hostContext.close();
     await guestContext.close();
