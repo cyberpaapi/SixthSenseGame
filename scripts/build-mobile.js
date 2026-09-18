@@ -17,8 +17,10 @@ for (const name of files) {
 }
 fs.cpSync(path.join(root, "assets"), path.join(destination, "assets"), { recursive: true, filter: source => !/\.(md|psd|xlsx)$/i.test(source) });
 let html = fs.readFileSync(path.join(destination, "index.html"), "utf8");
-if (!process.argv.includes("--web")) {
+if (!process.argv.includes("--web") || process.argv.includes("--pages")) {
   html = html.replace('<html lang="en"', '<html lang="en" data-multiplayer-api="https://sixth-sense-game.vercel.app"');
+}
+if (!process.argv.includes("--web")) {
   html = html.replace('  <script src="answer-bank.js', '  <script src="capacitor-runtime.js"></script>\n  <script src="answer-bank.js');
   fs.copyFileSync(path.join(root, "node_modules/@capacitor/core/dist/capacitor.js"), path.join(destination, "capacitor-runtime.js"));
 }

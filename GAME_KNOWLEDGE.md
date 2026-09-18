@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Bollywood Race refined to 579 complete-title/first-name answers; data/server and phone checks passed. Prior full browser/core/touch/presence/banner checks passed. Live checks of the refined pool pending.)
+Last verified: 2026-09-18 (Bollywood Race refined to 579 complete-title/first-name answers; data/server and phone checks passed. Prior full browser/core/touch/presence/banner checks passed. Real Vercel room checks and private-bank 404 passed. Pages API-origin repair verified locally; live retest pending.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -247,7 +247,7 @@ The onscreen keyboard specifically uses `touch-action:none` and disables text se
 
 `data/bollywood-answers.json` contains 579 unique 5–7-letter answers: 567 entries tied to 2000–2025 releases/acting credits and 12 classics. The owner explicitly chose this strong smaller pool after restricting answers to complete film titles and first names. See `BOLLYWOOD_CONTENT.md` for the category counts, sources, spelling decisions and limitations. This includes supporting performers, not just household-name stars. Only whole hit-film titles and first names/mononyms are selected. Title fragments and surnames are excluded. Spaces/punctuation are omitted for titles such as New York and Ra.One. Sources are retained in the repository; clues are newly authored. The cutoff applies to a cited credit, so older actors with modern roles qualify; re-release-only credits do not.
 
-The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel, Pages and mobile publish only the allow-listed client bundle; all omit the data folder. The source repository is public, which does not expose a room's randomly chosen active route. A server-only legacy archive preserves purchased clue lookup for the short-lived rooms created before the owner’s refinement arrived; it is never selected for new routes.
+The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel, Pages and mobile publish only the allow-listed client bundle; all omit the data folder. Pages packaging explicitly sets the Vercel API origin with `--web --pages`; Vercel web builds retain same-origin API requests and native builds retain the explicit Vercel endpoint. The source repository is public, which does not expose a room's randomly chosen active route. A server-only legacy archive preserves purchased clue lookup for the short-lived rooms created before the owner’s refinement arrived; it is never selected for new routes.
 
 ### Standard vocabulary
 
@@ -344,9 +344,11 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 publishing correction: a real GET proved that Vercel’s static filesystem served the JSON before the attempted rewrite. Replaced root-directory publication with `node scripts/build-mobile.js --web` and `outputDirectory=www`, preserving automatic root API functions. Local bundle contains the game/privacy/economy/art assets and excludes both Bollywood data files and API/source files. Live 404 and API checks pending.
+September 18 Pages API-origin correction: the live Pages test caught that --web omitted the remote API attribute, causing room creation to hit the static Pages origin. Added --pages for this workflow only and verified native/web/Pages output independently: correct API target, Capacitor script only in native, no data folder in any static bundle. The production test now has an explicit 20-second default timeout. Live Pages retest pending.
 
-September 18 owner refinement (cache version `20260918.14`): new answer selection is restricted to 579 entries (58 full hit-film titles, 521 first names/mononyms), 567 recent and 12 classic. The data/server suite verifies exact category/whole-title filtering and excludes KAPOOR/JAWAANI; legacy clue lookup preserves already-created room routes without selecting those entries again. Local phone checks rerun; live checks pending.
+September 18 publishing correction: a real GET proved that Vercel’s static filesystem served the JSON before the attempted rewrite. Replaced root-directory publication with `node scripts/build-mobile.js --web` and `outputDirectory=www`, preserving automatic root API functions. Local bundle contains the game/privacy/economy/art assets and excludes both Bollywood data files and API/source files. Vercel deployment 5875cd9 passed real two-browser rooms and HTTP 404 for current/legacy data; privacy/economy remain HTTP 200 and the API remains active.
+
+September 18 owner refinement (cache version `20260918.14`): new answer selection is restricted to 579 entries (58 full hit-film titles, 521 first names/mononyms), 567 recent and 12 classic. The data/server suite verifies exact category/whole-title filtering and excludes KAPOOR/JAWAANI; legacy clue lookup preserves already-created room routes without selecting those entries again. Local phone checks rerun and real Vercel rooms passed. The Pages run caught an existing same-origin API misconfiguration, now corrected by its separate --pages bundle target.
 
 September 18 Bollywood Race (styles/core/multiplayer/mobile cache version `20260918.13`; shared keyboard binder unchanged): `npm test`, `node test-bollywood.js`, `node test-bollywood-browser.js`, full `test-browser.js`, Peek, Race join, Last Chance server, keyboard touch, Race mobile, presence API/browser, banner layout, JS syntax and `npm run build:mobile` passed locally. The new tests check exactly 1,000 unique sourced answers, era cutoff/cap, no clue-answer leakage, 5/6/7-letter scoring and board transitions, single tap/autosubmit, seven-position Peek, six guesses/Last Chance, unchanged ordinary dictionary validation, eight racers, 320×568/390×844/844×360 geometry, and a 7×7 Last Chance board at 320×518 with 44px keys. Physical Safari and a fresh Android binary are not claimed. Live publication/real Neon room acceptance remains pending for this implementation commit.
 
@@ -496,6 +498,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Connect Pages multiplayer to the durable Vercel service
+
+- Real Pages acceptance caught that its static build had no explicit API origin. Added a Pages-only build flag and workflow argument so all multiplayer modes call the existing authoritative Vercel/Neon service. Vercel retains same-origin requests; native bundles retain their original remote endpoint. Verified all three packaging variants and bounded the live test timeout.
 
 ### 2026-09-18 — Publish only the public client on Vercel
 

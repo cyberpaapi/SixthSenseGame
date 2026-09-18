@@ -11,6 +11,7 @@ const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
     const pages = [];
     for (const name of ["CinemaHost", "CinemaGuest"]) {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, reducedMotion: "reduce" });
+      page.setDefaultTimeout(20000);
       await page.addInitScript(name => {
         localStorage.setItem("sixth-sense.visited.v1", "yes");
         localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name }));

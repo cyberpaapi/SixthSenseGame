@@ -31,7 +31,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Bundle only public client files
-        run: node scripts/build-mobile.js --web
+        run: node scripts/build-mobile.js --web --pages
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
