@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Bollywood Race refined to 579 complete-title/first-name answers; data/server and phone checks passed. Prior full browser/core/touch/presence/banner checks passed. Real Vercel room checks and private-bank 404 passed. Pages API-origin repair verified locally; live retest pending.)
+Last verified: 2026-09-18 (Bollywood Race: refined 579-answer data/server and phone checks passed; full browser/core/touch/presence/banner checks passed. Real two-browser create/join/start, Sense/Peek, solve/advance, refresh restoration and late join passed on both Vercel and Pages. Current/legacy banks return HTTP 404.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -344,13 +344,13 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 Pages API-origin correction: the live Pages test caught that --web omitted the remote API attribute, causing room creation to hit the static Pages origin. Added --pages for this workflow only and verified native/web/Pages output independently: correct API target, Capacitor script only in native, no data folder in any static bundle. The production test now has an explicit 20-second default timeout. Live Pages retest pending.
+September 18 Pages API-origin correction: the live Pages test caught that --web omitted the remote API attribute, causing room creation to hit the static Pages origin. Added --pages for this workflow only and verified native/web/Pages output independently: correct API target, Capacitor script only in native, no data folder in any static bundle. The production test now has an explicit 20-second default timeout. Live Pages retest passed after commit `12ff3fd` deployed (workflow `35361602805`): two isolated browser seats created/joined/started a real Neon room, purchased Sense/Peek, solved and advanced, restored word-two progress after refresh, and admitted a late player at word one without resetting the host. Current bank returned HTTP 404. The same live flow passed on Vercel (`5875cd9`), with both current and legacy banks HTTP 404; `12ff3fd` also deployed successfully to Vercel.
 
 September 18 publishing correction: a real GET proved that Vercel’s static filesystem served the JSON before the attempted rewrite. Replaced root-directory publication with `node scripts/build-mobile.js --web` and `outputDirectory=www`, preserving automatic root API functions. Local bundle contains the game/privacy/economy/art assets and excludes both Bollywood data files and API/source files. Vercel deployment 5875cd9 passed real two-browser rooms and HTTP 404 for current/legacy data; privacy/economy remain HTTP 200 and the API remains active.
 
 September 18 owner refinement (cache version `20260918.14`): new answer selection is restricted to 579 entries (58 full hit-film titles, 521 first names/mononyms), 567 recent and 12 classic. The data/server suite verifies exact category/whole-title filtering and excludes KAPOOR/JAWAANI; legacy clue lookup preserves already-created room routes without selecting those entries again. Local phone checks rerun and real Vercel rooms passed. The Pages run caught an existing same-origin API misconfiguration, now corrected by its separate --pages bundle target.
 
-September 18 Bollywood Race (styles/core/multiplayer/mobile cache version `20260918.13`; shared keyboard binder unchanged): `npm test`, `node test-bollywood.js`, `node test-bollywood-browser.js`, full `test-browser.js`, Peek, Race join, Last Chance server, keyboard touch, Race mobile, presence API/browser, banner layout, JS syntax and `npm run build:mobile` passed locally. The new tests check exactly 1,000 unique sourced answers, era cutoff/cap, no clue-answer leakage, 5/6/7-letter scoring and board transitions, single tap/autosubmit, seven-position Peek, six guesses/Last Chance, unchanged ordinary dictionary validation, eight racers, 320×568/390×844/844×360 geometry, and a 7×7 Last Chance board at 320×518 with 44px keys. Physical Safari and a fresh Android binary are not claimed. Live publication/real Neon room acceptance remains pending for this implementation commit.
+September 18 Bollywood Race (styles/core/multiplayer/mobile cache version `20260918.13`; shared keyboard binder unchanged): `npm test`, `node test-bollywood.js`, `node test-bollywood-browser.js`, full `test-browser.js`, Peek, Race join, Last Chance server, keyboard touch, Race mobile, presence API/browser, banner layout, JS syntax and `npm run build:mobile` passed locally. The new tests check exactly 1,000 unique sourced answers, era cutoff/cap, no clue-answer leakage, 5/6/7-letter scoring and board transitions, single tap/autosubmit, seven-position Peek, six guesses/Last Chance, unchanged ordinary dictionary validation, eight racers, 320×568/390×844/844×360 geometry, and a 7×7 Last Chance board at 320×518 with 44px keys. Physical Safari and a fresh Android binary are not claimed. That initial pool was superseded by the owner’s complete-title/first-name refinement; subsequent real Neon room acceptance on both sites is recorded above.
 
 September 18 duplicate-input correction (app 20260918.12): the new click-origin regression first failed on the prior release with `wwzxed` instead of `wzxed`: its pointer-up path entered W and its mouse-labelled click entered W again. The shared binder now activates only on click. Focused touch and Race suites, core, syntax and packaging passed locally; full-browser checks also passed. Commit `b9358f7` deployed successfully to Vercel and GitHub Pages (workflow `35275951630`); both public sites passed the solo click-origin and Race touch/geometry suites. Coverage retains repeated letters/Delete, held/edge touches, cancellation/drag-away, mouse/Space/semantic clicks and mid-poll target retention. Click-origin variation is an explicit browser fixture; no physical Safari reproduction is claimed.
 
@@ -498,6 +498,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Verify Bollywood Race on both public sites
+
+- Confirmed the refined 579-answer release on Vercel and GitHub Pages with actual separate browser contexts and the durable API: room creation, joining, start, paid clue/reveal, solving/advancement, refresh restoration and late join. Verified static data exclusion and successful deployment statuses; recorded results in Last verified and Verification. Phone touch/layout tests remain Chromium emulation, not a claim of physical iPhone testing or a new Android release.
 
 ### 2026-09-18 — Connect Pages multiplayer to the durable Vercel service
 
