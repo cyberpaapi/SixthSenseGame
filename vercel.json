@@ -1,5 +1,6 @@
 {
-  "outputDirectory": ".",
+  "buildCommand": "node scripts/build-mobile.js --web",
+  "outputDirectory": "www",
   "functions": {
     "api/play-purchase.js": {
       "maxDuration": 30
@@ -26,12 +27,6 @@
           "value": "no-store"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/data/:path*",
-      "destination": "/not-found"
     }
   ]
 }

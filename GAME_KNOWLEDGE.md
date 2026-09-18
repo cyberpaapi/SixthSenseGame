@@ -183,7 +183,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
 | `assets/` | Generated logo, hero, three separate Adventure zone maps, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
 | `package.json` / `package-lock.json` | Reproducible Node dependencies plus explicit static build and test scripts. The runtime dependency is the Neon serverless Postgres driver. |
-| `vercel.json` | Explicit repository-root static output, function duration, no-store API/economy headers, and a 404 rewrite for server-only data paths. |
+| `vercel.json` | Builds the allow-listed web client into www, with root API functions, function duration and no-store API/economy headers. Data/source files are absent from static output. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
 | `favicon.svg` | Fallback favicon; the fixed primary brand logo remains the runtime favicon. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
@@ -247,7 +247,7 @@ The onscreen keyboard specifically uses `touch-action:none` and disables text se
 
 `data/bollywood-answers.json` contains 579 unique 5–7-letter answers: 567 entries tied to 2000–2025 releases/acting credits and 12 classics. The owner explicitly chose this strong smaller pool after restricting answers to complete film titles and first names. See `BOLLYWOOD_CONTENT.md` for the category counts, sources, spelling decisions and limitations. This includes supporting performers, not just household-name stars. Only whole hit-film titles and first names/mononyms are selected. Title fragments and surnames are excluded. Spaces/punctuation are omitted for titles such as New York and Ra.One. Sources are retained in the repository; clues are newly authored. The cutoff applies to a cited credit, so older actors with modern roles qualify; re-release-only credits do not.
 
-The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel blocks `/data/*`; Pages/mobile packaging already omits this folder. The source repository is public, which does not expose a room's randomly chosen active route. A server-only legacy archive preserves purchased clue lookup for the short-lived rooms created before the owner’s refinement arrived; it is never selected for new routes.
+The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel, Pages and mobile publish only the allow-listed client bundle; all omit the data folder. The source repository is public, which does not expose a room's randomly chosen active route. A server-only legacy archive preserves purchased clue lookup for the short-lived rooms created before the owner’s refinement arrived; it is never selected for new routes.
 
 ### Standard vocabulary
 
@@ -343,6 +343,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 publishing correction: a real GET proved that Vercel’s static filesystem served the JSON before the attempted rewrite. Replaced root-directory publication with `node scripts/build-mobile.js --web` and `outputDirectory=www`, preserving automatic root API functions. Local bundle contains the game/privacy/economy/art assets and excludes both Bollywood data files and API/source files. Live 404 and API checks pending.
 
 September 18 owner refinement (cache version `20260918.14`): new answer selection is restricted to 579 entries (58 full hit-film titles, 521 first names/mononyms), 567 recent and 12 classic. The data/server suite verifies exact category/whole-title filtering and excludes KAPOOR/JAWAANI; legacy clue lookup preserves already-created room routes without selecting those entries again. Local phone checks rerun; live checks pending.
 
@@ -494,6 +496,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Publish only the public client on Vercel
+
+- A post-deploy check caught that a rewrite did not exclude existing static data files. Vercel now uses the same allow-listed web bundle as Pages, with server functions traced from the root API directory. This keeps the current/legacy Bollywood banks available to the server without shipping them as static downloads.
 
 ### 2026-09-18 — Honor complete titles and first names only
 
