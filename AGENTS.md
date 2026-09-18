@@ -13,7 +13,7 @@ At minimum, after a change:
 
 Preserve these product invariants unless the user explicitly changes them:
 
-- The game uses six-letter words and six standard chances, followed by one optional Last Chance.
+- Standard modes use six-letter words. Bollywood Race alone uses 5–7-letter film/title-word and performer-name answers. All modes retain six standard chances, followed by one optional Last Chance.
 - The visual identity, artwork, terminology, copy, and layout remain original and must not imitate Wordle branding.
 - The answer pool contains every clueable answer-safe word. The Normal tier is usage-threshold based (Zipf 2.75, currently 4,058 words), followed by Hard (Zipf 2.0–2.74) and Extreme; accepted guesses remain substantially broader.
 - Multiplayer must use the authoritative room API and durable database. Never replace it with localStorage, BroadcastChannel, or another same-browser simulation, and never expose answer words or database credentials to the client.

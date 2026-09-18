@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260918.10">
+  <link rel="stylesheet" href="styles.css?v=20260918.13">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -96,6 +96,7 @@
       </div>
       <div class="online-mode-grid">
         <button class="online-mode-tile" type="button" data-open-online="race"><span class="online-mode-art online-mode-art-race" aria-hidden="true"></span><span><strong>Race</strong><small>2–8 players · 3, 5, or 10 words</small></span></button>
+        <button class="online-mode-tile" type="button" data-open-online="bollywood"><span class="online-mode-art online-mode-art-bollywood" aria-hidden="true"></span><span><strong>Bollywood Race</strong><small>2–8 players · films &amp; stars · 5–7 letters</small></span></button>
         <button class="online-mode-tile" type="button" data-open-online="vs"><span class="online-mode-art online-mode-art-vs" aria-hidden="true"></span><span><strong>VS</strong><small>1v1 · 3, 5, 9, or Endless rounds</small></span></button>
         <button class="online-mode-tile online-mode-tile-coop" type="button" data-open-online="coop"><span class="online-mode-art online-mode-art-coop" aria-hidden="true"></span><span><strong>Co-op</strong><small>2–4 players · solve one shared route</small></span></button>
       </div>
@@ -218,7 +219,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
         </button>
       </div>
-      <p>Uncover one common six-letter word in six tries. Every guess must be a valid six-letter word.</p>
+      <p>Uncover one common six-letter word in six tries. In standard modes, every guess must be a valid six-letter word. Bollywood Race has 5–7-letter film and performer answers; check the type and length above its board.</p>
       <div class="example-row" aria-label="Example guess planet">
         <span class="demo-tile exact">P<small>●</small></span><span class="demo-tile">L</span><span class="demo-tile present">A<small>◆</small></span><span class="demo-tile">N</span><span class="demo-tile absent">E<small>×</small></span><span class="demo-tile">T</span>
       </div>
@@ -438,6 +439,7 @@
         <button class="icon-button modal-close" type="button" aria-label="Close multiplayer lobby"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
       </div>
       <div class="online-identity-preview"><span class="avatar-art avatar-fox" id="online-avatar-preview"></span><label><span>Your username</span><input id="online-player-name" maxlength="18" autocomplete="nickname" placeholder="Player name" readonly></label></div>
+      <p id="bollywood-room-guide" hidden>1,000 answers from Hindi hits and performers, mostly from 2000 onward. Guess a film, a word from its title, or an actor’s first name, surname or screen name. Answers have 5–7 letters; the board shows the type and length. Sense gives a clue.</p>
       <fieldset class="room-options" id="online-difficulty-options"><legend>Word difficulty</legend><div class="segmented-options"><label><input type="radio" name="online-difficulty" value="easy" checked><span>Normal</span></label><label><input type="radio" name="online-difficulty" value="medium"><span>Hard</span></label><label><input type="radio" name="online-difficulty" value="extreme"><span>Extreme</span></label></div></fieldset>
       <fieldset class="room-options" id="online-distance-options"><legend>Game length</legend><div class="segmented-options" id="online-distance-grid"><label><input type="radio" name="online-distance" value="3" checked><span>Sprint <small>3</small></span></label><label><input type="radio" name="online-distance" value="5"><span>Normal <small>5</small></span></label><label><input type="radio" name="online-distance" value="10"><span>Marathon <small>10</small></span></label></div></fieldset>
       <button class="primary-button online-create-room" id="online-create-room" type="button">Create private room</button>
@@ -537,10 +539,10 @@
   <div class="celebration" id="celebration" aria-hidden="true"></div>
   <script src="answer-bank.js?v=20260917.1"></script>
   <script src="word-bank.js?v=20260917.1"></script>
-  <script src="game-core.js?v=20260918.9"></script>
+  <script src="game-core.js?v=20260918.13"></script>
   <script src="progression.js?v=20260917.1"></script>
   <script src="app.js?v=20260918.12"></script>
-  <script src="multiplayer.js?v=20260918.10"></script>
-  <script src="mobile.js?v=20260918.10"></script>
+  <script src="multiplayer.js?v=20260918.13"></script>
+  <script src="mobile.js?v=20260918.13"></script>
 </body>
 </html>

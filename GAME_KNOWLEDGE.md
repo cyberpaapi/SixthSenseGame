@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Single-path keyboard input: duplicate-click regression reproduced before fix and passes locally; core, touch/Race, syntax and packaging checks passed; full browser passed; solo/Race duplicate-input regressions passed on both public sites.)
+Last verified: 2026-09-18 (Bollywood Race: 1,000-answer data/server audit, variable-length phone/Last Chance layout, full browser, core, Peek, room join, touch/Race, presence, banner layout, syntax and mobile packaging passed locally. Publication/live Bollywood checks pending.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -28,7 +28,7 @@ For every future change:
 
 ## Product summary
 
-Sixth Sense is an original, mobile-first word deduction game with solo and private-room multiplayer. Every puzzle answer has six letters. New puzzles have six standard guesses, followed by one optional Last Chance. Feedback is presented through both color and symbols:
+Sixth Sense is an original, mobile-first word deduction game with solo and private-room multiplayer. Standard-mode answers have six letters; Bollywood Race uses 5–7-letter film/title-word and performer-name answers. New puzzles have six standard guesses, followed by one optional Last Chance. Feedback is presented through both color and symbols:
 
 - Aligned: green plus `●` — correct letter in the correct position.
 - Echoing: orange plus `◆` — correct letter in a different position.
@@ -38,10 +38,10 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 
 ## Current game rules
 
-- Word length: 6 letters.
+- Word length: 6 letters in standard modes; 5–7 in Bollywood Race only.
 - Standard guesses: 6; maximum 7 after one optional Last Chance (legacy saves/rooms retain their recorded limit).
-- Accepted input: physical keyboard, onscreen keyboard, touch, optional physical Enter, and Backspace/Delete. Entering the sixth letter submits the row immediately in solo, Race, and VS; there is no onscreen Enter key.
-- A guess must contain exactly six letters and exist in the accepted-guess dictionary.
+- Accepted input: physical keyboard, onscreen keyboard, touch, optional physical Enter, and Backspace/Delete. Entering the final required letter submits the row immediately (six in standard modes, the displayed 5–7 length in Bollywood Race); there is no onscreen Enter key.
+- Standard-mode guesses must contain exactly six letters and exist in the accepted-guess dictionary. Bollywood Race accepts alphabetic guesses of the displayed answer length, including names/title words outside the English dictionary; its hidden answer pool is server-only.
 - Scoring handles repeated letters correctly: exact positions are allocated first, then remaining answer-letter counts are used for misplaced matches.
 - The player has six standard guesses. After six misses, Last Chance offers one seventh and final row for 125 coins or an optional native rewarded ad. Coins are not spent on the ad path; only the earned callback grants the extra row. Plain web has the coin option only.
 - A loss reveals the answer.
@@ -51,7 +51,7 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 
 ## Modes
 
-The home screen exposes nine modes:
+The home screen exposes ten modes:
 
 | Mode | Current behavior |
 | --- | --- |
@@ -62,6 +62,7 @@ The home screen exposes nine modes:
 | Insight | Starts with the clue unlocked and one deterministic answer position revealed. |
 | Streak | Consecutive wins grow a separate mode streak; a loss or Skip resets that run. |
 | Race | A room-code match for 2–8 players. The host chooses Normal, Hard, or Extreme and a 3-word Sprint, 5-word Normal, or 10-word Marathon. Everyone receives the same ordered words; players can join while the race is running and space remains, starting at word one without resetting existing racers. Finished/expired races cannot be joined. The first player to solve the full route wins. A slim vertical green course beside the board places all avatars at the same bottom baseline initially and moves them upward with completed words to a checkered finish at the top. |
+| Bollywood Race | A 2–8-player Race variant with 3/5/10-word routes and 5–7-letter answers. Its separate 1,000-answer bank has 988 post-2000 film/performer entries and 12 classics including Sholay. The board shows the generic answer kind and length; Sense unlocks its clue. Complete titles, complete title words, first names, surnames and screen names are allowed. No difficulty selector. Six guesses plus Last Chance, late joins, saved-seat resume, screen-away alerts and solo-only Skip rules remain shared with Race. |
 | VS | A two-player point duel with host-selected 3-round Quick, 5-round Classic, 9-round Epic, or Endless play. Both players receive the same word each round and see each other's name, score, and feedback patterns in real time, but never the opponent's letters. The first correct guess wins one point, earns 60% of the equivalent solo coin reward, and advances both screens. Skip is unavailable. In newly created updated-server rooms, after six misses Last Chance can unlock a seventh attempt; declining or missing it awards the opponent the point. |
 | Co-op | A 2–4-player shared-word journey with 3, 5, or 10 words. Everyone receives the same route and the first teammate to solve a word advances the entire room. Teammates retain private boards and authoritative lifelines while progress and transitions are shared. |
 
@@ -126,7 +127,7 @@ Updated web clients also read public `economy.json` on startup, every 30 seconds
 Developer brand preparation (September 16): the user selected public developer name **AlphaCode**, reports company name **AlphaCodeAI**, and supplied https://www.alphacodeai.com/ . `branding/alphacode/` contains generated developer-profile icon/header pairs. Recommended v2 follows the visually inspected website: gold Greek alpha, cobalt, ivory grid, navy type and orange accents. Final upload exports are `alphacode-developer-icon-upload.png` (512 x 512, 24-bit RGB, 264,775 bytes) and `alphacode-developer-header-upload.jpg` (4096 x 2304, 24-bit RGB JPEG, 772,486 bytes), both non-transparent and under 1 MB. These supersede the earlier 32-bit icon/large PNG header for uploads; generated originals and exact prompts are retained. Header exports are upscaled from 1672 x 941 source images. Monochrome v1 remains an alternative. Neither set is bundled in the game, applied to the website, nor uploaded to Play Console. Existing in-app Sensei/support copy and historical account settings are not silently rewritten; profile rename and app copy alignment remain separate work.
 
 - Visual direction: vibrant claymorphism with purple, pink, cyan, yellow, and orange depth lighting.
-- Home: generated observatory hero art, a seven-day streak progress rail with a 300-coin reward icon, a Daily call-to-action, a major Adventure launcher, generated Race/VS/Co-op launchers, and the compact four-mode solo launcher. Play Together appears above Game Modes. Race, VS, and Co-op use original independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
+- Home: generated observatory hero art, a seven-day streak progress rail with a 300-coin reward icon, a Daily call-to-action, a major Adventure launcher, Race/Bollywood Race/VS/Co-op launchers in a two-by-two grid, and the compact four-mode solo launcher. Play Together appears above Game Modes. Race, VS, and Co-op use original independent clay scenes. On phones, the Daily and Adventure feature cards each occupy approximately half of the small viewport.
 - Adventure: three original generated portrait environments—Sky Garden, Ember Canopy, and Cosmic Prism—each contain a monumental endless golden ladder as part of the raster artwork. The old winding-road scenes are no longer referenced, and no CSS rails or rung elements duplicate the illustrated ladder. Only the active zone asset is loaded at runtime; exactly eight semantic level markers align to eight evenly spaced painted-rung positions. Vertical swipes and stacked up/down controls browse virtualized pages. Future pages keep the scenery fully visible and apply chain/disabled treatment only to their individual rungs. A one-level win animates the animal upward from the completed rung; reduced-motion players receive the settled state immediately. It is original genre-inspired progression presentation and does not use Candy Crush art, characters, candy motifs, branded copy, or copied level UI.
 - Game screen: visible Sixth Sense branding, a compact game-mode line, a phone-safe five-digit coin count at top right, six-row letter grid plus one optional extra row, a full-width color-state keyboard, and an evenly spaced bottom lifeline dock. The header now keeps only Help and Settings beside the wallet; Statistics is a full-width clay action inside Settings. The three keyboard rows contain 27 controls—26 letters plus Delete—with a proportionally centered final row; the removed Enter key is unnecessary because the sixth letter submits automatically. Status toasts are absolutely contained in a fixed-height message slot, so feedback cannot reflow the board or cover the bottom price chips.
 - Every finished solo puzzle, including Adventure, opens the dedicated completion sheet instead of the generic Statistics modal. The sheet leads with the player's selected animal avatar: the original happy portrait for wins and a matching generated sad portrait for losses (including skips). Selected cosmetic frames remain visible. All nine free and nine premium animals are supported; online match result cards use the same avatar renderer and existing match-outcome rules. The former signal crest and halo are no longer rendered on result cards. The animated six-tile answer, attempt-specific copy, coins, points, bonuses, and OK action remain. Losses use calmer recovery copy and no celebration. Adventure returns to its map; the existing mode-specific result exits and optional Next word behavior remain. Re-entering a finished Daily restores its card and current selected avatar.
@@ -173,6 +174,8 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `multiplayer.js` | Room create/join/leave flows, resume-token session state, polling/reconnect, online board/keyboard/one-tap lifeline rendering, shared hint and match-result popups, the shared Race course, VS series progress, attempt patterns, and live identity synchronization. |
 | `api/multiplayer.js` | Vercel serverless authority for codes, seats, room lifecycle, answer selection, guess validation/scoring, lifeline effects, identity updates, CAS revisions, idempotency, results, and redacted snapshots. It creates and migrates its Postgres tables idempotently after a database is connected. |
 | `answer-bank.js` | 10,187 answer objects with a six-letter `word`, `clue`, and `tier`. Loaded before `game-core.js` in the browser and required by the server. |
+| `data/bollywood-answers.json` / `BOLLYWOOD_CONTENT.md` | Separate server-loaded Bollywood bank, per-entry factual source/era metadata and editorial audit. No active room route or full Bollywood bank is sent to the client. |
+| `test-bollywood.js` / `test-bollywood-browser.js` / `test-production-bollywood.js` | Data/server invariants, 5–7-column phone input/layout, and real two-browser production rooms with late join, clue/Peek, progression and resume. |
 | `word-bank.js` | Expanded accepted-guess vocabulary. Loaded before `game-core.js` in the browser. |
 | `scripts/build_word_banks.py` | Deterministically audits and regenerates both banks from a hash-verified ENABLE lexicon, pinned `wordfreq`, and WordNet. |
 | `scripts/clue_overrides.json` / `scripts/clue-audit.json` | 143 explicit editorial clue corrections and a complete before/after clue-only release audit against c055f52. The refresh path preserves all words, tier assignments, and ordering. |
@@ -180,7 +183,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `VOCABULARY_AUDIT.md` | Acceptance criteria, before/after counts, source hash, and reproducible audit instructions. |
 | `assets/` | Generated logo, hero, three separate Adventure zone maps, mode, control, and supporting icon artwork. WebP is preferred for scene imagery; transparent PNG/WebP assets are used for controls. |
 | `package.json` / `package-lock.json` | Reproducible Node dependencies plus explicit static build and test scripts. The runtime dependency is the Neon serverless Postgres driver. |
-| `vercel.json` | Explicit repository-root static output, Vercel function duration, and no-store API headers. |
+| `vercel.json` | Explicit repository-root static output, function duration, no-store API/economy headers, and a 404 rewrite for server-only data paths. |
 | `manifest.webmanifest` | Installable web-app metadata and default logo icon. |
 | `favicon.svg` | Fallback favicon; the fixed primary brand logo remains the runtime favicon. |
 | `.nojekyll` | Tells GitHub Pages to publish the repository as a plain static site without Jekyll processing. |
@@ -239,6 +242,14 @@ Multiplayer name/room-code inputs explicitly render at 16px instead of inheritin
 The onscreen keyboard specifically uses `touch-action:none` and disables text selection; its marker/icon children do not intercept hit testing. Solo and multiplayer build semantic keyboard buttons once and update color/label states in place; online also updates disabled state. Click is now the sole activation path for touch, pen, mouse and semantic/assistive input. Pointer capture retains the original touch target; pointer release only tracks the 18px drag-away/cancellation threshold and never enters a letter. No pointer-type inference or timed click suppression is used, so a browser labelling a touch compatibility click as mouse cannot double-enter. Detail-zero semantic/assistive clicks remain available. Selection, callouts and tap highlight are disabled directly on keys/children, and key feedback no longer transforms/shrinks the hit area. Multiplayer also guards input while a decision dialog is open. The shared binder is exposed by app.js as SixthSenseKeyboard. Home/settings zoom remains available.
 
 ## Data and selection
+
+### Bollywood Race exception
+
+`data/bollywood-answers.json` contains 1,000 unique 5–7-letter answers: 988 entries tied to 2000–2025 releases/acting credits and 12 classics. See `BOLLYWOOD_CONTENT.md` for the category counts, sources, spelling decisions and limitations. This includes supporting performers, not just household-name stars. Complete words from longer hit titles and first/surname/screen-name tokens are intentional, never arbitrary truncation. Sources are retained in the repository; clues are newly authored. The cutoff applies to a cited credit, so older actors with modern roles qualify; re-release-only credits do not.
+
+The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel blocks `/data/*`; Pages/mobile packaging already omits this folder. The source repository is public, which does not expose a room's randomly chosen active route.
+
+### Standard vocabulary
 
 - Answer pool: exactly 10,187 unique, clueable, answer-safe six-letter words.
 - Player-facing difficulty names are Normal, Hard, and Extreme. For backward-compatible data, API, and saved-state stability, their internal keys remain `easy`, `medium`, and `extreme` respectively.
@@ -332,6 +343,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 Bollywood Race (styles/core/multiplayer/mobile cache version `20260918.13`; shared keyboard binder unchanged): `npm test`, `node test-bollywood.js`, `node test-bollywood-browser.js`, full `test-browser.js`, Peek, Race join, Last Chance server, keyboard touch, Race mobile, presence API/browser, banner layout, JS syntax and `npm run build:mobile` passed locally. The new tests check exactly 1,000 unique sourced answers, era cutoff/cap, no clue-answer leakage, 5/6/7-letter scoring and board transitions, single tap/autosubmit, seven-position Peek, six guesses/Last Chance, unchanged ordinary dictionary validation, eight racers, 320×568/390×844/844×360 geometry, and a 7×7 Last Chance board at 320×518 with 44px keys. Physical Safari and a fresh Android binary are not claimed. Live publication/real Neon room acceptance remains pending for this implementation commit.
 
 September 18 duplicate-input correction (app 20260918.12): the new click-origin regression first failed on the prior release with `wwzxed` instead of `wzxed`: its pointer-up path entered W and its mouse-labelled click entered W again. The shared binder now activates only on click. Focused touch and Race suites, core, syntax and packaging passed locally; full-browser checks also passed. Commit `b9358f7` deployed successfully to Vercel and GitHub Pages (workflow `35275951630`); both public sites passed the solo click-origin and Race touch/geometry suites. Coverage retains repeated letters/Delete, held/edge touches, cancellation/drag-away, mouse/Space/semantic clicks and mid-poll target retention. Click-origin variation is an explicit browser fixture; no physical Safari reproduction is claimed.
 
@@ -457,6 +470,8 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ## Known limitations
 
+- Bollywood content has per-entry factual sources and automated/editorial cleanup, not an independent manual fact-check of every film credit. It includes supporting actors and shared first/surnames; familiarity and Latin spellings vary. Future corrections should preserve the 1,000-entry, 5–7-letter, recent/classic constraints.
+
 - The user rejected the CSS party accessories and requested rendered transparent sheets. Four generated sources in `artwork-drafts/party-sheets/` cover all 18 avatars in extended/rolled blower poses, but contain baked checkerboards. Genuine alpha cleanup, cell packing/alignment, and runtime replacement remain pending; a local cleanup permission question is awaiting the user's reply. Exact prompts and source status are recorded in that folder's README.
 
 - Android source, test-ad SDK integration, rewarded solve bonuses and banner-removal billing/verification are implemented. The verification endpoint and privacy page are deployed, but `/api/play-purchase` correctly returns 503/available=false until Play server credentials are configured. Live AdMob serving/verification, Play product/pricing, app-ads.txt verification, store graphics and real-device/account release checks remain outstanding. A signed sample-ad internal-test AAB exists, but this is not yet a production-ready Play release; `ANDROID_RELEASE.md` lists the remaining steps.
@@ -477,6 +492,13 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Bollywood Race with variable answer lengths
+
+- Added the requested separate Bollywood Race launcher, original clapperboard artwork, explanatory lobby and authoritative room theme. Existing room modes/routes and the fixed iPhone click-only input path are preserved.
+- Added 1,000 distinct sourced film/title-word and performer-name answers: 988 tied to 2000 onward and 12 classics, below the maximum 100 older entries. Normalized obvious name variants, removed re-release/footnote artifacts, retained original clues and documented supporting-performer/fact-check limitations.
+- Made online columns, input length, duplicate-letter scoring, Peek and responsive fitting follow the active answer length. Standard modes stay six letters; attempts, Last Chance, presence, late join, seat restore and disabled multiplayer Skip remain unchanged. Added local and live acceptance suites, source notes and the explicit AGENTS exception.
+- Local checks passed as recorded above. This is a web/source feature; no new APK/AAB or Play Store release is part of this change.
 
 ### 2026-09-18 — Remove the second keyboard activation path
 

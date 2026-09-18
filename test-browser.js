@@ -34,7 +34,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#home-screen").isVisible(), true);
     assert.equal(await page.locator("#game-screen").isHidden(), true);
     assert.equal(await page.locator("[data-start-mode]").count(), 5);
-    assert.equal(await page.locator("[data-open-online]").count(), 3);
+    assert.equal(await page.locator("[data-open-online]").count(), 4);
     assert.equal(await page.locator("[data-open-adventure-map]").count(), 1);
     assert.equal(await page.locator("#adventure-feature").isVisible(), true);
     assert.match(await page.locator("#adventure-feature-art").getAttribute("src"), /adventure-zone-sky-ladder-v1\.webp$/);

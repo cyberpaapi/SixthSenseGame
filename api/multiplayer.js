@@ -3,6 +3,10 @@
 const crypto = require("node:crypto");
 const { neon } = require("@neondatabase/serverless");
 const Core = require("../game-core.js");
+const Bollywood = require("../data/bollywood-answers.json");
+const BOLLYWOOD_BY_WORD = new Map(Bollywood.map(entry => [entry.word, entry]));
+const isBollywood = room => room.mode === "race" && room.answer_theme === "bollywood";
+const clueFor = (room, answer) => isBollywood(room) ? BOLLYWOOD_BY_WORD.get(answer)?.clue : ANSWER_CLUES.get(answer);
 const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -62,6 +66,7 @@ async function ensureSchema(sql) {
       UNIQUE(room_code, seat)
     )`;
     await sql`CREATE INDEX IF NOT EXISTS sixth_sense_players_room_idx ON sixth_sense_players(room_code)`;
+    await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS answer_theme text NOT NULL DEFAULT 'classic'`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS max_guesses integer NOT NULL DEFAULT 7`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS endless boolean NOT NULL DEFAULT false`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS current_round integer NOT NULL DEFAULT 0`;
@@ -184,7 +189,7 @@ async function snapshot(sql, room, me) {
   // Update an already purchased clue after a content release, without revealing
   // anything to seats that have not unlocked Sense or carrying it into a new round.
   if (ownLifelines.clue && Number(ownLifelines.round) === active.index) {
-    ownLifelines.clue = ANSWER_CLUES.get(active.answer) || ownLifelines.clue;
+    ownLifelines.clue = clueFor(room, active.answer) || ownLifelines.clue;
   }
   return {
     room: {
@@ -193,6 +198,7 @@ async function snapshot(sql, room, me) {
       lastChanceAds: true,
       presenceEnabled: true,
       mode: room.mode,
+      theme: isBollywood(room) ? "bollywood" : "classic",
       difficulty: room.difficulty,
       wordCount: room.word_count,
       endless: room.endless,
@@ -204,6 +210,8 @@ async function snapshot(sql, room, me) {
     },
     me: {
       id: me.id,
+      wordLength: isBollywood(room) ? (active.answer?.length || 6) : Core.WORD_LENGTH,
+      answerKind: isBollywood(room) ? (BOLLYWOOD_BY_WORD.get(active.answer)?.kind || "") : "",
       presenceSequence: Number(own.presence_sequence) || 0,
       screenAway: Boolean(own.screen_away),
       isHost: room.host_player_id === me.id,
@@ -222,7 +230,8 @@ async function snapshot(sql, room, me) {
 
 async function createRoom(sql, body) {
   const mode = ["race", "vs", "coop"].includes(body.mode) ? body.mode : "race";
-  const difficulty = ["easy", "medium", "extreme"].includes(body.difficulty) ? body.difficulty : "easy";
+  const theme = mode === "race" && body.theme === "bollywood" ? "bollywood" : "classic";
+  const difficulty = theme === "classic" && ["easy", "medium", "extreme"].includes(body.difficulty) ? body.difficulty : "easy";
   const { wordCount, endless } = normalizeGameLength(mode, body.wordCount);
   const capacity = mode === "vs" ? 2 : mode === "coop" ? 4 : 8;
   const player = cleanPlayer(body.player);
@@ -231,8 +240,8 @@ async function createRoom(sql, body) {
   let code;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     code = roomCode();
-    const inserted = await sql`INSERT INTO sixth_sense_rooms (code, mode, difficulty, word_count, endless, capacity, host_player_id, max_guesses, expires_at)
-      VALUES (${code}, ${mode}, ${difficulty}, ${wordCount}, ${endless}, ${capacity}, ${playerId}, ${Core.MAX_GUESSES}, now() + (${ROOM_TTL_HOURS} || ' hours')::interval)
+    const inserted = await sql`INSERT INTO sixth_sense_rooms (code, mode, difficulty, word_count, endless, capacity, host_player_id, max_guesses, answer_theme, expires_at)
+      VALUES (${code}, ${mode}, ${difficulty}, ${wordCount}, ${endless}, ${capacity}, ${playerId}, ${Core.MAX_GUESSES}, ${theme}, now() + (${ROOM_TTL_HOURS} || ' hours')::interval)
       ON CONFLICT DO NOTHING RETURNING *`;
     if (inserted.length) break;
     code = null;
@@ -248,6 +257,7 @@ async function createRoom(sql, body) {
 async function joinRoom(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const room = await getRoom(sql, code);
+  if (isBollywood(room) && body.supportsVariableLength !== true) throw Object.assign(new Error("Refresh or update the game to join this Bollywood Race."), { status: 409 });
   // An authenticated return uses the existing seat, even when the room is full
   // or no longer accepts new players. A name alone never proves seat ownership.
   if (body.resumeToken) {
@@ -294,8 +304,8 @@ function canJoinRoom(room) {
   return room.status === "waiting" || (room.mode === "race" && room.status === "running");
 }
 
-function chooseAnswers(difficulty, count) {
-  const pool = [...Core.answersForDifficulty(difficulty)];
+function chooseAnswers(difficulty, count, theme = "classic") {
+  const pool = [...(theme === "bollywood" ? Bollywood : Core.answersForDifficulty(difficulty))];
   const chosen = [];
   while (chosen.length < count) {
     const index = crypto.randomInt(pool.length);
@@ -320,7 +330,7 @@ async function startMatch(sql, body) {
   if (room.status !== "waiting") return { snapshot: await snapshot(sql, room, me) };
   const counts = await sql`SELECT COUNT(*)::int AS count FROM sixth_sense_players WHERE room_code=${code}`;
   if (counts[0].count < 2) throw Object.assign(new Error("At least two players are needed."), { status: 409 });
-  const answers = chooseAnswers(room.difficulty, room.endless ? 1 : room.word_count);
+  const answers = chooseAnswers(room.difficulty, room.endless ? 1 : room.word_count, isBollywood(room) ? "bollywood" : "classic");
   const updated = await sql`UPDATE sixth_sense_rooms SET status='running', answer_words=${JSON.stringify(answers)}::jsonb, current_round=0, last_round_winner_player_id=NULL, revision=revision+1
     WHERE code=${code} AND status='waiting' AND revision=${room.revision} RETURNING *`;
   const activeRoom = updated[0] || await getRoom(sql, code);
@@ -462,7 +472,9 @@ async function submitGuess(sql, body) {
   const currentEffects = Number(effects.round) === active.index ? effects : {};
   if (currentEffects.lastChancePending || currentEffects.pendingSkip) throw Object.assign(new Error("Finish the open decision before guessing."), { status: 409 });
   if (parseJson(me.attempts, []).length >= roomGuessLimit(room) + (currentEffects.extraAttempt ? 1 : 0)) throw Object.assign(new Error("No attempts remain for this word."), { status: 409 });
-  if (!Core.isValidWord(guess)) throw Object.assign(new Error("That word is not in the accepted dictionary."), { status: 400 });
+  if (isBollywood(room)) {
+    if (!active.answer || !/^[a-z]{5,7}$/.test(guess) || guess.length !== active.answer.length) throw Object.assign(new Error(`Enter ${active.answer?.length || "5–7"} letters for this Bollywood answer.`), { status: 400 });
+  } else if (!Core.isValidWord(guess)) throw Object.assign(new Error("That word is not in the accepted dictionary."), { status: 400 });
   if (room.mode === "vs") return submitVsGuess(sql, { code, guess, actionId, me, room });
   if (room.mode === "coop") return submitCoopGuess(sql, { code, guess, actionId, me, room });
   const answers = parseJson(room.answer_words, []);
@@ -538,10 +550,10 @@ async function submitLifeline(sql, body) {
 
   let effect;
   if (kind === "sense") {
-    lifelines.clue = ANSWER_CLUES.get(answer) || lifelines.clue || "A familiar six-letter word.";
+    lifelines.clue = clueFor(room, answer) || lifelines.clue || (isBollywood(room) ? "A Hindi film or performer." : "A familiar six-letter word.");
     effect = { kind, clue: lifelines.clue };
   } else if (kind === "peek") {
-    const candidates = Core.remainingPeekPositions(parseJson(me.attempts, []), (lifelines.peeked || []).map(entry => entry.position));
+    const candidates = Core.remainingPeekPositions(parseJson(me.attempts, []), (lifelines.peeked || []).map(entry => entry.position), answer.length);
     if (!candidates.length) throw Object.assign(new Error("Every position is already revealed."), { status: 409 });
     const seed = crypto.createHash("sha256").update(`${answer}:${me.id}:${candidates.length}`).digest().readUInt32BE(0);
     const position = candidates[seed % candidates.length];
@@ -718,4 +730,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };

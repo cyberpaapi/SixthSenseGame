@@ -1,5 +1,9 @@
 # Third-party data and audio notices
 
+## Bollywood facts and references
+
+The server-only Bollywood Race bank contains film titles, performer names, dates and cast-credit facts researched from Wikipedia contributors, Box Office India and Bollywood Hungama. Each record retains its source links; `BOLLYWOOD_CONTENT.md` explains selection and limitations. Wikipedia article text is available under CC BY-SA; no article prose, film posters, performer photos, studio logos or music is reproduced here. Clues and the generic clapperboard SVG were newly authored for this game. Inclusion identifies the referenced films/performers and does not imply their endorsement.
+
 ## Bundled fonts and native dependencies
 
 DM Sans and Nunito are redistributed under the SIL Open Font License 1.1. Full copyright/license notices are in `assets/fonts/dmsans-OFL.txt` and `assets/fonts/nunito-OFL.txt`. `scripts/vendor-fonts.js` records retrieval from Google Fonts for offline use. Capacitor is MIT-licensed; native Google Ads, UMP and Play Billing SDKs are subject to their Google SDK terms. Lockfiles pin JavaScript dependencies.

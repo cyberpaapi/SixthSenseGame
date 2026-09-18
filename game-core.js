@@ -119,13 +119,13 @@
   const WORDS = new Set([...ANSWERS.map(item => item.word), ...EXTRA_GUESSES, ...loadFrequencyWords()]);
 
   function scoreGuess(guess, answer) {
-    const result = Array(WORD_LENGTH).fill("absent");
+    const result = Array(answer.length).fill("absent");
     const remaining = Object.create(null);
-    for (let i = 0; i < WORD_LENGTH; i += 1) {
+    for (let i = 0; i < answer.length; i += 1) {
       if (guess[i] === answer[i]) result[i] = "exact";
       else remaining[answer[i]] = (remaining[answer[i]] || 0) + 1;
     }
-    for (let i = 0; i < WORD_LENGTH; i += 1) {
+    for (let i = 0; i < answer.length; i += 1) {
       if (result[i] === "exact") continue;
       if ((remaining[guess[i]] || 0) > 0) {
         result[i] = "present";
@@ -135,12 +135,12 @@
     return result;
   }
 
-  function remainingPeekPositions(history = [], revealed = []) {
+  function remainingPeekPositions(history = [], revealed = [], wordLength = WORD_LENGTH) {
     const known = new Set(revealed.map(Number));
     history.forEach(entry => (entry.score || []).forEach((status, position) => {
       if (status === "exact") known.add(position);
     }));
-    return Array.from({ length: WORD_LENGTH }, (_, position) => position).filter(position => !known.has(position));
+    return Array.from({ length: wordLength }, (_, position) => position).filter(position => !known.has(position));
   }
 
   function validateHardMode(guess, history) {

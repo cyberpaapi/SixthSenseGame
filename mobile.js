@@ -81,7 +81,8 @@
       const bounds = wrap.getBoundingClientRect();
       const rows = board.children.length || window.SixthSenseCore.MAX_GUESSES;
       const padding = parseFloat(getComputedStyle(wrap).paddingRight) + parseFloat(getComputedStyle(wrap).paddingLeft);
-      const size = Math.floor(Math.min(52, (bounds.width - padding - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+      const columns = board.firstElementChild?.children.length || 6;
+      const size = Math.floor(Math.min(52, (bounds.width - padding - (columns - 1) * 4 - 5) / columns, (bounds.height - 2 - (rows - 1) * 4) / rows));
       board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
     });
   };

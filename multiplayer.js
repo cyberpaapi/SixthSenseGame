@@ -97,7 +97,8 @@
     if (!bounds.height || !bounds.width) return;
     const rows = els.board.children.length || Core.MAX_GUESSES;
     const padding = parseFloat(getComputedStyle(els.board.parentElement).paddingRight) + parseFloat(getComputedStyle(els.board.parentElement).paddingLeft);
-    const size = Math.floor(Math.min(52, (bounds.width - padding - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+    const columns = wordLength();
+    const size = Math.floor(Math.min(52, (bounds.width - padding - (columns - 1) * 4 - 5) / columns, (bounds.height - 2 - (rows - 1) * 4) / rows));
     els.board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
   }
   new ResizeObserver(fitOnlineBoard).observe(els.board.parentElement);
@@ -205,9 +206,18 @@
     els.message.dataset.error = String(error);
   }
 
+  function wordLength() {
+    const length = Number(state.snapshot?.me?.wordLength);
+    return state.snapshot?.room.theme === "bollywood" && [5, 6, 7].includes(length) ? length : Core.WORD_LENGTH;
+  }
+
   function openLobby(mode) {
+    state.requestedTheme = mode === "bollywood" ? "bollywood" : "classic";
+    const bollywood = state.requestedTheme === "bollywood";
+    document.querySelector("#online-difficulty-options").hidden = bollywood;
+    document.querySelector("#bollywood-room-guide").hidden = !bollywood;
     state.requestedMode = ["race", "vs", "coop"].includes(mode) ? mode : "race";
-    const label = state.requestedMode === "vs" ? "One-on-one VS" : state.requestedMode === "coop" ? "Co-op journey" : "Multiplayer Race";
+    const label = bollywood ? "Bollywood Race" : state.requestedMode === "vs" ? "One-on-one VS" : state.requestedMode === "coop" ? "Co-op journey" : "Multiplayer Race";
     els.lobbyKicker.textContent = label;
     els.distance.hidden = false;
     renderLengthOptions();
@@ -232,7 +242,7 @@
     const response = await fetch(`${API_BASE}/api/multiplayer`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action, ...payload })
+      body: JSON.stringify({ action, supportsVariableLength: true, ...payload })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw Object.assign(new Error(data.error || `Room service returned ${response.status}.`), { status: response.status });
@@ -252,6 +262,7 @@
     try {
       const result = await api("create", {
         mode: state.requestedMode,
+        theme: state.requestedTheme,
         difficulty: selectedValue("online-difficulty") || "easy",
         wordCount: selectedValue("online-distance") || "3",
         player
@@ -415,9 +426,9 @@
     const roundAdvanced = sharedRound && state.activeRound !== null && nextRound > state.activeRound;
     if (nextRound !== state.activeRound) state.current = "";
     state.activeRound = nextRound;
-    els.kicker.textContent = room.mode === "vs" ? "One-on-one VS" : room.mode === "coop" ? "Co-op journey" : "Multiplayer Race";
+    els.kicker.textContent = room.theme === "bollywood" ? "Bollywood Race" : room.mode === "vs" ? "One-on-one VS" : room.mode === "coop" ? "Co-op journey" : "Multiplayer Race";
     const lengthLabel = room.mode === "vs" && room.endless ? "Endless" : `${room.wordCount} ${room.mode === "vs" ? "rounds" : "words"}`;
-    els.title.textContent = `${DIFFICULTY_LABELS[room.difficulty] || "Normal"} · ${lengthLabel}`;
+    els.title.textContent = `${room.theme === "bollywood" ? "Cinema" : DIFFICULTY_LABELS[room.difficulty] || "Normal"} · ${lengthLabel}`;
     renderVersusNames();
     els.roomCode.textContent = room.code;
     els.roomState.textContent = room.status;
@@ -425,7 +436,7 @@
     if (room.status === "waiting") els.status.textContent = snapshot.players.length < 2 ? "Share the room code. The match can start when another player joins." : snapshot.me.isHost ? "Everyone is here—start when ready." : "Waiting for the host to start.";
     else if (room.status === "finished") els.status.textContent = winner ? `${winner.name} won the match!` : "Match complete.";
     else if (snapshot.me.finished) els.status.textContent = "Match complete.";
-    else if (room.mode === "race") els.status.textContent = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}`;
+    else if (room.mode === "race") els.status.textContent = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : ""}`;
     else if (room.mode === "coop") els.status.textContent = `Shared word ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount} · Solve it together.`;
     else els.status.textContent = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`} · First solve wins the point.`;
     els.start.hidden = !(room.status === "waiting" && snapshot.me.isHost && snapshot.players.length >= 2);
@@ -507,6 +518,7 @@
     const attempts = currentAttempts();
     const peeked = new Map((state.snapshot?.me?.lifelines?.peeked || []).map(entry => [Number(entry.position), entry.letter]));
     els.board.innerHTML = "";
+    els.board.style.setProperty("--word-length", wordLength());
     const maxGuesses = baseGuessLimit() + (state.snapshot?.me?.lifelines?.extraAttempt ? 1 : 0);
     els.board.classList.toggle("has-extra-row", Boolean(state.snapshot?.me?.lifelines?.extraAttempt));
     els.board.style.setProperty("--board-rows", maxGuesses);
@@ -516,7 +528,7 @@
       row.setAttribute("role", "row");
       const prior = attempts[rowIndex];
       const letters = prior ? prior.guess : rowIndex === attempts.length ? state.current : "";
-      for (let column = 0; column < Core.WORD_LENGTH; column += 1) {
+      for (let column = 0; column < wordLength(); column += 1) {
         const tile = document.createElement("div");
         const letter = letters[column] || "";
         const status = prior?.score[column];
@@ -593,18 +605,18 @@
       state.current = state.current.slice(0, -1);
       playAudio("delete");
     }
-    else if (/^[A-Z]$/.test(key) && state.current.length < Core.WORD_LENGTH && !(state.snapshot?.me?.lifelines?.eliminatedLetters || []).includes(key.toLowerCase())) {
+    else if (/^[A-Z]$/.test(key) && state.current.length < wordLength() && !(state.snapshot?.me?.lifelines?.eliminatedLetters || []).includes(key.toLowerCase())) {
       state.current += key.toLowerCase();
       playAudio("letter", { semitone: (key.charCodeAt(0) - 65) % 7 });
     }
     else return;
     renderBoard();
-    if (key !== "BACK" && state.current.length === Core.WORD_LENGTH) void submitGuess();
+    if (key !== "BACK" && state.current.length === wordLength()) void submitGuess();
   }
 
   async function submitGuess() {
-    if (state.current.length !== Core.WORD_LENGTH) return setPlayStatus("Six letters make the signal.");
-    if (!Core.isValidWord(state.current)) return setPlayStatus("That word isn’t in the accepted dictionary.");
+    if (state.current.length !== wordLength()) return setPlayStatus(`Enter ${wordLength()} letters.`);
+    if (state.snapshot?.room.theme !== "bollywood" && !Core.isValidWord(state.current)) return setPlayStatus("That word isn’t in the accepted dictionary.");
     state.busy = true;
     renderKeyboard();
     const guess = state.current;
@@ -636,7 +648,7 @@
       const price = item.querySelector(".lifeline-price");
       const stored = Math.max(0, Number(economy.inventory?.[kind]) || 0);
       const senseUnlocked = kind === "sense" && Boolean(effects.clue);
-      const exhausted = kind === "peek" && Core.remainingPeekPositions(state.snapshot?.me?.attempts || [], (effects.peeked || []).map(entry => entry.position)).length === 0;
+      const exhausted = kind === "peek" && Core.remainingPeekPositions(state.snapshot?.me?.attempts || [], (effects.peeked || []).map(entry => entry.position), wordLength()).length === 0;
       const available = !exhausted;
       stock.hidden = !(stored > 0 || senseUnlocked);
       stock.querySelector("b").textContent = senseUnlocked ? "1" : stored;
@@ -785,7 +797,7 @@
     if (kind === "skip") return;
     if (state.busy || state.snapshot?.room.status !== "running" || state.snapshot.me.finished) return;
     const currentEffect = state.snapshot.me.lifelines || {};
-    if (kind === "peek" && !Core.remainingPeekPositions(state.snapshot.me.attempts || [], (currentEffect.peeked || []).map(entry => entry.position)).length) return;
+    if (kind === "peek" && !Core.remainingPeekPositions(state.snapshot.me.attempts || [], (currentEffect.peeked || []).map(entry => entry.position), wordLength()).length) return;
     if (kind === "sense" && currentEffect.clue) {
       showLifelineEffect({ kind, clue: currentEffect.clue });
       return;

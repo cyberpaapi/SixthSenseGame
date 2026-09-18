@@ -412,7 +412,7 @@ body[data-screen="adventure"] .topbar { flex:0 0 auto; }
 .mode-tile strong { font: 900 16px/1.05 "Nunito", sans-serif; }
 .mode-tile small { margin-top: 5px; color: #705b7c; font-size: 10px; font-weight: 700; line-height: 1.15; }
 .online-shelf { padding: 22px; border: 1px solid rgba(255,255,255,.48); border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(229,244,255,.94)); box-shadow: 16px 20px 38px rgba(47,9,89,.26), inset 2px 2px 4px rgba(255,255,255,.8); }
-.online-mode-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.online-mode-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .online-mode-tile { min-height: 116px; display: grid; grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 15px; padding: 8px; border: 1px solid rgba(101,57,165,.16); border-radius: 24px; background: #fff; color: #32134f; box-shadow: 7px 10px 20px rgba(75,34,120,.15); text-align: left; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .online-mode-tile:hover { transform: translateY(-3px); box-shadow: 10px 15px 26px rgba(75,34,120,.22); }
 .online-mode-tile:active { transform: scale(.98); }
@@ -1334,11 +1334,11 @@ body[data-screen="online"] :is(.progress-panel,.player-progress-list,.race-cours
   .online-shelf { padding:16px 12px 14px; border-radius:24px; }
   .online-mode-grid { gap:8px; }
   .online-mode-grid { grid-template-columns:1fr 1fr; }
-  .online-mode-tile-coop { grid-column:1 / -1; }
-  .online-mode-tile-coop .online-mode-art { width:72px; }
-  .online-mode-tile { min-height:86px; grid-template-columns:72px minmax(0,1fr); gap:8px; padding:6px; border-radius:18px; }
-  .online-mode-art { width:72px; height:72px; border-radius:14px; }
-  .online-mode-tile strong { font-size:16px; }
+  .online-mode-tile-coop { grid-column:auto; }
+  .online-mode-tile-coop .online-mode-art { width:48px; }
+  .online-mode-tile { min-height:86px; grid-template-columns:48px minmax(0,1fr); gap:8px; padding:6px; border-radius:18px; }
+  .online-mode-art { width:48px; height:60px; border-radius:14px; }
+  .online-mode-tile strong { font-size:clamp(11px,3.5vw,14px); }
   .online-mode-tile small { margin-top:4px; font-size:9px; line-height:1.2; }
   .game-card { min-height: calc(100dvh - 72px); padding: 12px 12px max(10px, env(safe-area-inset-bottom)); border-radius: 30px 30px 0 0; border-left: 0; border-right: 0; }
   .game-hud { min-height: 38px; padding-bottom: 7px; }
@@ -1600,3 +1600,6 @@ body:is(.is-native-app,.is-fitted-online)[data-screen="online"] .online-shell { 
 }
 
 .has-race-course .race-token:has(.is-away) small { display:block; top:12px; left:50%; transform:translateX(-50%); padding:1px 2px; border-radius:3px; background:#5b101d; color:white; font-size:7px; }
+
+.online-board .board-row { grid-template-columns:repeat(var(--word-length,6),var(--tile-size)); }
+.online-mode-art-bollywood { background:center/cover no-repeat url("assets/multiplayer-bollywood.svg"); }
