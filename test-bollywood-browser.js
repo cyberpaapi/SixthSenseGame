@@ -1,6 +1,6 @@
 "use strict";
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 const Core = require("./game-core");
 const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
 

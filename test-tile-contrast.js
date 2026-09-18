@@ -1,7 +1,7 @@
 "use strict";
 const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 const path = require("node:path");
 const fs = require("node:fs");
 

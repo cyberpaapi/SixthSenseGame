@@ -3,7 +3,7 @@ const openLegacySolo = require("./test-legacy-solo-helper");
 
 const assert = require("assert");
 const path = require("path");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 
 const baseUrl = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4173";
 const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, "../../work/sixth-sense-qa");
@@ -23,6 +23,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.locator("#help-modal").getAttribute("open"), null, "help must wait until the required first-open username is saved");
     await page.fill("#username-onboarding-input", "FoxPilot");
     await page.click("#username-onboarding-save");
+    await page.waitForSelector("#username-modal", { state: "hidden" });
     assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.online.identity.v1"))), { name: "FoxPilot" });
     await page.waitForSelector("#help-modal[open]");
     await page.click(".modal-got-it");
@@ -514,8 +515,9 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await modesPage.locator("#settings-username").inputValue(), "ModeFox");
     await modesPage.fill("#settings-username", "TigerNova");
     await modesPage.click("#save-settings-username");
+    await modesPage.waitForFunction(() => JSON.parse(localStorage.getItem("sixth-sense.online.identity.v1"))?.name === "TigerNova");
     assert.deepEqual(await modesPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.online.identity.v1"))), { name: "TigerNova" }, "Identity Studio must persist username changes");
-    assert.equal(await modesPage.locator("#settings-username-message").textContent(), "Saved.");
+    assert.match(await modesPage.locator("#settings-username-message").textContent(), /^Saved\./);
     await modesPage.click("#settings-modal .modal-close");
     await modesPage.click("#profile-trigger");
     assert.equal(await modesPage.locator("#profile-name").textContent(), "TigerNova", "profile must show the chosen username");

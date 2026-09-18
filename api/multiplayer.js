@@ -2,6 +2,7 @@
 
 const crypto = require("node:crypto");
 const { neon } = require("@neondatabase/serverless");
+const Identities = require("../lib/identities");
 const Core = require("../game-core.js");
 const Bollywood = require("../data/bollywood-answers.json");
 // Retain clues for routes created before the owner's complete-title/first-name refinement.
@@ -30,6 +31,7 @@ function database() {
 
 async function ensureSchema(sql) {
   if (!schemaPromise) schemaPromise = (async () => {
+    await Identities.ensureSchema(sql);
     await sql`CREATE TABLE IF NOT EXISTS sixth_sense_rooms (
       code text PRIMARY KEY,
       mode text NOT NULL CHECK (mode IN ('race','vs','coop')),
@@ -69,6 +71,8 @@ async function ensureSchema(sql) {
       UNIQUE(room_code, seat)
     )`;
     await sql`CREATE INDEX IF NOT EXISTS sixth_sense_players_room_idx ON sixth_sense_players(room_code)`;
+    await sql`ALTER TABLE sixth_sense_players ADD COLUMN IF NOT EXISTS identity_id uuid REFERENCES sixth_sense_identities(id)`;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS sixth_sense_players_identity_idx ON sixth_sense_players(room_code, identity_id) WHERE identity_id IS NOT NULL`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS answer_theme text NOT NULL DEFAULT 'classic'`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS max_guesses integer NOT NULL DEFAULT 7`;
     await sql`ALTER TABLE sixth_sense_rooms ADD COLUMN IF NOT EXISTS endless boolean NOT NULL DEFAULT false`;
@@ -163,13 +167,14 @@ async function authenticate(sql, code, resumeToken) {
 }
 
 async function snapshot(sql, room, me) {
-  const players = await sql`SELECT id, display_name, avatar, accent, decoration, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated, lifeline_state, screen_away, away_count, presence_sequence
+  const players = await sql`SELECT id, display_name, avatar, accent, decoration, seat, current_word_index, attempts, completed_rounds, failed_batches, score, finished, eliminated, lifeline_state, screen_away, away_count, presence_sequence,
+    COALESCE((SELECT i.display_name FROM sixth_sense_identities i WHERE i.id=sixth_sense_players.identity_id), 'Guest-' || room_code || '-' || seat) AS global_name
     FROM sixth_sense_players WHERE room_code=${room.code} ORDER BY seat`;
   const normalized = players.map(player => {
     const attempts = parseJson(player.attempts, []);
     return {
       id: player.id,
-      name: player.display_name,
+      name: player.global_name || player.display_name,
       screenAway: room.status === "running" && Boolean(player.screen_away),
       awayCount: Number(player.away_count) || 0,
       avatar: player.avatar,
@@ -213,6 +218,7 @@ async function snapshot(sql, room, me) {
     },
     me: {
       id: me.id,
+      name: own.global_name || own.display_name,
       wordLength: isBollywood(room) ? (active.answer?.length || 6) : Core.WORD_LENGTH,
       answerKind: isBollywood(room) ? (BOLLYWOOD_BY_WORD.get(active.answer)?.kind || "") : "",
       presenceSequence: Number(own.presence_sequence) || 0,
@@ -250,8 +256,8 @@ async function createRoom(sql, body) {
     code = null;
   }
   if (!code) throw Object.assign(new Error("Could not allocate a room code. Try again."), { status: 503 });
-  await sql`INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat)
-    VALUES (${playerId}, ${code}, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, 1)`;
+  await sql`INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat, identity_id)
+    VALUES (${playerId}, ${code}, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, 1, ${body.identityId || null})`;
   const room = await getRoom(sql, code);
   const me = await authenticate(sql, code, resumeToken);
   return { roomCode: code, resumeToken, playerId, snapshot: await snapshot(sql, room, me) };
@@ -265,7 +271,18 @@ async function joinRoom(sql, body) {
   // or no longer accepts new players. A name alone never proves seat ownership.
   if (body.resumeToken) {
     const me = await authenticate(sql, code, body.resumeToken);
+    await bindIdentity(sql, me, body);
     return { roomCode: code, resumeToken: body.resumeToken, playerId: me.id, snapshot: await snapshot(sql, room, me) };
+  }
+  if (body.identityId) {
+    const existing = await sql`SELECT * FROM sixth_sense_players WHERE room_code=${code} AND identity_id=${body.identityId}`;
+    if (existing.length) {
+      // Stable for a profile/seat, so retrying a lost restore response cannot
+      // invalidate the credential returned by another simultaneous restore.
+      const resumedToken = crypto.createHmac("sha256", body.identityToken.toLowerCase()).update(`room:${code}:${existing[0].id}`).digest("base64url");
+      await sql`UPDATE sixth_sense_players SET resume_hash=${tokenHash(resumedToken)} WHERE id=${existing[0].id}`;
+      return { roomCode: code, resumeToken: resumedToken, playerId: existing[0].id, snapshot: await snapshot(sql, room, existing[0]) };
+    }
   }
   const player = cleanPlayer(body.player);
   if (!canJoinRoom(room)) throw Object.assign(new Error(room.status === "finished" ? "That match has finished." : "That match has already started."), { status: 409 });
@@ -281,10 +298,10 @@ async function joinRoom(sql, body) {
           SELECT (COALESCE(MAX(seat),0) + 1)::int AS seat, COUNT(*)::int AS player_count
           FROM sixth_sense_players WHERE room_code=${code}
         )
-        INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat)
-        SELECT ${playerId}, locked_room.code, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, next_seat.seat
+        INSERT INTO sixth_sense_players (id, room_code, resume_hash, display_name, avatar, accent, decoration, seat, identity_id)
+        SELECT ${playerId}, locked_room.code, ${tokenHash(resumeToken)}, ${player.name}, ${player.avatar}, ${player.accent}, ${player.decoration}, next_seat.seat, ${body.identityId || null}
         FROM locked_room CROSS JOIN next_seat WHERE next_seat.player_count < locked_room.capacity
-          AND NOT EXISTS (SELECT 1 FROM sixth_sense_players WHERE room_code=locked_room.code AND lower(display_name)=lower(${player.name}))
+          AND NOT EXISTS (SELECT 1 FROM sixth_sense_players WHERE room_code=locked_room.code AND identity_id=${body.identityId || null})
         RETURNING *`;
     } catch (error) {
       if (error.code !== "23505") throw error;
@@ -293,8 +310,8 @@ async function joinRoom(sql, body) {
   if (!inserted?.length) {
     const currentRoom = await getRoom(sql, code);
     if (!canJoinRoom(currentRoom)) throw Object.assign(new Error(currentRoom.status === "finished" ? "That match has finished." : "That match has already started."), { status: 409 });
-    const duplicate = await sql`SELECT 1 FROM sixth_sense_players WHERE room_code=${code} AND lower(display_name)=lower(${player.name}) LIMIT 1`;
-    if (duplicate.length) throw Object.assign(new Error("That username is already taken in this room."), { status: 409 });
+    const duplicate = await sql`SELECT 1 FROM sixth_sense_players WHERE room_code=${code} AND identity_id=${body.identityId || null} LIMIT 1`;
+    if (duplicate.length) throw Object.assign(new Error("Your seat was just added. Join again to restore it."), { status: 409 });
     const count = await sql`SELECT COUNT(*)::int AS count FROM sixth_sense_players WHERE room_code=${code}`;
     if (count[0].count >= currentRoom.capacity) throw Object.assign(new Error("That room is full."), { status: 409 });
     throw Object.assign(new Error("The room changed while you joined. Try once more."), { status: 409 });
@@ -666,10 +683,10 @@ async function submitLastChance(sql, body) {
 async function updateIdentity(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const me = await authenticate(sql, code, body.resumeToken);
+  await bindIdentity(sql, me, body);
   const player = cleanPlayer(body.player);
   const updated = await sql`UPDATE sixth_sense_players SET display_name=${player.name}, avatar=${player.avatar}, accent=${player.accent}, decoration=${player.decoration}, revision=revision+1, updated_at=now()
-    WHERE id=${me.id} AND NOT EXISTS (SELECT 1 FROM sixth_sense_players WHERE room_code=${code} AND id<>${me.id} AND lower(display_name)=lower(${player.name})) RETURNING *`;
-  if (!updated.length) throw Object.assign(new Error("That username is already taken in this room."), { status: 409 });
+    WHERE id=${me.id} RETURNING *`;
   const room = await getRoom(sql, code);
   return { snapshot: await snapshot(sql, room, updated[0]) };
 }
@@ -698,8 +715,32 @@ async function updatePresence(sql, body) {
 async function getSnapshot(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const me = await authenticate(sql, code, body.resumeToken);
+  await bindIdentity(sql, me, body);
   const room = await getRoom(sql, code);
   return { snapshot: await snapshot(sql, room, me) };
+}
+
+async function bindIdentity(sql, me, body) {
+  if (!body.identityId) return; // Old seats can finish using their unique Guest label.
+  if (me.identity_id && me.identity_id !== body.identityId) throw Object.assign(new Error("This room belongs to another profile. Restore its recovery code to continue."), { status: 403 });
+  if (me.identity_id) return;
+  try {
+    const rows = await sql`UPDATE sixth_sense_players SET identity_id=${body.identityId} WHERE id=${me.id} AND identity_id IS NULL RETURNING id`;
+    if (!rows.length) throw Object.assign(new Error("The room identity changed. Rejoin your room."), { status: 409 });
+  } catch (error) {
+    if (error.code === "23505") throw Object.assign(new Error("This profile already has a seat. Leave and rejoin with the room code."), { status: 409 });
+    throw error;
+  }
+}
+
+async function authorizeIdentity(sql, body) {
+  delete body.identityId; // Never trust a client-supplied database identity.
+  const required = body.action === "create" || body.action === "identity" || (body.action === "join" && !body.resumeToken);
+  if (required || (body.identityToken && ["join", "snapshot"].includes(body.action))) {
+    const profile = await Identities.authenticate(sql, body.identityToken);
+    body.identityId = profile.id;
+    body.player = { ...body.player, name: profile.display_name };
+  }
 }
 
 async function handler(request, response) {
@@ -713,6 +754,7 @@ async function handler(request, response) {
     const sql = database();
     await ensureSchema(sql);
     const body = typeof request.body === "string" ? JSON.parse(request.body) : (request.body || {});
+    await authorizeIdentity(sql, body);
     let result;
     if (body.action === "create") result = await createRoom(sql, body);
     else if (body.action === "join") result = await joinRoom(sql, body);
@@ -727,10 +769,10 @@ async function handler(request, response) {
     else throw Object.assign(new Error("Unknown multiplayer action."), { status: 400 });
     return response.status(200).json(result);
   } catch (error) {
-    console.error("multiplayer", error);
+    console.error("multiplayer", error.status || error.code || "internal");
     return response.status(error.status || 500).json({ error: error.status ? error.message : "The room service could not complete that action." });
   }
 }
 
 module.exports = handler;
-module.exports._test = { snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, chooseFreshAnswer, ACCENTS, AVATARS };
+module.exports._test = { authorizeIdentity, bindIdentity, snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, chooseFreshAnswer, ACCENTS, AVATARS };

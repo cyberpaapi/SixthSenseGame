@@ -3,7 +3,7 @@ const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const fs = require("node:fs");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 const baseUrl = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4173";
 const evidence = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, "../work/sixth-sense-qa");
 

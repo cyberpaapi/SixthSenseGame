@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260918.15">
+  <link rel="stylesheet" href="styles.css?v=20260918.16">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -201,11 +201,30 @@
       <div class="username-welcome-avatar"><span class="avatar-art avatar-fox" aria-hidden="true"></span></div>
       <p class="eyebrow">Welcome to Sixth Sense</p>
       <h2 id="username-title">Choose your username</h2>
-      <p>This name follows your scores, avatar, and multiplayer rooms.</p>
+      <p>Reserve a name that is yours across Sixth Sense. Connect to the internet to check availability.</p>
       <label class="username-field"><span>Username</span><input id="username-onboarding-input" maxlength="18" minlength="2" autocomplete="nickname" placeholder="Your unique name" required></label>
       <p class="username-message" id="username-onboarding-message" aria-live="polite"></p>
       <button class="primary-button" id="username-onboarding-save" type="submit">Start sensing</button>
+      <button class="secondary-button" type="button" data-identity-restore>Restore a username</button>
+      <button class="text-button" type="button" id="username-offline">Play solo as a guest</button>
     </form>
+  </dialog>
+
+  <dialog class="modal" id="identity-recovery-modal" aria-labelledby="identity-recovery-title">
+    <div class="modal-sheet">
+      <div class="modal-head"><h2 id="identity-recovery-title">Your username</h2><button class="modal-close" type="button" aria-label="Close">×</button></div>
+      <section id="identity-backup-section" hidden>
+        <p>Save this code privately. Anyone with it can use or rename your username. It restores your name on another device, not your coins or solo progress.</p>
+        <label class="username-field">Recovery code<textarea id="identity-recovery-code" rows="3" readonly spellcheck="false"></textarea></label>
+        <button class="secondary-button" id="identity-copy-code" type="button">Copy recovery code</button>
+      </section>
+      <form id="identity-restore-form" hidden>
+        <p>Paste your saved recovery code to use your username on this device. Coins and solo progress stay on their original device.</p>
+        <label class="username-field">Recovery code<input id="identity-restore-code" type="password" maxlength="64" autocomplete="off" required></label>
+        <button class="primary-button" type="submit">Restore username</button>
+      </form>
+      <p class="username-message" id="identity-recovery-message" role="status"></p>
+    </div>
   </dialog>
 
   <dialog class="modal" id="help-modal" aria-labelledby="help-title">
@@ -382,7 +401,8 @@
         <div class="username-editor">
           <label for="settings-username">Username</label>
           <div><input id="settings-username" maxlength="18" minlength="2" autocomplete="nickname"><button class="secondary-button" id="save-settings-username" type="button">Save name</button></div>
-          <small id="settings-username-message" aria-live="polite">Your room name must be unique among the players you join.</small>
+          <small id="settings-username-message" aria-live="polite">Your username is unique across Sixth Sense. Connect to save it.</small>
+          <div><button class="secondary-button" type="button" id="identity-backup">Save recovery code</button><button class="secondary-button" type="button" data-identity-restore>Restore username</button></div>
         </div>
         <div class="avatar-choice-grid" role="group" aria-label="Choose a fun animal avatar">
           <button class="avatar-choice" type="button" data-avatar-option="fox" aria-label="Choose fox avatar" aria-pressed="true"><span class="avatar-art avatar-fox"></span></button>
@@ -538,8 +558,9 @@
   <script src="word-bank.js?v=20260917.1"></script>
   <script src="game-core.js?v=20260918.14"></script>
   <script src="progression.js?v=20260917.1"></script>
-  <script src="app.js?v=20260918.12"></script>
-  <script src="multiplayer.js?v=20260918.15"></script>
+  <script src="identity.js?v=20260918.16"></script>
+  <script src="app.js?v=20260918.16"></script>
+  <script src="multiplayer.js?v=20260918.16"></script>
   <script src="mobile.js?v=20260918.14"></script>
 </body>
 </html>

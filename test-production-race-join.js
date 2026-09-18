@@ -1,10 +1,15 @@
 "use strict";
 const assert = require("node:assert/strict");
-const { randomUUID } = require("node:crypto");
+const { randomUUID, randomBytes } = require("node:crypto");
 const { chromium } = require("playwright");
 const root = process.env.SIXTH_SENSE_PRODUCTION_URL || "https://sixth-sense-game.vercel.app";
 const name = "Join" + String(Date.now()).slice(-7);
 async function request(action, fields = {}) {
+  if (["create", "join"].includes(action) && !fields.resumeToken) {
+    fields.identityToken = randomBytes(32).toString("hex");
+    const claim = await fetch(`${root}/api/identity`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "claim", name: fields.player.name, identityToken: fields.identityToken }) });
+    if (!claim.ok) return { status: claim.status, ...await claim.json() };
+  }
   const response = await fetch(`${root}/api/multiplayer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, ...fields }) });
   return { status: response.status, ...await response.json() };
 }

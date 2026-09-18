@@ -1,7 +1,7 @@
 "use strict";
 const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 const purchaseApi = require("./api/play-purchase");
 assert.equal(purchaseApi.isOwnedPurchase({ purchaseState: 0, consumptionState: 0 }), true);
 for (const purchaseState of [1, 2, undefined]) assert.equal(purchaseApi.isOwnedPurchase({ purchaseState, consumptionState: 0 }), false);

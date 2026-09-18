@@ -242,7 +242,7 @@
     const response = await fetch(`${API_BASE}/api/multiplayer`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action, supportsVariableLength: true, ...payload })
+      body: JSON.stringify({ action, supportsVariableLength: true, identityToken: window.SixthSenseIdentity?.credential(), ...payload })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw Object.assign(new Error(data.error || `Room service returned ${response.status}.`), { status: response.status });
@@ -257,9 +257,10 @@
     if (state.busy) return;
     const player = identity();
     if (!player.name || player.name === "Player") return setLobbyMessage("Choose a player name first.", true);
-    saveJson(IDENTITY_KEY, { name: player.name });
     setBusy(true, "Creating room…");
     try {
+      const profile = await window.SixthSenseIdentity.ensure(player.name);
+      player.name = profile.name;
       const result = await api("create", {
         mode: state.requestedMode,
         theme: state.requestedTheme,
@@ -278,9 +279,12 @@
     const code = els.joinCode.value.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 6);
     if (!player.name || player.name === "Player") return setLobbyMessage("Choose a player name first.", true);
     if (code.length !== 6) return setLobbyMessage("Enter the six-character room code.", true);
-    saveJson(IDENTITY_KEY, { name: player.name });
     setBusy(true, "Joining room…");
-    try { enterRoom(await api("join", { roomCode: code, player, resumeToken: savedSeat(code)?.token })); }
+    try {
+      const profile = await window.SixthSenseIdentity.ensure(player.name);
+      player.name = profile.name;
+      enterRoom(await api("join", { roomCode: code, player, resumeToken: savedSeat(code)?.token }));
+    }
     catch (error) { setLobbyMessage(friendlyError(error), true); }
     finally { setBusy(false); }
   }

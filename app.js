@@ -244,7 +244,7 @@
   }
 
   function cleanUsername(value) {
-    return String(value || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 18);
+    return String(value || "").normalize("NFKC").replace(/[<>\p{Cf}]/gu, "").replace(/\s+/g, " ").trim().slice(0, 18);
   }
 
   function usernameValidation(value) {
@@ -254,19 +254,29 @@
     return { name, error: "" };
   }
 
-  function saveUsername(value, messageElement) {
+  let savingUsername = false;
+  async function saveUsername(value, messageElement) {
+    if (savingUsername) return false;
     const result = usernameValidation(value);
     if (result.error) {
       messageElement.textContent = result.error;
       return false;
     }
-    playerIdentity = { name: result.name };
-    saveJson(STORAGE.identity, playerIdentity);
-    messageElement.textContent = "Saved.";
-    applySettings();
-    renderProfile();
-    playEffect("choice");
-    return true;
+    savingUsername = true;
+    els.settingsUsernameSave.disabled = true;
+    document.querySelector("#username-onboarding-save").disabled = true;
+    messageElement.textContent = "Checking availability…";
+    try {
+      await window.SixthSenseIdentity.reserve(result.name);
+      messageElement.textContent = "Saved. Back up your recovery code in Settings.";
+      playEffect("choice");
+      return true;
+    } catch (error) { messageElement.textContent = error.message; return false; }
+    finally {
+      savingUsername = false;
+      els.settingsUsernameSave.disabled = false;
+      document.querySelector("#username-onboarding-save").disabled = false;
+    }
   }
 
   function loadSettings() {
@@ -1892,9 +1902,14 @@
   }
 
   function bindEvents() {
-    els.usernameForm.addEventListener("submit", event => {
+    document.addEventListener("sixth-sense-global-identity", event => {
+      playerIdentity = { name: event.detail.name };
+      applySettings();
+      renderProfile();
+    });
+    els.usernameForm.addEventListener("submit", async event => {
       event.preventDefault();
-      if (!saveUsername(els.usernameInput.value, els.usernameMessage)) return;
+      if (!await saveUsername(els.usernameInput.value, els.usernameMessage)) return;
       els.usernameDialog.close();
       if (showHelpAfterUsername) {
         showHelpAfterUsername = false;
@@ -1909,6 +1924,44 @@
       }
     });
     els.usernameDialog.addEventListener("cancel", event => event.preventDefault());
+    document.querySelector("#username-offline").addEventListener("click", () => { els.usernameDialog.close(); });
+    const recoveryDialog = document.querySelector("#identity-recovery-modal");
+    const recoveryMessage = document.querySelector("#identity-recovery-message");
+    function openRecovery(backup) {
+      if (!backup && document.body.dataset.screen === "online") {
+        els.settingsUsernameMessage.textContent = "Leave your room before restoring a different profile.";
+        return;
+      }
+      const profile = window.SixthSenseIdentity.read();
+      if (backup && !profile.id) { els.settingsUsernameMessage.textContent = "Save your username first to get its recovery code."; return; }
+      document.querySelector("#identity-backup-section").hidden = !backup;
+      document.querySelector("#identity-restore-form").hidden = backup;
+      document.querySelector("#identity-recovery-code").value = backup ? profile.token : "";
+      document.querySelector("#identity-restore-code").value = "";
+      recoveryMessage.textContent = "";
+      recoveryDialog.showModal();
+    }
+    document.querySelector("#identity-backup").addEventListener("click", () => openRecovery(true));
+    document.querySelectorAll("[data-identity-restore]").forEach(button => button.addEventListener("click", () => openRecovery(false)));
+    document.querySelector("#identity-copy-code").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(document.querySelector("#identity-recovery-code").value); recoveryMessage.textContent = "Copied. Keep this code private."; }
+      catch (_) { document.querySelector("#identity-recovery-code").select(); recoveryMessage.textContent = "Select and copy the code above."; }
+    });
+    document.querySelector("#identity-restore-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = event.target.querySelector("button"); button.disabled = true;
+      recoveryMessage.textContent = "Restoring…";
+      try {
+        await window.SixthSenseIdentity.restore(document.querySelector("#identity-restore-code").value);
+        recoveryDialog.close(); els.usernameDialog.close();
+        els.settingsUsernameMessage.textContent = "Username restored on this device.";
+      } catch (error) { recoveryMessage.textContent = error.message; }
+      finally { button.disabled = false; }
+    });
+    recoveryDialog.addEventListener("close", () => {
+      document.querySelector("#identity-recovery-code").value = "";
+      document.querySelector("#identity-restore-code").value = "";
+    });
     els.modeButtons.forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
     els.clueButton.addEventListener("click", revealClue);
     els.peekButton.addEventListener("click", revealPosition);
@@ -2126,6 +2179,16 @@
   }
 
   init();
+  void window.SixthSenseIdentity.refresh().catch(error => {
+    els.settingsUsernameMessage.textContent = error.message;
+    if (error.status === 409) {
+      els.usernameInput.value = playerIdentity.name;
+      playerIdentity = { name: "" }; saveJson(STORAGE.identity, playerIdentity);
+      applySettings(); renderProfile();
+      els.usernameMessage.textContent = "Your old name is already reserved. Choose another name, or restore it with your recovery code.";
+      els.usernameDialog.showModal();
+    }
+  });
   void checkWalletReset();
   setInterval(checkWalletReset, 30000);
   window.addEventListener("online", checkWalletReset);

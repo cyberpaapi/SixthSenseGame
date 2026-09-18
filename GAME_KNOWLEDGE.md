@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Bollywood Race/VS home replacement: local core/data/server, both phone fixtures, full browser, touch/banner and packaging checks passed. Live two-browser Bollywood VS passed on Vercel and Pages; Race late-join regression passed on Vercel. Both sites show the new cards/art, omit the retired launchers and return HTTP 404 for current/legacy Bollywood banks. No new Android binary or physical iPhone test is claimed.)
+Last verified: 2026-09-18 (Global username work: normalization/ownership unit checks, duplicate claim/rename/recovery browser tests, core/data/VS, keyboard touch, room recovery and banner checks passed locally. Full browser, Race mobile/presence and native/Vercel/Pages packaging checks also passed. Real database/preview/public deployment checks are pending. No new Android binary or physical iPhone test is claimed.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -161,7 +161,7 @@ The following items were removed because they made the interface feel crowded or
 
 ## Architecture and file map
 
-This is a framework-free browser client with a small Vercel serverless multiplayer API. Solo play remains fully local and works without the API. Online rooms require a Postgres-compatible `DATABASE_URL`; Neon is the intended Vercel integration. There is no account system.
+This is a framework-free browser client with a small Vercel serverless multiplayer API. Solo play remains fully local and works without the API. Online rooms require a Postgres-compatible `DATABASE_URL`; Neon is the intended Vercel integration. A global username registry uses device-held recovery credentials; there is no email/password sign-in or cloud save for solo progress.
 
 | File or directory | Responsibility |
 | --- | --- |
@@ -170,6 +170,9 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `game-core.js` | Environment-neutral rules: constants, answer/guess loading, repeated-letter scoring, hard-mode validation, daily/practice selection, deterministic seeded Adventure shuffling/progress, and coin rewards. It exports to both browser globals and CommonJS tests. |
 | `progression.js` | Pure, separately tested daily-trio normalization/reward transitions and point-derived mastery levels; loaded before app.js. |
 | `app.js` | Browser state, rendering, input, modes, Adventure map/progress, persistence, inventory/economy migration, streak/point rewards, cosmetic unlocks, modal and browser-history navigation, animations, recorded music/procedural gameplay effects, sharing, and statistics. It exposes narrow audio, economy, dialog, celebration, and navigation interfaces so multiplayer shares the same services. |
+| `identity.js` / `api/identity.js` / `lib/identities.js` | Global reservation, normalization, ownership verification, recovery, concurrency-safe name mutation, rate limiting and device-held credential persistence. Only display id/name leave the identity API; raw credentials are never stored server-side. |
+| `test-identities.js` / `test-identity-browser.js` / `test-production-identities.js` | Username validation/ownership guards, explicit browser claim/rename/recovery fixtures, and real concurrent registry claims plus room/profile migration/recovery checks. |
+| `test-browser-runtime.js` | Explicit in-memory username API fixture for local browser regressions. Production suites import Playwright directly and use the real API. |
 | `multiplayer.js` | Room create/join/leave flows, resume-token session state, polling/reconnect, online board/keyboard/one-tap lifeline rendering, shared hint and match-result popups, the shared Race course, VS series progress, attempt patterns, and live identity synchronization. |
 | `api/multiplayer.js` | Vercel serverless authority for codes, seats, room lifecycle, answer selection, guess validation/scoring, lifeline effects, identity updates, CAS revisions, idempotency, results, and redacted snapshots. It creates and migrates its Postgres tables idempotently after a database is connected. |
 | `answer-bank.js` | 10,187 answer objects with a six-letter `word`, `clue`, and `tier`. Loaded before `game-core.js` in the browser and required by the server. |
@@ -222,7 +225,7 @@ This is a framework-free browser client with a small Vercel serverless multiplay
 | `ANDROID_RELEASE.md` / `privacy.html` | Release configuration/test checklist, store copy draft, and bundled/public privacy policy. |
 | `GAME_KNOWLEDGE.md` | This canonical living context and change record. |
 
-Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, `progression.js`, `app.js`, then `multiplayer.js`.
+Keep the script order in `index.html`: `answer-bank.js`, `word-bank.js`, `game-core.js`, `progression.js`, `identity.js`, `app.js`, then `multiplayer.js`.
 
 ### Last Chance reward delivery and server compatibility
 
@@ -284,7 +287,8 @@ Current `localStorage` keys:
 - `sixth-sense.stats.v1`
 - `sixth-sense.settings.v1`
 - `sixth-sense.visited.v1`
-- `sixth-sense.online.identity.v1`
+- `sixth-sense.online.identity.v1` (display-name cache)
+- `sixth-sense.global-identity.v1` (profile id, canonical display name and private 256-bit recovery credential; must never be logged or exposed in room snapshots)
 - `sixth-sense.active-room.v1`
 - `sixth-sense.room-seats.v1` (up to 32 recent room credentials for same-site/browser rejoin; entries older than 24 hours since last save are ignored and pruned on a subsequent save)
 - `sixth-sense.online-rewards.v1`
@@ -299,13 +303,16 @@ Statistics include Daily play/win/streak fields, the last rewarded seven-day mil
 Online room rules and security:
 
 - Codes are generated by the server and omit visually ambiguous characters.
-- Race capacity is 8, VS capacity is 2, and Co-op capacity is 4. A match needs at least 2 players and only the host can start. Running Race rooms accept late joins up to eight seats; new seats start at word index 0 on the existing route with empty attempts/lifelines. Waiting rooms remain joinable in every mode; running VS/Co-op and all finished/expired rooms reject new joins. The room-row lock rechecks joinable status at insertion and preserves seat/capacity/duplicate-name checks. This backend change also serves already-open clients.
-- Join requests containing a valid room resume token restore that exact existing seat and authoritative progress before new-entry/capacity checks, including full/running rooms or finished-room results. Invalid tokens return 401 and never fall back to username takeover or new-seat creation. On entry/leave, the client remembers credentials by room code; leaving clears only automatic reopening. Entering that code again uses the saved token. Legacy active-only saves migrate before network recovery; transient errors retain them, while 401/404 clears invalid active credentials. Same-browser storage is required, Vercel/Pages have separate origins, and old keys already erased by a prior leave/cleared data cannot be recovered from a name. Submitted guesses, word index, scores and lifelines persist on the server; unsubmitted draft letters are not restored.
-- Usernames persist per device and are case-insensitively unique within an online room. Global username reservation is not claimed because the game has no account system.
+- Race capacity is 8, VS capacity is 2, and Co-op capacity is 4. A match needs at least 2 players and only the host can start. Running Race rooms accept late joins up to eight seats; new seats start at word index 0 on the existing route with empty attempts/lifelines. Waiting rooms remain joinable in every mode; running VS/Co-op and all finished/expired rooms reject new joins. The room-row lock rechecks joinable status at insertion and preserves seat/capacity/duplicate-profile checks. This backend change also serves already-open clients.
+- Join requests containing a valid room resume token restore that exact existing seat and authoritative progress before new-entry/capacity checks, including full/running rooms or finished-room results. Invalid tokens return 401 and never fall back to username takeover or new-seat creation. On entry/leave, the client remembers credentials by room code; leaving clears only automatic reopening. Entering that code again uses the saved token. Legacy active-only saves migrate before network recovery; transient errors retain them, while 401/404 clears invalid active credentials. Without a linked global profile, same-browser storage is required; Vercel/Pages have separate origins, and lost legacy keys cannot be recovered from a name alone. Linked profiles can use their recovery code to reclaim the seat on another origin/device. Submitted guesses, word index, scores and lifelines persist on the server; unsubmitted draft letters are not restored.
+- Usernames are reserved globally in the shared Neon `sixth_sense_identities` table, across Vercel, Pages and updated native clients. NFKC normalization, invisible-format removal, whitespace collapse and lowercasing form a unique database key. Names use 2–18 characters with a letter/number; the Guest- prefix is reserved. An atomic upsert and unique constraints decide concurrent claims and keep the old name if a rename conflicts. Each profile has one name; renaming releases its former name.
+- Ownership uses a random 256-bit recovery credential stored on the device, with only its SHA-256 hash in the database. The Settings backup/restore UI lets players carry their name across origins/devices. Codes must be kept private; they do not transfer local coins, cosmetics or solo progress. Lost codes with cleared browser storage have no automatic recovery. Registry reservations outlive 24-hour rooms; there is no automated profile expiration/deletion UI. Support handles deletion requests. Thirty username requests per keyed connection/minute are allowed; rate buckets are removed after a day on subsequent requests. This limits basic request floods but is not comprehensive anti-squatting protection.
+- Existing local names are claimed on first updated online load, first successful reservation wins when older users chose the same name, and conflicts prompt for a different name or recovery. Unlinked legacy room seats show unique `Guest-ROOMCODE-SEAT` labels without resetting their progress. A held room resume key plus a verified profile can link that seat once; another profile cannot overwrite its owner. Guest-prefixed names cannot be reserved. Offline solo guest play remains available, and new reservations/renames require the service. Old native clients must update to create/join new rooms; existing seat keys can continue old rooms.
+- New room creation/join and identity changes authenticate the global profile; any client-supplied profile id/name is ignored. Snapshots read the current registry display name so a rename reaches every linked room. A unique room/profile index prevents multiple seats for one profile. With a restored profile and room code, join recovers its existing seat before capacity/start checks, using a deterministic replacement room credential so retries are safe. This also works across devices/sites and preserves server-held attempts, progress and lifelines.
 - All players receive the same server-selected sequence from the room's explicit difficulty tier. Personal solo unlock state is irrelevant.
 - The API validates accepted guesses and scores them server-side. Snapshots never include answer words. Opponents receive score patterns only; the current player receives their own submitted letters and scores.
 - Multiplayer lifelines are authoritative: the API stores private per-player clue/Peek/Clear/Skip/Last-Chance state, returns only the purchased effect to that seat, and clears assistance on round/word advancement. New Skip requests are rejected in every mode. Pre-release pending Race/Co-op Skip decisions can still advance after authenticated OK. Wallet ownership remains device-local until account-backed monetization exists.
-- Avatar, accent, decoration, and username updates are accepted from an authenticated room seat and broadcast through subsequent snapshots; duplicate room usernames remain rejected.
+- Avatar, accent, decoration, and username updates are accepted from an authenticated room seat and broadcast through subsequent snapshots; the registry supplies the username and prevents duplicate global ownership.
 - Mutations use player/room revisions for compare-and-set protection plus UUID action IDs for retry idempotency.
 - The client uses 900ms bounded polling, persists an active-room seat credential plus a bounded recent-seat history in site-scoped local storage, automatically restores the active seat after refresh/reopen, catches up immediately after foreground/online recovery, and renders temporary connection errors without destroying room state. It signatures each redacted snapshot and skips DOM work when a poll is unchanged, preventing the board, keyboard, lifelines, player track, scroll position, and avatar tokens from repainting every 900ms. Phone layouts also use scrolling rather than fixed background attachment to avoid mobile compositor flicker at the page boundary.
 - New games pause after six misses and offer one seventh attempt for 125 coins or an eligible Android rewarded ad. In VS, declining Last Chance or missing that extra attempt awards the opponent the point. Race and Co-op retain their existing failed-batch/team-continuation behavior after the extra attempt is resolved.
@@ -344,6 +351,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 global usernames (`20260918.16` for CSS/identity/app/multiplayer): unit checks passed for normalized collision keys, invalid/reserved names, hashed credentials, atomic claim/rename query shape, server-derived names, forged-owner denial and protected legacy-seat binding. Browser fixtures passed duplicate case/space claims, rejected-rename preservation, invalid/valid recovery, cross-device profile reuse, unchanged wallet, reload and 320px recovery layout. Core/data/VS, room resume, touch and banner checks passed. Full browser, Race mobile, presence, syntax and native/Vercel/Pages bundle checks also passed. The bundle includes identity.js and excludes server identity code/data. Real database concurrency/migration and preview/public deployment checks are pending. No native binary rebuilt.
 
 September 18 Bollywood home replacement / VS (CSS and multiplayer cache `20260918.15`): full browser phone playthrough/home artwork/desktop/dark/overflow checks, core/multiplayer/progression, 579-answer data rules, VS creation/capacity/5-and-7-letter solves/Last Chance forfeit/both Endless selection paths/exhausted-pool recycling, both Race and VS variable-length phone fixtures, keyboard touch and native-banner geometry passed locally. No change to the shared keyboard binder. Legacy solo tests use an explicit test-only DOM helper after removal of the four home launchers. JavaScript syntax and native/Vercel/Pages packaging passed: generated art/cards are included, backend banks are excluded, and runtime/API origin selection is correct. Light phone and dark desktop artwork were visually inspected. Code commit `6d4e5bb` deployed successfully on Vercel and Pages (workflow `35362794484`). Real two-browser Bollywood VS on both sites passed room creation/join/start, paid Sense/Peek, solving, scoring, synchronized round advancement, reload restoration, Endless Bollywood-pool retention and late-entry rejection. The Race regression passed on Vercel including late join with existing progress intact. Both public homes expose the new cards and omit the four retired launchers; both WebP images return HTTP 200, and current/legacy data files return HTTP 404.
 
@@ -489,7 +498,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Trio, mastery, and personal bests currently apply to solo play; multiplayer retains its existing independent coin/round rewards. Local progress is not cheat-resistant and should not be used for real-money entitlements. There is no telemetry or evidence yet that these changes improve retention; they provide clearer short goals and competence feedback, not a promised addiction outcome.
 
 - Solo progress, wallet, inventory, settings, and statistics are device/browser-local and can be cleared with site storage.
-- The game does not provide accounts, cloud saves, or leaderboards.
+- The game provides recoverable username profiles, but no email/password sign-in, solo cloud saves or leaderboards.
 - Production multiplayer uses 900ms bounded polling rather than WebSockets/SSE. It is playable and production-tested, but is not yet a push-realtime architecture.
 - Online rooms expire after 24 hours and currently have no Force End or Play Again command. Players can leave and create a new room instead.
 - Planned monetization is intentionally not active: the first three multiplayer match starts per player should be free, after which starting another match should require coins or an optional rewarded ad. This needs account/server-authoritative entitlement counters, ad-provider integration, consent/privacy handling, and abuse protection before implementation; do not enforce it from local storage.
@@ -501,6 +510,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Globally unique, recoverable usernames
+
+- Replaced room-only name checks with one authoritative registry, normalized unique keys and atomic claims/renames. Added random private recovery credentials, backup/restore controls and offline solo guest entry. Claiming and changing names require the server.
+- New room joins/creation derive names from verified profiles. Linked room snapshots follow global renames, and recovery can reclaim the same room seat across devices without losing server progress. Unlinked old seats receive distinct guest labels until claimed; old room keys remain usable.
+- Added ownership/concurrency/recovery coverage and explicit identity API fixtures for local browser tests, updated privacy copy and the public-client allow-list. Existing wallets and solo saves are not migrated or reset. Current verification and remaining limitations are above.
 
 ### 2026-09-18 — Verify the illustrated Bollywood release on both sites
 

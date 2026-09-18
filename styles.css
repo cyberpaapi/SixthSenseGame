@@ -784,7 +784,7 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .popup-ok:active { transform:scale(.96); }
 .is-dark .popup-sheet { background:rgba(255,255,255,.6); color:#111; }
 .username-modal { width:min(430px,calc(100% - 24px)); text-align:center; }
-.username-modal .modal-sheet { overflow:hidden; }
+.username-modal .modal-sheet { overflow-y:auto; }
 .username-welcome-avatar { width:92px; height:92px; margin:0 auto 15px; padding:6px; border-radius:28px; background:linear-gradient(145deg,#fff4a5,#ff9c51); box-shadow:var(--shadow-soft),inset 2px 2px 4px rgba(255,255,255,.72); transform:rotate(-3deg); }
 .username-welcome-avatar .avatar-art { width:100%; }
 .username-modal h2 { margin-top:5px; font-size:clamp(30px,8vw,40px); }
@@ -793,6 +793,11 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .username-field input,.username-editor input { width:100%; min-height:50px; padding:0 15px; border:1px solid var(--line); border-radius:15px; background:var(--surface-strong); color:var(--ink); box-shadow:var(--shadow-in); font:800 16px/1 "Nunito",sans-serif; }
 .username-message { min-height:20px; margin:7px 0 5px; color:var(--primary-deep)!important; font-size:11px; font-weight:800; }
 .username-modal .primary-button { width:100%; min-height:50px; }
+.username-modal .secondary-button, .username-modal .text-button { width:100%; min-height:44px; margin-top:10px; }
+.text-button { border:0; background:transparent; color:var(--ink); font:700 14px "DM Sans",sans-serif; cursor:pointer; text-decoration:underline; }
+#identity-recovery-code { width:100%; padding:12px; resize:none; overflow-wrap:anywhere; border:1px solid var(--line); border-radius:12px; background:var(--surface-strong); color:var(--ink); font:16px/1.5 monospace; }
+#identity-recovery-modal .primary-button, #identity-copy-code { margin-top:14px; min-height:44px; }
+.username-editor > div:has(#identity-backup) { grid-template-columns:1fr; margin-top:12px; }
 .example-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 22px 0; }
 .demo-tile { aspect-ratio: 1; position: relative; display: grid; place-items: center; border-radius: 12px; background: var(--tile); box-shadow: var(--shadow-soft); font: 900 21px/1 "Nunito"; }
 .demo-tile small { position: absolute; right: 4px; bottom: 3px; font-size: 8px; }

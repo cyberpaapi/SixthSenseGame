@@ -1,16 +1,19 @@
 "use strict";
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
+const { randomBytes } = require("node:crypto");
 const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
 const bank = require("./data/bollywood-answers.json");
 const base = process.env.SIXTH_SENSE_URL || "https://sixth-sense-game.vercel.app/";
-const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
+const apiBase = process.env.SIXTH_SENSE_API_URL || "https://sixth-sense-game.vercel.app";
+const endpoint = `${apiBase}/api/multiplayer`;
 
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN });
   try {
     const pages = [];
-    for (const name of ["CinemaHost", "CinemaGuest"]) {
+    const suffix = randomBytes(4).toString("hex");
+    for (const name of [`QAHost${suffix}`, `QAGuest${suffix}`]) {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, reducedMotion: "reduce" });
       page.setDefaultTimeout(20000);
       await page.addInitScript(name => {
@@ -69,7 +72,10 @@ const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
       assert(bank.some(e => e.clue === secondClue.effect.clue), "endless VS stays in the Bollywood pool");
       await host.click("#hint-ok-button");
     }
-    const lateResponse = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "join", supportsVariableLength: true, roomCode: code, player: { name: "CinemaLate" } }) });
+    const identityToken = randomBytes(32).toString("hex");
+    const claim = await fetch(`${apiBase}/api/identity`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "claim", name: `QALate${suffix}`, identityToken }) });
+    assert.equal(claim.status, 200);
+    const lateResponse = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "join", identityToken, supportsVariableLength: true, roomCode: code, player: { name: `QALate${suffix}` } }) });
     if (isVs) assert.equal(lateResponse.status, 409, "running VS does not admit new opponents");
     else {
     assert.equal(lateResponse.status, 200);

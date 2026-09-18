@@ -1,6 +1,6 @@
 "use strict";
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const { chromium } = require("./test-browser-runtime");
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN });
   try {
