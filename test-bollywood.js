@@ -6,10 +6,10 @@ const bank = require("./data/bollywood-answers.json");
 const api = require("./api/multiplayer")._test;
 
 (async () => {
-  assert.equal(bank.length, 1000);
-  assert.equal(new Set(bank.map(e => e.word)).size, 1000);
+  assert.equal(bank.length, 579);
+  assert.equal(new Set(bank.map(e => e.word)).size, 579);
   assert(bank.filter(e => e.era === "classic").length <= 100);
-  assert(bank.filter(e => e.era === "recent").length >= 900);
+  assert.equal(bank.filter(e => e.era === "recent").length, 567);
   for (const entry of bank) {
     assert.match(entry.word, /^[a-z]{5,7}$/);
     assert.equal(entry.era, entry.year >= 2000 ? "recent" : "classic");
@@ -18,12 +18,18 @@ const api = require("./api/multiplayer")._test;
     assert(!new RegExp(`\\b${entry.word}\\b`, "i").test(entry.clue), `clue leaks ${entry.word}`);
     assert(!/\[[^\]]*\]/.test(entry.clue), `source footnote in ${entry.word}`);
     assert.match(entry.source, /^https:\/\/(www\.boxofficeindia\.com|www\.bollywoodhungama\.com|en\.wikipedia\.org)\//);
-    assert(["Film", "Title word", "First name", "Surname", "Screen name"].includes(entry.kind));
-    if (entry.person) assert(entry.credit && entry.personSource);
-    else assert(entry.title && entry.verdict && !/Flop|Average|Semi Hit/.test(entry.verdict));
+    assert(["Film", "First name"].includes(entry.kind));
+    if (entry.person) {
+      assert(entry.credit && entry.personSource);
+      assert.equal(entry.person.split(" ")[0].toLowerCase(), entry.word, "only first names/mononyms");
+    }
+    else {
+      assert(entry.title && entry.verdict && !/Flop|Average|Semi Hit/.test(entry.verdict));
+      assert.equal(entry.title.toLowerCase().replace(/[^a-z]/g, ""), entry.word, "film answers must be complete titles");
+    }
   }
-  for (const word of ["sholay", "dangal", "pathaan", "jawan", "chhaava", "ranbir", "deepika", "kapoor", "jawaani"]) assert(bank.some(e => e.word === word), word);
-  for (const word of ["tushar", "jhanvi", "sharm", "amisha", "comedy", "needed"]) assert(!bank.some(e => e.word === word), word);
+  for (const word of ["sholay", "dangal", "pathaan", "jawan", "chhaava", "ranbir", "deepika", "noentry", "newyork", "kajol"]) assert(bank.some(e => e.word === word), word);
+  for (const word of ["tushar", "jhanvi", "sharm", "amisha", "comedy", "needed", "kapoor", "jawaani"]) assert(!bank.some(e => e.word === word), word);
   for (let i = 0; i < 20; i++) {
     const route = api.chooseAnswers("easy", 10, "bollywood");
     assert.equal(new Set(route).size, 10);
@@ -75,8 +81,12 @@ const api = require("./api/multiplayer")._test;
   const exhausted = await send("zzzzzzz");
   assert.equal(exhausted.snapshot.me.lifelines.lastChancePending, true);
   await assert.rejects(send("pathaan"), /Finish the open decision/);
+  // A route chosen before the scope refinement must retain its purchased clue.
+  room.answer_words[1] = "kapoor"; me.attempts = []; me.lifeline_state = {};
+  const legacy = await api.submitLifeline(sql, { ...body, kind: "sense", actionId: randomUUID() });
+  assert.equal(legacy.effect.clue, require("./data/bollywood-legacy-20260918.json").find(e => e.word === "kapoor").clue);
   room.answer_theme = "classic"; me.attempts = []; me.lifeline_state = {};
   await assert.rejects(send("ranbir"), /accepted dictionary/);
-  console.log("Bollywood passed: 1,000 unique sourced answers, era/length/clue audit, random routes, 5→7 progression, scoring, Peek, Sense, six tries/Last Chance, Skip guard, old-client refresh and answer redaction.");
+  console.log("Bollywood passed: 579 unique complete-title/first-name answers, era/length/clue audit, random routes, 5→7 progression, scoring, Peek, Sense, six tries/Last Chance, Skip guard, old-client refresh and answer redaction.");
 })().catch(error => { console.error(error); process.exitCode = 1; });
 

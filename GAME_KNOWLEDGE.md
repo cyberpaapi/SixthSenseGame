@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Bollywood Race: 1,000-answer data/server audit, variable-length phone/Last Chance layout, full browser, core, Peek, room join, touch/Race, presence, banner layout, syntax and mobile packaging passed locally. Publication/live Bollywood checks pending.)
+Last verified: 2026-09-18 (Bollywood Race refined to 579 complete-title/first-name answers; data/server and phone checks passed. Prior full browser/core/touch/presence/banner checks passed. Live checks of the refined pool pending.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -28,7 +28,7 @@ For every future change:
 
 ## Product summary
 
-Sixth Sense is an original, mobile-first word deduction game with solo and private-room multiplayer. Standard-mode answers have six letters; Bollywood Race uses 5–7-letter film/title-word and performer-name answers. New puzzles have six standard guesses, followed by one optional Last Chance. Feedback is presented through both color and symbols:
+Sixth Sense is an original, mobile-first word deduction game with solo and private-room multiplayer. Standard-mode answers have six letters; Bollywood Race uses 5–7-letter complete hit-film titles and actors’ first names. New puzzles have six standard guesses, followed by one optional Last Chance. Feedback is presented through both color and symbols:
 
 - Aligned: green plus `●` — correct letter in the correct position.
 - Echoing: orange plus `◆` — correct letter in a different position.
@@ -41,7 +41,7 @@ The game is inspired by the broad genre of classic letter-deduction puzzles, but
 - Word length: 6 letters in standard modes; 5–7 in Bollywood Race only.
 - Standard guesses: 6; maximum 7 after one optional Last Chance (legacy saves/rooms retain their recorded limit).
 - Accepted input: physical keyboard, onscreen keyboard, touch, optional physical Enter, and Backspace/Delete. Entering the final required letter submits the row immediately (six in standard modes, the displayed 5–7 length in Bollywood Race); there is no onscreen Enter key.
-- Standard-mode guesses must contain exactly six letters and exist in the accepted-guess dictionary. Bollywood Race accepts alphabetic guesses of the displayed answer length, including names/title words outside the English dictionary; its hidden answer pool is server-only.
+- Standard-mode guesses must contain exactly six letters and exist in the accepted-guess dictionary. Bollywood Race accepts alphabetic guesses of the displayed answer length, including names/titles outside the English dictionary; its hidden answer pool is server-only.
 - Scoring handles repeated letters correctly: exact positions are allocated first, then remaining answer-letter counts are used for misplaced matches.
 - The player has six standard guesses. After six misses, Last Chance offers one seventh and final row for 125 coins or an optional native rewarded ad. Coins are not spent on the ad path; only the earned callback grants the extra row. Plain web has the coin option only.
 - A loss reveals the answer.
@@ -62,7 +62,7 @@ The home screen exposes ten modes:
 | Insight | Starts with the clue unlocked and one deterministic answer position revealed. |
 | Streak | Consecutive wins grow a separate mode streak; a loss or Skip resets that run. |
 | Race | A room-code match for 2–8 players. The host chooses Normal, Hard, or Extreme and a 3-word Sprint, 5-word Normal, or 10-word Marathon. Everyone receives the same ordered words; players can join while the race is running and space remains, starting at word one without resetting existing racers. Finished/expired races cannot be joined. The first player to solve the full route wins. A slim vertical green course beside the board places all avatars at the same bottom baseline initially and moves them upward with completed words to a checkered finish at the top. |
-| Bollywood Race | A 2–8-player Race variant with 3/5/10-word routes and 5–7-letter answers. Its separate 1,000-answer bank has 988 post-2000 film/performer entries and 12 classics including Sholay. The board shows the generic answer kind and length; Sense unlocks its clue. Complete titles, complete title words, first names, surnames and screen names are allowed. No difficulty selector. Six guesses plus Last Chance, late joins, saved-seat resume, screen-away alerts and solo-only Skip rules remain shared with Race. |
+| Bollywood Race | A 2–8-player Race variant with 3/5/10-word routes and 5–7-letter answers. Its separate 579-answer bank has 567 post-2000 film/performer entries and 12 classics including Sholay. The board shows the generic answer kind and length; Sense unlocks its clue. Only complete film titles and actors’ first names (including mononyms) are allowed; omit spaces/punctuation when typing film titles. No difficulty selector. Six guesses plus Last Chance, late joins, saved-seat resume, screen-away alerts and solo-only Skip rules remain shared with Race. |
 | VS | A two-player point duel with host-selected 3-round Quick, 5-round Classic, 9-round Epic, or Endless play. Both players receive the same word each round and see each other's name, score, and feedback patterns in real time, but never the opponent's letters. The first correct guess wins one point, earns 60% of the equivalent solo coin reward, and advances both screens. Skip is unavailable. In newly created updated-server rooms, after six misses Last Chance can unlock a seventh attempt; declining or missing it awards the opponent the point. |
 | Co-op | A 2–4-player shared-word journey with 3, 5, or 10 words. Everyone receives the same route and the first teammate to solve a word advances the entire room. Teammates retain private boards and authoritative lifelines while progress and transitions are shared. |
 
@@ -245,9 +245,9 @@ The onscreen keyboard specifically uses `touch-action:none` and disables text se
 
 ### Bollywood Race exception
 
-`data/bollywood-answers.json` contains 1,000 unique 5–7-letter answers: 988 entries tied to 2000–2025 releases/acting credits and 12 classics. See `BOLLYWOOD_CONTENT.md` for the category counts, sources, spelling decisions and limitations. This includes supporting performers, not just household-name stars. Complete words from longer hit titles and first/surname/screen-name tokens are intentional, never arbitrary truncation. Sources are retained in the repository; clues are newly authored. The cutoff applies to a cited credit, so older actors with modern roles qualify; re-release-only credits do not.
+`data/bollywood-answers.json` contains 579 unique 5–7-letter answers: 567 entries tied to 2000–2025 releases/acting credits and 12 classics. The owner explicitly chose this strong smaller pool after restricting answers to complete film titles and first names. See `BOLLYWOOD_CONTENT.md` for the category counts, sources, spelling decisions and limitations. This includes supporting performers, not just household-name stars. Only whole hit-film titles and first names/mononyms are selected. Title fragments and surnames are excluded. Spaces/punctuation are omitted for titles such as New York and Ra.One. Sources are retained in the repository; clues are newly authored. The cutoff applies to a cited credit, so older actors with modern roles qualify; re-release-only credits do not.
 
-The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel blocks `/data/*`; Pages/mobile packaging already omits this folder. The source repository is public, which does not expose a room's randomly chosen active route.
+The durable room model remains `mode=race`, with additive `answer_theme` defaulting to `classic` for all existing rooms. Bollywood rooms use `answer_theme=bollywood`; answer selection remains random without repeats within the shared server route. Snapshots expose only the active word length and generic answer kind before purchased hints. The browser uses that length for columns, submission and Peek exhaustion; scoring uses the actual answer length and standard-mode validation stays six-letter. Older clients lacking variable-length capability are told to refresh/update when joining these rooms. Vercel blocks `/data/*`; Pages/mobile packaging already omits this folder. The source repository is public, which does not expose a room's randomly chosen active route. A server-only legacy archive preserves purchased clue lookup for the short-lived rooms created before the owner’s refinement arrived; it is never selected for new routes.
 
 ### Standard vocabulary
 
@@ -343,6 +343,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 18 owner refinement (cache version `20260918.14`): new answer selection is restricted to 579 entries (58 full hit-film titles, 521 first names/mononyms), 567 recent and 12 classic. The data/server suite verifies exact category/whole-title filtering and excludes KAPOOR/JAWAANI; legacy clue lookup preserves already-created room routes without selecting those entries again. Local phone checks rerun; live checks pending.
 
 September 18 Bollywood Race (styles/core/multiplayer/mobile cache version `20260918.13`; shared keyboard binder unchanged): `npm test`, `node test-bollywood.js`, `node test-bollywood-browser.js`, full `test-browser.js`, Peek, Race join, Last Chance server, keyboard touch, Race mobile, presence API/browser, banner layout, JS syntax and `npm run build:mobile` passed locally. The new tests check exactly 1,000 unique sourced answers, era cutoff/cap, no clue-answer leakage, 5/6/7-letter scoring and board transitions, single tap/autosubmit, seven-position Peek, six guesses/Last Chance, unchanged ordinary dictionary validation, eight racers, 320×568/390×844/844×360 geometry, and a 7×7 Last Chance board at 320×518 with 44px keys. Physical Safari and a fresh Android binary are not claimed. Live publication/real Neon room acceptance remains pending for this implementation commit.
 
@@ -470,7 +472,7 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ## Known limitations
 
-- Bollywood content has per-entry factual sources and automated/editorial cleanup, not an independent manual fact-check of every film credit. It includes supporting actors and shared first/surnames; familiarity and Latin spellings vary. Future corrections should preserve the 1,000-entry, 5–7-letter, recent/classic constraints.
+- Bollywood content has per-entry factual sources and automated/editorial cleanup, not an independent manual fact-check of every film credit. It includes supporting actors and shared first names; familiarity and Latin spellings vary. Future corrections should preserve the complete-title/first-name, 5–7-letter and era constraints, with counts updated honestly.
 
 - The user rejected the CSS party accessories and requested rendered transparent sheets. Four generated sources in `artwork-drafts/party-sheets/` cover all 18 avatars in extended/rolled blower poses, but contain baked checkerboards. Genuine alpha cleanup, cell packing/alignment, and runtime replacement remain pending; a local cleanup permission question is awaiting the user's reply. Exact prompts and source status are recorded in that folder's README.
 
@@ -492,6 +494,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Honor complete titles and first names only
+
+- The owner answered the content clarification after the initial web deployment, excluding surname/title-word answers and choosing a strong smaller pool over padding to 1,000. Restricted new routes to 579 answers (567 recent, 12 classics), added eligible complete titles such as Dhoom, No Entry, New York and Ra.One, and updated lobby copy and tests.
+- Preserved the earlier bank strictly for clues in already-created 24-hour rooms; new answer selection reads only the refined bank. No player progress, route or wallet is reset.
 
 ### 2026-09-18 — Bollywood Race with variable answer lengths
 

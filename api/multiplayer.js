@@ -4,7 +4,10 @@ const crypto = require("node:crypto");
 const { neon } = require("@neondatabase/serverless");
 const Core = require("../game-core.js");
 const Bollywood = require("../data/bollywood-answers.json");
-const BOLLYWOOD_BY_WORD = new Map(Bollywood.map(entry => [entry.word, entry]));
+// Retain clues for routes created before the owner's complete-title/first-name refinement.
+// This archive is never used to choose new answers; rooms expire after 24 hours.
+const BollywoodLegacy = require("../data/bollywood-legacy-20260918.json");
+const BOLLYWOOD_BY_WORD = new Map([...BollywoodLegacy, ...Bollywood].map(entry => [entry.word, entry]));
 const isBollywood = room => room.mode === "race" && room.answer_theme === "bollywood";
 const clueFor = (room, answer) => isBollywood(room) ? BOLLYWOOD_BY_WORD.get(answer)?.clue : ANSWER_CLUES.get(answer);
 const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
