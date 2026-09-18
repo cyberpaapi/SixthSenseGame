@@ -193,7 +193,7 @@
   function identity() {
     const settings = readJson(SETTINGS_KEY, { avatar: "fox", accent: "coral", decoration: "none" });
     const saved = readJson(IDENTITY_KEY, { name: "" });
-    return { name: (els.name.value || saved.name || "Player").trim().slice(0, 18), avatar: settings.avatar || "fox", accent: settings.accent || "coral", decoration: settings.decoration || "none" };
+    return { name: (els.name.value || saved.name || "").trim().slice(0, 18), avatar: settings.avatar || "fox", accent: settings.accent || "coral", decoration: settings.decoration || "none" };
   }
 
   function decorateAvatar(element, player) {
@@ -256,7 +256,7 @@
   async function createRoom() {
     if (state.busy) return;
     const player = identity();
-    if (!player.name || player.name === "Player") return setLobbyMessage("Choose a player name first.", true);
+    if (!player.name) return setLobbyMessage("Choose a player name first.", true);
     setBusy(true, "Creating room…");
     try {
       const profile = await window.SixthSenseIdentity.ensure(player.name);
@@ -277,7 +277,7 @@
     if (state.busy) return;
     const player = identity();
     const code = els.joinCode.value.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 6);
-    if (!player.name || player.name === "Player") return setLobbyMessage("Choose a player name first.", true);
+    if (!player.name) return setLobbyMessage("Choose a player name first.", true);
     if (code.length !== 6) return setLobbyMessage("Enter the six-character room code.", true);
     setBusy(true, "Joining room…");
     try {

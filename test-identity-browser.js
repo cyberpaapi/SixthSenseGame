@@ -9,7 +9,9 @@ const { chromium } = require("./test-browser-runtime");
       const page = await browser.newPage({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
       await page.addInitScript(() => localStorage.setItem("sixth-sense.visited.v1", "yes"));
       await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269");
-      await page.waitForSelector("#username-modal[open]"); pages.push(page);
+      await page.waitForSelector("#username-modal[open]");
+      await page.waitForFunction(() => { const r = document.querySelector('#username-offline').getBoundingClientRect(); return r.height >= 44 && r.bottom <= innerHeight; });
+      pages.push(page);
     }
     const [a, b] = pages;
     await a.fill("#username-onboarding-input", "Cinema Hero"); await a.click("#username-onboarding-save");

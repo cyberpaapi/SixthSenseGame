@@ -798,6 +798,13 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 #identity-recovery-code { width:100%; padding:12px; resize:none; overflow-wrap:anywhere; border:1px solid var(--line); border-radius:12px; background:var(--surface-strong); color:var(--ink); font:16px/1.5 monospace; }
 #identity-recovery-modal .primary-button, #identity-copy-code { margin-top:14px; min-height:44px; }
 .username-editor > div:has(#identity-backup) { grid-template-columns:1fr; margin-top:12px; }
+@media(max-height:650px) {
+  .username-modal .modal-sheet { padding:18px; }
+  .username-welcome-avatar { width:64px; height:64px; margin-bottom:8px; }
+  .username-modal h2 { font-size:28px; margin-bottom:8px; }
+  .username-modal > .modal-sheet > p:not(.eyebrow):not(.username-message) { font-size:14px; line-height:1.4; }
+  .username-modal .username-field { margin-top:14px; }
+}
 .example-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 22px 0; }
 .demo-tile { aspect-ratio: 1; position: relative; display: grid; place-items: center; border-radius: 12px; background: var(--tile); box-shadow: var(--shadow-soft); font: 900 21px/1 "Nunito"; }
 .demo-tile small { position: absolute; right: 4px; bottom: 3px; font-size: 8px; }
