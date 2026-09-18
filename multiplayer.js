@@ -212,12 +212,12 @@
   }
 
   function openLobby(mode) {
-    state.requestedTheme = mode === "bollywood" ? "bollywood" : "classic";
+    state.requestedTheme = ["bollywood", "bollywood-vs"].includes(mode) ? "bollywood" : "classic";
     const bollywood = state.requestedTheme === "bollywood";
     document.querySelector("#online-difficulty-options").hidden = bollywood;
     document.querySelector("#bollywood-room-guide").hidden = !bollywood;
-    state.requestedMode = ["race", "vs", "coop"].includes(mode) ? mode : "race";
-    const label = bollywood ? "Bollywood Race" : state.requestedMode === "vs" ? "One-on-one VS" : state.requestedMode === "coop" ? "Co-op journey" : "Multiplayer Race";
+    state.requestedMode = mode === "bollywood-vs" ? "vs" : ["race", "vs", "coop"].includes(mode) ? mode : "race";
+    const label = bollywood ? (state.requestedMode === "vs" ? "Bollywood VS" : "Bollywood Race") : state.requestedMode === "vs" ? "One-on-one VS" : state.requestedMode === "coop" ? "Co-op journey" : "Multiplayer Race";
     els.lobbyKicker.textContent = label;
     els.distance.hidden = false;
     renderLengthOptions();
@@ -426,7 +426,7 @@
     const roundAdvanced = sharedRound && state.activeRound !== null && nextRound > state.activeRound;
     if (nextRound !== state.activeRound) state.current = "";
     state.activeRound = nextRound;
-    els.kicker.textContent = room.theme === "bollywood" ? "Bollywood Race" : room.mode === "vs" ? "One-on-one VS" : room.mode === "coop" ? "Co-op journey" : "Multiplayer Race";
+    els.kicker.textContent = room.theme === "bollywood" ? (room.mode === "vs" ? "Bollywood VS" : "Bollywood Race") : room.mode === "vs" ? "One-on-one VS" : room.mode === "coop" ? "Co-op journey" : "Multiplayer Race";
     const lengthLabel = room.mode === "vs" && room.endless ? "Endless" : `${room.wordCount} ${room.mode === "vs" ? "rounds" : "words"}`;
     els.title.textContent = `${room.theme === "bollywood" ? "Cinema" : DIFFICULTY_LABELS[room.difficulty] || "Normal"} · ${lengthLabel}`;
     renderVersusNames();
@@ -438,7 +438,7 @@
     else if (snapshot.me.finished) els.status.textContent = "Match complete.";
     else if (room.mode === "race") els.status.textContent = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : ""}`;
     else if (room.mode === "coop") els.status.textContent = `Shared word ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount} · Solve it together.`;
-    else els.status.textContent = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`} · First solve wins the point.`;
+    else els.status.textContent = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : " · First solve wins the point."}`;
     els.start.hidden = !(room.status === "waiting" && snapshot.me.isHost && snapshot.players.length >= 2);
     renderBoard();
     renderKeyboard();

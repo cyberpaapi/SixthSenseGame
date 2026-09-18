@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const Core = require("./game-core");
@@ -41,7 +42,7 @@ const attempts = [{ guess: "rattle", score: Core.scoreGuess("rattle", "battle") 
         });
       }
       await page.goto(root);
-      if (mode === "practice") await page.click('[data-start-mode="practice"]');
+      if (mode === "practice") await openLegacySolo(page, "practice");
       else { await page.click(`[data-open-online="${mode}"]`); await page.click("#online-create-room"); }
       const button = page.locator(mode === "practice" ? "#peek-button" : '[data-online-lifeline="peek"] button');
       await button.click();

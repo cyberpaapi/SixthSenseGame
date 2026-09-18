@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -27,7 +28,7 @@ const evidence = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, "..
         guesses: [], startedAt: Date.now() - 10000
       })), word);
       await page.reload();
-      await page.click('[data-start-mode="practice"]');
+      await openLegacySolo(page, "practice");
       if (index === 0) {
         const before = await page.locator("#keyboard").boundingBox();
         await page.click("#clue-button");

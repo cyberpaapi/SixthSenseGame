@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
@@ -37,7 +38,7 @@ const { chromium } = require("playwright");
       assert.equal(state.settings.decoration, "aurora");
       assert.equal(state.game.answer, "planet");
       assert.equal(state.game.status, "playing");
-      await page.click('[data-start-mode="practice"]');
+      await openLegacySolo(page, "practice");
       await page.keyboard.type("planet");
       await page.waitForSelector("#result-modal[open]");
       const earned = await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins);

@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const purchaseApi = require("./api/play-purchase");
@@ -42,7 +43,7 @@ assert.throws(() => purchaseApi.validateToken({ purchaseToken: "short" }));
       await page.evaluate(() => {
         localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 3, mode: "practice", answer: "planet", clue: "A world orbiting a star.", status: "playing", guesses: ["rattle", "castle"].map(guess => ({ guess, score: window.SixthSenseCore.scoreGuess(guess, "planet") })) }));
       });
-      await page.click('[data-start-mode="practice"]');
+      await openLegacySolo(page, "practice");
       await page.keyboard.type("planet");
       await page.waitForSelector("#result-modal[open]");
       assert.match(await page.locator("#reward-ad-button").textContent(), /300 solve coins total/);

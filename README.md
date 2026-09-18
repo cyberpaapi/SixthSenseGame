@@ -20,7 +20,7 @@ Then open `http://localhost:4173`.
 
 ## Included
 
-- Nine modes: Daily, Adventure, Practice, ten-minute Time Tackle, Insight, Streak, private-room Race, live one-on-one VS, and shared-route Co-op
+- Seven home modes: Daily, Adventure, private-room Race, one-on-one VS, Co-op, Bollywood Race and Bollywood VS
 - A persistent 10,187-level Adventure signal trail with a per-device randomized route, vertical eight-level paging, replayable completed rungs, and individually chained future rungs
 - Separate home and play screens, keeping the puzzle view focused
 - 10,187 clueable answers in Normal (4,058), Hard (2,246), and Extreme (3,883) player-facing tiers
@@ -34,7 +34,7 @@ Then open `http://localhost:4173`.
 - A 250-coin starting wallet capped at 99,999, with attempt-based solve rewards (140 coins down to 20) and an economy-v4 migration that resets every older saved wallet to the same baseline once
 - A visible 300-coin reward every seven consecutive Daily wins
 - Today's trio: solve three different solo words in a UTC day for one 60-coin bonus; no penalty for missing a day
-- Persistent mastery ranks every 3,000 earned solo points, personal-best feedback, and an optional Next word action after Practice, Time Tackle, Insight, and Streak wins
+- Persistent mastery ranks every 3,000 earned solo points and personal-best feedback
 - Sense clues use target-word sense ranking, grammatical-form labels, and 143 explicit wording overrides; saved solo and purchased multiplayer clues refresh from the current bank
 - Sense clues can be reopened freely after their one-time purchase in each puzzle
 - Peek, Clear, and Skip can be stocked, used, repurchased, and used again; a zero-stock tap buys and uses immediately, and each Peek and Clear finds fresh information

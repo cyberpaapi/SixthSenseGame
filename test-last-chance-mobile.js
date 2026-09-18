@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
@@ -41,7 +42,7 @@ const { chromium } = require("playwright");
         const guesses = ["rattle", "castle", "bright", "silver", "purple"].map(guess => ({ guess, score: window.SixthSenseCore.scoreGuess(guess, "planet") }));
         localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 4, mode: "practice", answer: "planet", clue: "A world.", status: "playing", guesses }));
       });
-      await page.click('[data-start-mode="practice"]');
+      await openLegacySolo(page, "practice");
       assert.equal(await page.locator("#game-board .board-row").count(), 6);
       await page.keyboard.type("orange");
       await page.waitForSelector("#last-chance-modal[open]");
@@ -67,7 +68,7 @@ const { chromium } = require("playwright");
           assert.equal(await page.locator("#game-board .board-row").count(), 7, "replay cannot add another attempt");
         }
         await page.reload();
-        await page.click('[data-start-mode="practice"]');
+        await openLegacySolo(page, "practice");
         assert.equal(await page.locator("#game-board .board-row").count(), 7, "earned extra try must survive restart");
         await page.keyboard.type("planet");
         await page.waitForSelector("#result-modal[open]");

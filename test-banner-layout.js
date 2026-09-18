@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
@@ -21,7 +22,7 @@ const { chromium } = require("playwright");
     });
     const root = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269";
     await page.goto(root);
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.waitForFunction(() => window.__bannerQA.visible);
     async function measure(prefix) {
       // Wait for the resize observer's visible result instead of assuming that

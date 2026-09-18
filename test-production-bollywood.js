@@ -1,6 +1,7 @@
 "use strict";
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
+const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
 const bank = require("./data/bollywood-answers.json");
 const base = process.env.SIXTH_SENSE_URL || "https://sixth-sense-game.vercel.app/";
 const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
@@ -21,11 +22,12 @@ const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
     }
     const [host, guest] = pages;
     const responseFor = (page, action, kind) => page.waitForResponse(r => r.url().includes("/api/multiplayer") && r.request().method() === "POST" && r.request().postDataJSON()?.action === action && (!kind || r.request().postDataJSON().kind === kind), { timeout: 20000 });
-    await host.click('[data-open-online="bollywood"]');
+    await host.click(isVs ? '[data-open-online="bollywood-vs"]' : '[data-open-online="bollywood"]');
+    if (isVs) await host.check('input[name="online-distance"][value="endless"]');
     await host.click("#online-create-room");
     await host.waitForSelector("#online-screen:not([hidden])");
     const code = (await host.locator("#online-room-code").textContent()).trim();
-    await guest.click('[data-open-online="bollywood"]');
+    await guest.click(isVs ? '[data-open-online="bollywood-vs"]' : '[data-open-online="bollywood"]');
     await guest.fill("#online-join-code", code); await guest.click("#online-join-room");
     await guest.waitForSelector("#online-screen:not([hidden])");
     await host.waitForSelector("#online-start:not([hidden])");
@@ -33,6 +35,8 @@ const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
     const startResponse = await started; assert.equal(startResponse.status(), 200);
     const initial = (await startResponse.json()).snapshot;
     assert.equal(initial.room.theme, "bollywood");
+    assert.equal(initial.room.mode, isVs ? "vs" : "race");
+    if (isVs) assert.equal(initial.room.endless, true);
     assert([5, 6, 7].includes(initial.me.wordLength));
     assert(!("answer_words" in initial.room) && !("answers" in initial.room) && !("answer" in initial.me));
     assert.deepEqual(initial.me.lifelines, {});
@@ -55,15 +59,27 @@ const endpoint = "https://sixth-sense-game.vercel.app/api/multiplayer";
     assert.equal(advanced.me.currentWordIndex, 1); assert.deepEqual(advanced.me.attempts, []);
     assert.deepEqual(advanced.me.lifelines, {});
     await host.reload(); await host.waitForSelector("#online-screen:not([hidden])");
-    await host.waitForFunction(() => document.querySelector("#online-live-status").textContent.startsWith("Word 2"));
+    await host.waitForFunction(prefix => document.querySelector("#online-live-status").textContent.startsWith(prefix), isVs ? "Round 2" : "Word 2");
+    if (isVs) {
+      assert.equal(advanced.me.score, 1);
+      await guest.waitForFunction(() => document.querySelector("#online-live-status").textContent.startsWith("Round 2"));
+      const secondClueResponse = responseFor(host, "lifeline", "sense");
+      await host.click('[data-online-lifeline="sense"] button');
+      const secondClue = await (await secondClueResponse).json();
+      assert(bank.some(e => e.clue === secondClue.effect.clue), "endless VS stays in the Bollywood pool");
+      await host.click("#hint-ok-button");
+    }
     const lateResponse = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "join", supportsVariableLength: true, roomCode: code, player: { name: "CinemaLate" } }) });
+    if (isVs) assert.equal(lateResponse.status, 409, "running VS does not admit new opponents");
+    else {
     assert.equal(lateResponse.status, 200);
     const late = (await lateResponse.json()).snapshot;
     assert.equal(late.me.currentWordIndex, 0); assert.equal(late.me.wordLength, initial.me.wordLength);
     assert.equal(late.players.find(p => p.id === advanced.me.id).currentWordIndex, 1);
     assert(!JSON.stringify(late).includes(entry.word), "a late joiner does not receive the active answer");
+    }
     const dataResponse = await fetch(new URL("data/bollywood-answers.json", base));
     assert.equal(dataResponse.status, 404, "the answer bank is excluded from public static hosting");
-    console.log(`Live Bollywood passed on ${base}: two isolated browser seats, server theme/length, paid Sense/Peek, solve/advance, refresh restoration, late join and private bank HTTP 404. Room ${code}.`);
+    console.log(`Live Bollywood ${isVs ? "VS" : "Race"} passed on ${base}: two isolated browser seats, server theme/length, paid Sense/Peek, solve/advance, refresh restoration, ${isVs ? "Endless pool and late-entry rejection" : "late join"}, private bank HTTP 404. Room ${code}.`);
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 (async () => {
@@ -41,7 +42,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("audio").count(), 1, "repeated start/mute must never stack music players");
     await page.route("**/tea-and-tangrams-loop.mp3*", route => route.abort());
     await page.reload();
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.waitForFunction(() => Boolean(document.querySelector("#background-music")?.error));
     assert.equal(await page.evaluate(() => window.SixthSenseAudio.state().musicRunning), false);
     assert.equal(await page.locator("#game-board .tile").count(), 36);

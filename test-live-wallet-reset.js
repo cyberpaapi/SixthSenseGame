@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 (async () => {
@@ -21,7 +22,7 @@ const { chromium } = require("playwright");
     const root = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269";
     await first.goto(root); await second.goto(root);
     assert.equal(await first.locator("#coin-count").textContent(), "9876");
-    await first.click('[data-start-mode="practice"]'); await first.keyboard.type("pla");
+    await openLegacySolo(first, "practice"); await first.keyboard.type("pla");
     const savedPuzzle = await first.evaluate(() => localStorage.getItem("sixth-sense.practice.v1"));
     policy = { resetVersion: 10, startingCoins: 500 };
     await first.evaluate(() => window.dispatchEvent(new Event("focus")));

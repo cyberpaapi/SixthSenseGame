@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const path = require("node:path");
@@ -28,7 +29,7 @@ function contrast(foreground, background) {
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ dark: true, effects: false, music: false }));
     });
     await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4173", { waitUntil: "networkidle" });
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.keyboard.type("ra");
     assert.equal(await page.locator('#game-board [data-letter="r"]').count(), 1);
     for (const dark of [true, false]) {

@@ -1,6 +1,6 @@
-# Bollywood Race content audit
+# Bollywood Race and VS content audit
 
-Reviewed 2026-09-18. `data/bollywood-answers.json` is the source of truth for new races. The room API loads it; the client never downloads it.
+Reviewed 2026-09-18. `data/bollywood-answers.json` is the source of truth for new Bollywood Race and VS matches. The room API loads it; the client never downloads it. VS uses this same pool for fixed and Endless rounds, including advancement after a Last Chance forfeit.
 
 ## Owner-approved scope
 
@@ -21,8 +21,8 @@ Credits were ranked by repeat Hindi-film appearances and actor-index membership.
 
 ## Validation and compatibility
 
-`node test-bollywood.js` checks the exact count, uniqueness, complete-title/first-name categories, length, era cutoff/cap, metadata, unwanted spellings, clue leakage and authoritative gameplay. `node test-bollywood-browser.js` checks variable columns and phone input/layout. `node test-production-bollywood.js` tests real rooms on a supplied public origin. Sources and editorial cleanup reduce errors but are not an independent fact-check of every credit.
+`node test-bollywood.js` checks the exact count, uniqueness, complete-title/first-name categories, length, era cutoff/cap, metadata, unwanted spellings, clue leakage and authoritative gameplay. `node test-bollywood-vs.js` checks VS room configuration and both Endless advancement paths. `node test-bollywood-browser.js` checks variable columns and phone input/layout. `node test-production-bollywood.js` tests real rooms on a supplied public origin. Set `BOLLYWOOD_VARIANT=vs` for the VS variant of either browser test; default is Race. Sources and editorial cleanup reduce errors but are not an independent fact-check of every credit.
 
 `data/bollywood-legacy-20260918.json` retains the earlier 1,000-entry launch pool solely for clue lookup in rooms created before the owner's refinement arrived. **It never selects new answers.** Existing rooms expire after 24 hours; preserving clues avoids breaking an in-progress race. The current pool takes precedence for overlapping words.
 
-Unassisted snapshots send only the active answer's length and generic kind. Sense returns its clue after unlocking; Peek returns one authorized position. The full bank and route are not sent to players. The data folder is omitted from the allow-listed Vercel/Pages/mobile static bundle. Public repository readers can inspect vocabulary, but the random active route remains server-side. No posters, studio logos, likenesses or soundtrack media were copied; the launcher is an original generic clapperboard SVG.
+Unassisted snapshots send only the active answer's length and generic kind. Sense returns its clue after unlocking; Peek returns one authorized position. The full bank and route are not sent to players. The data folder is omitted from the allow-listed Vercel/Pages/mobile static bundle. Public repository readers can inspect vocabulary, but the random active route remains server-side. No posters, studio logos, likenesses or soundtrack media were copied. Both launchers use original generated animal-and-cinema illustrations; exact prompts and provenance are in `assets/bollywood-mode-art.md`.

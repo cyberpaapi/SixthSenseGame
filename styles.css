@@ -412,7 +412,7 @@ body[data-screen="adventure"] .topbar { flex:0 0 auto; }
 .mode-tile strong { font: 900 16px/1.05 "Nunito", sans-serif; }
 .mode-tile small { margin-top: 5px; color: #705b7c; font-size: 10px; font-weight: 700; line-height: 1.15; }
 .online-shelf { padding: 22px; border: 1px solid rgba(255,255,255,.48); border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(229,244,255,.94)); box-shadow: 16px 20px 38px rgba(47,9,89,.26), inset 2px 2px 4px rgba(255,255,255,.8); }
-.online-mode-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.online-mode-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .online-mode-tile { min-height: 116px; display: grid; grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 15px; padding: 8px; border: 1px solid rgba(101,57,165,.16); border-radius: 24px; background: #fff; color: #32134f; box-shadow: 7px 10px 20px rgba(75,34,120,.15); text-align: left; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .online-mode-tile:hover { transform: translateY(-3px); box-shadow: 10px 15px 26px rgba(75,34,120,.22); }
 .online-mode-tile:active { transform: scale(.98); }
@@ -1187,7 +1187,7 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .series-track { height:6px; margin-top:7px; overflow:hidden; border-radius:999px; background:var(--tile); }
 .series-track i { display:block; width:var(--progress); height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--accent),#ffd857); transition:width .35s var(--ease); }
 .attempt-patterns { display:flex; flex-wrap:wrap; gap:3px; margin-top:6px; }
-.attempt-patterns span { display:grid; grid-template-columns:repeat(6,5px); gap:2px; }
+.attempt-patterns span { display:grid; grid-auto-flow:column; grid-auto-columns:5px; gap:2px; }
 .attempt-patterns i { width:5px; height:5px; border-radius:2px; background:var(--tile); }
 .attempt-patterns i.exact { background:var(--exact); }.attempt-patterns i.present { background:var(--present); }.attempt-patterns i.absent { background:var(--absent); }
 .player-rank { font:900 18px/1 "Nunito"; color:var(--ink-soft); }
@@ -1334,7 +1334,7 @@ body[data-screen="online"] :is(.progress-panel,.player-progress-list,.race-cours
   .online-shelf { padding:16px 12px 14px; border-radius:24px; }
   .online-mode-grid { gap:8px; }
   .online-mode-grid { grid-template-columns:1fr 1fr; }
-  .online-mode-tile-coop { grid-column:auto; }
+  .online-mode-tile-coop { grid-column:1 / -1; }
   .online-mode-tile-coop .online-mode-art { width:48px; }
   .online-mode-tile { min-height:86px; grid-template-columns:48px minmax(0,1fr); gap:8px; padding:6px; border-radius:18px; }
   .online-mode-art { width:48px; height:60px; border-radius:14px; }
@@ -1602,4 +1602,23 @@ body:is(.is-native-app,.is-fitted-online)[data-screen="online"] .online-shell { 
 .has-race-course .race-token:has(.is-away) small { display:block; top:12px; left:50%; transform:translateX(-50%); padding:1px 2px; border-radius:3px; background:#5b101d; color:white; font-size:7px; }
 
 .online-board .board-row { grid-template-columns:repeat(var(--word-length,6),var(--tile-size)); }
-.online-mode-art-bollywood { background:center/cover no-repeat url("assets/multiplayer-bollywood.svg"); }
+.bollywood-mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.bollywood-mode-card { display:flex; flex-direction:column; min-width:0; padding:0; overflow:hidden; border:1px solid rgba(101,57,165,.2); border-radius:24px; background:var(--tile,#fff); color:var(--ink,#32134f); text-align:left; cursor:pointer; box-shadow:5px 8px 18px rgba(75,34,120,.16); transition:transform .2s var(--ease); }
+.bollywood-mode-card:hover { transform:translateY(-3px); }
+.bollywood-mode-card img { display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; }
+.bollywood-mode-card > span { display:flex; flex-direction:column; gap:5px; padding:14px; }
+.bollywood-mode-card strong { font:900 clamp(15px,2.4vw,24px)/1.1 "Nunito",sans-serif; }
+.bollywood-mode-card small { font-size:12px; font-weight:700; }
+.bollywood-mode-card em { font-size:11px; font-style:normal; opacity:.8; }
+.is-dark .bollywood-shelf { background:var(--surface); border-color:var(--line); box-shadow:var(--shadow-out); }
+.is-dark .bollywood-shelf h2 { color:var(--ink); }
+.is-dark .bollywood-shelf .eyebrow { color:var(--primary-deep); }
+.is-dark .bollywood-mode-card { background:var(--surface-strong); border-color:var(--line); }
+@media(max-width:600px) {
+  .bollywood-mode-grid { gap:10px; }
+  .bollywood-mode-card { border-radius:18px; }
+  .bollywood-mode-card > span { padding:10px 8px; }
+  .bollywood-mode-card strong { font-size:clamp(12px,3.8vw,16px); }
+  .bollywood-mode-card small { font-size:10px; }
+  .bollywood-mode-card em { display:none; }
+}

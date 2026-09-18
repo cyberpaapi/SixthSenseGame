@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
@@ -12,7 +13,7 @@ const { chromium } = require("playwright");
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
     });
     await page.goto(process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269");
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     const typed = () => page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")).current);
     // Some browsers label the compatibility click as mouse or omit its origin.
     // Replay those real touch clicks with that metadata before the key listener.

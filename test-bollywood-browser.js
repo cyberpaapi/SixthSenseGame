@@ -2,6 +2,7 @@
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const Core = require("./game-core");
+const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
 
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN });
@@ -15,9 +16,9 @@ const Core = require("./game-core");
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
     });
     const routeWords = ["jawan", "dangal", "pathaan"];
-    const players = Array.from({ length: 8 }, (_, i) => ({ id: `p${i}`, name: `Player${i}`, avatar: "fox", seat: i + 1, currentWordIndex: 0, attempts: [], score: 0, finished: false }));
+    const players = Array.from({ length: isVs ? 2 : 8 }, (_, i) => ({ id: `p${i}`, name: `Player${i}`, avatar: "fox", seat: i + 1, currentWordIndex: 0, attempts: [], score: 0, finished: false }));
     const me = { ...players[0], isHost: true, wordLength: 5, answerKind: "Film", lifelines: {} };
-    const snapshot = { room: { code: "BOLLYQ", mode: "race", theme: "bollywood", difficulty: "easy", wordCount: 3, status: "running", revision: 1, maxGuesses: 6 }, me, players };
+    const snapshot = { room: { code: "BOLLYQ", mode: isVs ? "vs" : "race", currentRound: 0, theme: "bollywood", difficulty: "easy", wordCount: 3, status: "running", revision: 1, maxGuesses: 6 }, me, players };
     const requests = [];
     await page.route("**/api/multiplayer", async route => {
       const body = route.request().postDataJSON(); requests.push(body);
@@ -26,6 +27,7 @@ const Core = require("./game-core");
         assert.equal(body.guess.length, answer.length);
         if (body.guess === answer) {
           me.currentWordIndex++; players[0].currentWordIndex = me.currentWordIndex;
+          if (isVs) { snapshot.room.currentRound = me.currentWordIndex; me.score++; players[0].score = me.score; snapshot.room.lastRoundWinnerPlayerId = me.id; }
           me.wordLength = routeWords[me.currentWordIndex]?.length || 7;
           me.attempts = []; me.lifelines = {};
         } else me.attempts.push({ guess: body.guess, score: Core.scoreGuess(body.guess, answer) });
@@ -40,13 +42,22 @@ const Core = require("./game-core");
       assert(geometry.scroll <= geometry.width, JSON.stringify(geometry));
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.click('[data-open-online="bollywood"]');
+    assert.equal(await page.locator('[data-start-mode]').count(), 1);
+    assert.equal(await page.locator('.bollywood-mode-card').count(), 2);
+    for (const image of await page.locator('.bollywood-mode-card img').all()) assert(await image.evaluate(el => el.complete && el.naturalWidth >= 1024));
+    await page.evaluate(() => document.body.classList.add("is-dark"));
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('.bollywood-shelf')).backgroundColor === 'rgb(20, 13, 36)');
+    const dark = await page.locator('.bollywood-shelf').evaluate(el => ({ background: getComputedStyle(el).backgroundColor, ink: getComputedStyle(el.querySelector('h2')).color }));
+    assert.equal(dark.background, 'rgb(20, 13, 36)');
+    assert.equal(dark.ink, 'rgb(255, 249, 255)');
+    await page.evaluate(() => document.body.classList.remove("is-dark"));
+    await page.click(isVs ? '[data-open-online="bollywood-vs"]' : '[data-open-online="bollywood"]');
     assert.equal(await page.locator("#online-difficulty-options").isHidden(), true);
     assert.equal(await page.locator("#bollywood-room-guide").isVisible(), true);
     await page.click("#online-create-room");
-    await page.waitForSelector(".race-token");
+    await page.waitForSelector(isVs ? "#online-versus-names:not([hidden])" : ".race-token");
     const create = requests.find(r => r.action === "create");
-    assert.equal(create.theme, "bollywood"); assert.equal(create.mode, "race"); assert.equal(create.supportsVariableLength, true);
+    assert.equal(create.theme, "bollywood"); assert.equal(create.mode, isVs ? "vs" : "race"); assert.equal(create.supportsVariableLength, true);
     for (const word of routeWords) {
       await page.waitForFunction(length => document.querySelector("#online-board .board-row")?.children.length === length, word.length);
       assert.equal(await page.locator("#online-board .board-row").count(), 6);
@@ -59,10 +70,11 @@ const Core = require("./game-core");
           return { scrollWidth: document.documentElement.scrollWidth, scrollHeight: document.documentElement.scrollHeight, board: rect("#online-board"), last: rect("#online-board .board-row:first-child .tile:last-child"), course: rect(".progress-panel"), dock: rect(".online-lifeline-dock"), key: rect("#online-keyboard .key") };
         });
         assert(g.scrollWidth <= viewport.width + 1 && g.scrollHeight <= viewport.height + 1 && g.dock.bottom <= viewport.height + 1, `${word} overflow: ${JSON.stringify(g)}`);
-        assert(g.last.right <= g.course.x + 1, `${word} overlaps race track: ${JSON.stringify(g)}`);
+        if (!isVs) assert(g.last.right <= g.course.x + 1, `${word} overlaps race track: ${JSON.stringify(g)}`);
         assert(g.key.height >= 44, "44px keys");
       }
       await page.setViewportSize({ width: 390, height: 844 });
+      if (isVs) await page.waitForSelector("#online-round-transition", { state: "hidden" });
       const before = requests.filter(r => r.action === "guess").length;
       for (const letter of word.slice(0, -1)) await page.tap(`[data-online-key="${letter.toUpperCase()}"]`);
       assert.equal(requests.filter(r => r.action === "guess").length, before, "do not submit before the last letter");
@@ -85,6 +97,6 @@ const Core = require("./game-core");
     assert(extra.height <= 519 && extra.width <= 321 && extra.dock <= 519 && extra.key >= 44, JSON.stringify(extra));
     assert.equal(await page.locator("#online-board .tile").count(), 49);
     assert.deepEqual(errors, []);
-    console.log("Bollywood browser passed: launcher/payload, 5→6→7 board transitions, single touch input and autosubmit, eight racers, 320px phone/landscape fit, 44px keys, no console errors.");
+    console.log(`Bollywood ${isVs ? "VS" : "Race"} browser passed: launcher/payload, 5→6→7 board transitions, single touch input and autosubmit, ${isVs ? "two opponents" : "eight racers"}, 320px phone/landscape fit, 44px keys, no console errors.`);
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

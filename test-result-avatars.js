@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -28,7 +29,7 @@ const { chromium } = require("playwright");
           }));
         }, { avatar, won });
         await page.reload();
-        await page.click('[data-start-mode="practice"]');
+        await openLegacySolo(page, "practice");
         if (won) await page.keyboard.type("planet");
         else await page.click("#last-chance-decline");
         await page.waitForSelector("#result-modal[open]");

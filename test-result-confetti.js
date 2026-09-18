@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -18,7 +19,7 @@ const { chromium } = require("playwright");
         localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 3, mode: "practice", answer: "planet", clue: "A world orbiting a star.", status: scenario === "loss" ? "last-chance" : "playing", guesses: words.map(guess => ({ guess, score: window.SixthSenseCore.scoreGuess(guess, "planet") })) }));
       }, scenario);
       await page.reload();
-      await page.click('[data-start-mode="practice"]');
+      await openLegacySolo(page, "practice");
       if (scenario === "loss") await page.click("#last-chance-decline");
       else await page.keyboard.type("planet");
       await page.waitForSelector("#result-modal[open]");

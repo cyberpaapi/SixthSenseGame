@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 
 const assert = require("assert");
 const path = require("path");
@@ -33,8 +34,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("coates")), false);
     assert.equal(await page.locator("#home-screen").isVisible(), true);
     assert.equal(await page.locator("#game-screen").isHidden(), true);
-    assert.equal(await page.locator("[data-start-mode]").count(), 5);
-    assert.equal(await page.locator("[data-open-online]").count(), 4);
+    assert.equal(await page.locator("[data-start-mode]").count(), 1);
+    assert.equal(await page.locator("[data-open-online]").count(), 5);
     assert.equal(await page.locator("[data-open-adventure-map]").count(), 1);
     assert.equal(await page.locator("#adventure-feature").isVisible(), true);
     assert.match(await page.locator("#adventure-feature-art").getAttribute("src"), /adventure-zone-sky-ladder-v1\.webp$/);
@@ -56,19 +57,19 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       const headerButton = document.querySelector(".header-actions .icon-button").getBoundingClientRect();
       const headerArt = document.querySelector(".header-actions .icon-button img").getBoundingClientRect();
       const daily = document.querySelector(".daily-quest").getBoundingClientRect();
-      const modeArt = document.querySelector(".mode-tile img").getBoundingClientRect();
+      const modeArt = document.querySelector(".bollywood-mode-card img").getBoundingClientRect();
       const modeShelf = document.querySelector(".mode-shelf").getBoundingClientRect();
       return { headerButton: headerButton.width, headerArt: headerArt.width, dailyHeight: daily.height, modeArtHeight: modeArt.height, modeShelfHeight: modeShelf.height };
     });
     assert(homeControlSizing.headerButton >= 44, "compact header art must retain a 44px touch target");
     assert(homeControlSizing.headerArt <= 36, "header artwork should remain visually compact");
     assert(homeControlSizing.dailyHeight <= 70, "Daily action should use the compact button treatment");
-    assert(homeControlSizing.modeArtHeight < 130, "mode artwork should not dominate the home screen");
-    assert(homeControlSizing.modeShelfHeight <= 250, "the phone mode launcher should remain compact");
-    assert.equal(await page.locator("#mode-shelf-title").textContent(), "Pick your signal");
+    assert(homeControlSizing.modeArtHeight >= 130 && homeControlSizing.modeArtHeight <= 190, "Bollywood generated artwork should be readable within its phone card");
+    assert(homeControlSizing.modeShelfHeight <= 340, "the phone mode launcher should remain compact");
+    assert.equal(await page.locator("#mode-shelf-title").textContent(), "Bollywood spotlight");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "0");
     assert.match(await page.locator("#home-title").textContent(), /Six chances/);
-    assert.equal(await page.locator(".mode-tile img").count(), 4);
+    assert.equal(await page.locator(".bollywood-mode-card img").count(), 2);
     assert.match(await page.locator(".lobby-hero-art").getAttribute("src"), /lobby-observatory-v2\.webp$/);
     assert.match(await page.locator(".brand-wordmark img").getAttribute("src"), /logo-sixth-sense-clay-v1\.png$/);
     const brandLogoSizing = await page.locator(".brand-wordmark img").evaluate(image => {
@@ -250,7 +251,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     await page.waitForSelector("#result-modal[open]", { timeout: 1200 });
     assert.equal(await page.locator("#result-primary").textContent(), "OK", "reopening a finished Daily must restore its completion card");
     await page.click("#result-primary");
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.click('[data-key="A"]');
     await page.evaluate(() => history.back());
     await page.waitForSelector("#leave-game-modal[open]");
@@ -522,19 +523,19 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await modesPage.locator("#settings-modal").isVisible(), true, "the top-left avatar profile must link to avatar controls");
     await modesPage.click("#settings-modal .modal-close");
 
-    await modesPage.click('[data-start-mode="sprint"]');
+    await openLegacySolo(modesPage, "sprint");
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Time Tackle");
     assert.match(await modesPage.locator("#mode-detail").textContent(), /^\d{2}:\d{2}$/);
     assert(await modesPage.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), "Time Tackle game must not scroll");
     await modesPage.click(".brand");
     await modesPage.click("#leave-game-confirm");
-    await modesPage.click('[data-start-mode="insight"]');
+    await openLegacySolo(modesPage, "insight");
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Insight Puzzle");
     assert.equal(await modesPage.locator("#game-board .tile.peeked").count(), 1);
     assert.match(await modesPage.locator("#clue-button").getAttribute("aria-label"), /show the clue again/);
     await modesPage.click(".brand");
     await modesPage.click("#leave-game-confirm");
-    await modesPage.click('[data-start-mode="streak"]');
+    await openLegacySolo(modesPage, "streak");
     assert.equal(await modesPage.locator("#game-mode-label").textContent(), "Streak Puzzle");
     assert.equal(await modesPage.locator("#mode-detail").textContent(), "0 win run");
     await modes.close();
@@ -734,7 +735,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await repeatPage.locator("#leave-game-modal").isVisible(), true, "leaving an active puzzle must ask for confirmation");
     await repeatPage.click("#leave-game-confirm");
     await repeatPage.evaluate(() => { Math.random = () => 0; });
-    await repeatPage.click('[data-start-mode="practice"]');
+    await openLegacySolo(repeatPage, "practice");
     await repeatPage.click("#skip-puzzle-button");
     await repeatPage.click("#confirm-skip-button");
     await repeatPage.waitForSelector("#result-modal[open]", { timeout: 4000 });
@@ -751,7 +752,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await repeatPage.locator("#home-screen").isVisible(), true);
     assert.equal(await repeatPage.locator("#result-modal").getAttribute("open"), null);
 
-    await repeatPage.click('[data-start-mode="practice"]');
+    await openLegacySolo(repeatPage, "practice");
     const lastChanceGame = await repeatPage.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.practice.v1")));
     const missCandidates = ["rattle", "raffle", "planet", "banner", "market", "school", "bridge", "coffee"].filter(word => word !== lastChanceGame.answer).slice(0, 6);
     for (let guessIndex = 0; guessIndex < missCandidates.length; guessIndex += 1) {

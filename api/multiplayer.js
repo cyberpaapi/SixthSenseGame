@@ -8,7 +8,7 @@ const Bollywood = require("../data/bollywood-answers.json");
 // This archive is never used to choose new answers; rooms expire after 24 hours.
 const BollywoodLegacy = require("../data/bollywood-legacy-20260918.json");
 const BOLLYWOOD_BY_WORD = new Map([...BollywoodLegacy, ...Bollywood].map(entry => [entry.word, entry]));
-const isBollywood = room => room.mode === "race" && room.answer_theme === "bollywood";
+const isBollywood = room => ["race", "vs"].includes(room.mode) && room.answer_theme === "bollywood";
 const clueFor = (room, answer) => isBollywood(room) ? BOLLYWOOD_BY_WORD.get(answer)?.clue : ANSWER_CLUES.get(answer);
 const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
 
@@ -233,7 +233,7 @@ async function snapshot(sql, room, me) {
 
 async function createRoom(sql, body) {
   const mode = ["race", "vs", "coop"].includes(body.mode) ? body.mode : "race";
-  const theme = mode === "race" && body.theme === "bollywood" ? "bollywood" : "classic";
+  const theme = ["race", "vs"].includes(mode) && body.theme === "bollywood" ? "bollywood" : "classic";
   const difficulty = theme === "classic" && ["easy", "medium", "extreme"].includes(body.difficulty) ? body.difficulty : "easy";
   const { wordCount, endless } = normalizeGameLength(mode, body.wordCount);
   const capacity = mode === "vs" ? 2 : mode === "coop" ? 4 : 8;
@@ -260,7 +260,7 @@ async function createRoom(sql, body) {
 async function joinRoom(sql, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const room = await getRoom(sql, code);
-  if (isBollywood(room) && body.supportsVariableLength !== true) throw Object.assign(new Error("Refresh or update the game to join this Bollywood Race."), { status: 409 });
+  if (isBollywood(room) && body.supportsVariableLength !== true) throw Object.assign(new Error("Refresh or update the game to join this Bollywood match."), { status: 409 });
   // An authenticated return uses the existing seat, even when the room is full
   // or no longer accepts new players. A name alone never proves seat ownership.
   if (body.resumeToken) {
@@ -318,8 +318,8 @@ function chooseAnswers(difficulty, count, theme = "classic") {
   return chosen;
 }
 
-function chooseFreshAnswer(difficulty, usedWords) {
-  const fullPool = Core.answersForDifficulty(difficulty).map(entry => entry.word);
+function chooseFreshAnswer(difficulty, usedWords, theme = "classic") {
+  const fullPool = (theme === "bollywood" ? Bollywood : Core.answersForDifficulty(difficulty)).map(entry => entry.word);
   const unused = fullPool.filter(word => !usedWords.includes(word));
   const pool = unused.length ? unused : fullPool;
   return pool[crypto.randomInt(pool.length)];
@@ -386,7 +386,7 @@ async function submitVsGuess(sql, { code, guess, actionId, me, room }) {
   const roundWinnerId = won ? me.id : opponent.id;
   const resolution = resolveVsRound({ currentRound: roundIndex, wordCount: room.word_count, endless: room.endless, players, roundWinnerId });
   const nextAnswers = [...answers];
-  if (room.endless && nextAnswers.length <= resolution.nextRound) nextAnswers.push(chooseFreshAnswer(room.difficulty, nextAnswers));
+  if (room.endless && nextAnswers.length <= resolution.nextRound) nextAnswers.push(chooseFreshAnswer(room.difficulty, nextAnswers, isBollywood(room) ? "bollywood" : "classic"));
   const updatedRooms = await sql`UPDATE sixth_sense_rooms SET current_round=${resolution.nextRound}, last_round_winner_player_id=${roundWinnerId},
       answer_words=${JSON.stringify(nextAnswers)}::jsonb, status=${resolution.finished ? "finished" : "running"},
       winner_player_id=${resolution.matchWinnerId}, revision=revision+1
@@ -642,7 +642,7 @@ async function submitLastChance(sql, body) {
     if (!opponent) throw Object.assign(new Error("The opponent is no longer in this room."), { status: 409 });
     const resolution = resolveVsRound({ currentRound: index, wordCount: room.word_count, endless: room.endless, players, roundWinnerId: opponent.id });
     const nextAnswers = [...answers];
-    if (room.endless && nextAnswers.length <= resolution.nextRound) nextAnswers.push(chooseFreshAnswer(room.difficulty, nextAnswers));
+    if (room.endless && nextAnswers.length <= resolution.nextRound) nextAnswers.push(chooseFreshAnswer(room.difficulty, nextAnswers, isBollywood(room) ? "bollywood" : "classic"));
     const updatedRooms = await sql`UPDATE sixth_sense_rooms SET current_round=${resolution.nextRound}, last_round_winner_player_id=${opponent.id}, answer_words=${JSON.stringify(nextAnswers)}::jsonb,
         status=${resolution.finished ? "finished" : "running"}, winner_player_id=${resolution.matchWinnerId}, revision=revision+1
       WHERE code=${code} AND status='running' AND current_round=${index} AND revision=${room.revision} RETURNING *`;
@@ -733,4 +733,4 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
-module.exports._test = { snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, ACCENTS, AVATARS };
+module.exports._test = { snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, chooseFreshAnswer, ACCENTS, AVATARS };

@@ -1,4 +1,5 @@
 "use strict";
+const openLegacySolo = require("./test-legacy-solo-helper");
 const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
@@ -16,7 +17,7 @@ const { chromium } = require("playwright");
       localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 3, mode: "practice", answer: "planet", clue: "A world.", guesses: [], status: "playing" }));
     });
     await page.reload();
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.keyboard.type("planet");
     await page.waitForSelector("#result-modal[open]");
     await page.waitForFunction(() => window.SixthSenseAudio.state().lastResult.status === "playing");
@@ -33,7 +34,7 @@ const { chromium } = require("playwright");
       const guesses = ["rattle", "castle", "bright", "silver", "purple", "orange", "signal"].map(guess => ({ guess, score: window.SixthSenseCore.scoreGuess(guess, "planet") }));
       localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({ version: 3, mode: "practice", answer: "planet", clue: "A world.", guesses, status: "last-chance" }));
     });
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.click("#last-chance-decline");
     await page.waitForSelector("#result-modal[open]");
     await page.waitForFunction(() => window.SixthSenseAudio.state().lastResult.status === "playing");
@@ -59,7 +60,7 @@ const { chromium } = require("playwright");
     // A missing optional sound must leave the app usable without a fallback robot voice.
     await page.route("**/assets/audio/**", route => route.abort());
     await page.reload();
-    await page.click('[data-start-mode="practice"]');
+    await openLegacySolo(page, "practice");
     await page.evaluate(() => window.SixthSenseAudio.play("lose"));
     await page.waitForFunction(() => window.SixthSenseAudio.state().lastResult.status === "unavailable");
     assert.equal(await page.evaluate(() => window.SixthSenseAudio.state().musicDucked), false);
