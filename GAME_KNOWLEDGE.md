@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-18
 
-Last verified: 2026-09-18 (Bollywood home replacement and VS: core/data/server, both Race/VS phone fixtures, full browser, keyboard touch and banner layout passed locally. Public deployment of this change is pending; previous Race release passed both production sites. No new Android binary or physical iPhone test is claimed.)
+Last verified: 2026-09-18 (Bollywood Race/VS home replacement: local core/data/server, both phone fixtures, full browser, touch/banner and packaging checks passed. Live two-browser Bollywood VS passed on Vercel and Pages; Race late-join regression passed on Vercel. Both sites show the new cards/art, omit the retired launchers and return HTTP 404 for current/legacy Bollywood banks. No new Android binary or physical iPhone test is claimed.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -345,7 +345,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 18 Bollywood home replacement / VS (CSS and multiplayer cache `20260918.15`): full browser phone playthrough/home artwork/desktop/dark/overflow checks, core/multiplayer/progression, 579-answer data rules, VS creation/capacity/5-and-7-letter solves/Last Chance forfeit/both Endless selection paths/exhausted-pool recycling, both Race and VS variable-length phone fixtures, keyboard touch and native-banner geometry passed locally. No change to the shared keyboard binder. Legacy solo tests use an explicit test-only DOM helper after removal of the four home launchers. JavaScript syntax and native/Vercel/Pages packaging passed: generated art/cards are included, backend banks are excluded, and runtime/API origin selection is correct. Light phone and dark desktop artwork were visually inspected. Public deployment is pending.
+September 18 Bollywood home replacement / VS (CSS and multiplayer cache `20260918.15`): full browser phone playthrough/home artwork/desktop/dark/overflow checks, core/multiplayer/progression, 579-answer data rules, VS creation/capacity/5-and-7-letter solves/Last Chance forfeit/both Endless selection paths/exhausted-pool recycling, both Race and VS variable-length phone fixtures, keyboard touch and native-banner geometry passed locally. No change to the shared keyboard binder. Legacy solo tests use an explicit test-only DOM helper after removal of the four home launchers. JavaScript syntax and native/Vercel/Pages packaging passed: generated art/cards are included, backend banks are excluded, and runtime/API origin selection is correct. Light phone and dark desktop artwork were visually inspected. Code commit `6d4e5bb` deployed successfully on Vercel and Pages (workflow `35362794484`). Real two-browser Bollywood VS on both sites passed room creation/join/start, paid Sense/Peek, solving, scoring, synchronized round advancement, reload restoration, Endless Bollywood-pool retention and late-entry rejection. The Race regression passed on Vercel including late join with existing progress intact. Both public homes expose the new cards and omit the four retired launchers; both WebP images return HTTP 200, and current/legacy data files return HTTP 404.
 
 September 18 Pages API-origin correction: the live Pages test caught that --web omitted the remote API attribute, causing room creation to hit the static Pages origin. Added --pages for this workflow only and verified native/web/Pages output independently: correct API target, Capacitor script only in native, no data folder in any static bundle. The production test now has an explicit 20-second default timeout. Live Pages retest passed after commit `12ff3fd` deployed (workflow `35361602805`): two isolated browser seats created/joined/started a real Neon room, purchased Sense/Peek, solved and advanced, restored word-two progress after refresh, and admitted a late player at word one without resetting the host. Current bank returned HTTP 404. The same live flow passed on Vercel (`5875cd9`), with both current and legacy banks HTTP 404; `12ff3fd` also deployed successfully to Vercel.
 
@@ -501,6 +501,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-18 — Verify the illustrated Bollywood release on both sites
+
+- Confirmed successful Vercel and Pages deployments, actual two-player Bollywood VS gameplay on each origin, and Race late-join/progress regression on Vercel. Checked home launcher replacement, loaded public art and excluded data files. Updated the verification record; no native binary was rebuilt.
 
 ### 2026-09-18 — Replace four solo launchers with illustrated Bollywood Race and VS
 
