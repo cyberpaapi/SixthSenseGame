@@ -643,7 +643,8 @@
   }
 
   function renderLifelines() {
-    const economy = window.SixthSenseEconomy?.state() || { inventory: {}, costs: Core.LIFELINE_COSTS };
+    const theme = state.snapshot?.room.theme;
+    const economy = window.SixthSenseEconomy?.state(theme) || { inventory: {}, costs: Core.lifelineCosts(theme) };
     const effects = state.snapshot?.me?.lifelines || {};
     const active = state.snapshot?.room.status === "running" && !state.snapshot?.me.finished && !effects.lastChancePending && !effects.pendingSkip && !state.busy;
     const names = { sense: "Sense", peek: "Peek", clear: "Clear", skip: "Skip" };
@@ -661,9 +662,10 @@
       stock.hidden = !(stored > 0 || senseUnlocked);
       stock.querySelector("b").textContent = senseUnlocked ? "1" : stored;
       price.hidden = !active || !available || stored > 0 || senseUnlocked;
-      price.querySelector("b").textContent = economy.costs?.[kind] ?? Core.LIFELINE_COSTS[kind];
+      const cost = economy.costs?.[kind] ?? Core.lifelineCosts(theme)[kind];
+      price.querySelector("b").textContent = cost;
       button.disabled = !active || !available;
-      button.setAttribute("aria-label", senseUnlocked ? "Sense: show the clue again" : stored > 0 ? `${names[kind]}: use one, ${stored} available` : `${names[kind]}: buy for ${Core.LIFELINE_COSTS[kind]} coins`);
+      button.setAttribute("aria-label", senseUnlocked ? "Sense: show the clue again" : stored > 0 ? `${names[kind]}: use one, ${stored} available` : `${names[kind]}: buy for ${cost} coins`);
     });
   }
 
@@ -814,7 +816,7 @@
     if (!economy) return;
     const wallet = economy.state();
     if ((Number(wallet.inventory?.[kind]) || 0) < 1) {
-      if (!economy.purchase(kind)) return;
+      if (!economy.purchase(kind, state.snapshot.room.theme)) return;
       item.classList.remove("is-purchased");
       void item.offsetWidth;
       item.classList.add("is-purchased");

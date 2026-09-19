@@ -2149,10 +2149,10 @@
       state: () => ({ ...stats.adventure, ...Core.adventureProgress(stats.adventure.level) })
     };
     window.SixthSenseEconomy = {
-      state: () => ({ coins: stats.coins, inventory: { ...stats.inventory }, costs: { ...Core.LIFELINE_COSTS } }),
-      purchase: kind => {
+      state: (theme = "classic") => ({ coins: stats.coins, inventory: { ...stats.inventory }, costs: { ...Core.lifelineCosts(theme) } }),
+      purchase: (kind, theme = "classic") => {
         if (!Object.hasOwn(defaultInventory, kind) || stats.inventory[kind] > 0) return false;
-        if (!spendCoins(kind, kind[0].toUpperCase() + kind.slice(1))) return false;
+        if (!spendAmount(Core.lifelineCosts(theme)[kind], kind[0].toUpperCase() + kind.slice(1), kind)) return false;
         stats.inventory[kind] += 1;
         saveJson(STORAGE.stats, stats);
         renderLifelines();

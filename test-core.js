@@ -5,6 +5,13 @@ const Core = require("./game-core.js");
 const GuessBank = require("./word-bank.js");
 const GuessBankSet = new Set(GuessBank);
 
+assert.deepEqual(Core.lifelineCosts("bollywood"), { sense: 75, peek: 125, clear: 100, skip: 60 });
+assert.deepEqual(Core.lifelineCosts(), { sense: 30, peek: 50, clear: 40, skip: 60 });
+assert.strictEqual(Core.lifelineCosts("classic"), Core.LIFELINE_COSTS);
+assert.strictEqual(Core.lifelineCosts("unknown"), Core.LIFELINE_COSTS);
+assert(Object.isFrozen(Core.lifelineCosts("bollywood")));
+assert.equal(Core.LAST_CHANCE_COST, 125, "Last Chance is not a hint purchase");
+
 assert.equal(Core.ANSWERS.length, new Set(Core.ANSWERS.map(item => item.word)).size, "answer words must be unique");
 assert.equal(Core.ANSWERS.length, 10187, "answer bank must contain every clueable answer-safe word");
 assert.deepEqual(Object.fromEntries(Object.entries(Core.ANSWER_TIERS).map(([tier, words]) => [tier, words.length])), { easy: 4058, medium: 2246, extreme: 3883 });

@@ -86,9 +86,19 @@
   const STARTING_COINS = 500;
   const MAX_COINS = 99999;
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
+  const BOLLYWOOD_LIFELINE_COSTS = Object.freeze({
+    ...LIFELINE_COSTS,
+    sense: LIFELINE_COSTS.sense * 2.5,
+    peek: LIFELINE_COSTS.peek * 2.5,
+    clear: LIFELINE_COSTS.clear * 2.5
+  });
   const LAST_CHANCE_COST = 125;
   const ADVENTURE_TOTAL = ANSWERS.length;
   const adventureRouteCache = new Map();
+
+  function lifelineCosts(theme = "classic") {
+    return theme === "bollywood" ? BOLLYWOOD_LIFELINE_COSTS : LIFELINE_COSTS;
+  }
 
   function rewardForAttempts(attempts) {
     const safeAttempts = Math.min(MAX_GUESSES + 1, Math.max(1, Number(attempts) || (MAX_GUESSES + 1)));
@@ -268,7 +278,7 @@
   return {
     ANSWERS, ANSWER_TIERS, TIER_ORDER, WORDS, MAX_GUESSES, WORD_LENGTH, STARTING_COINS, MAX_COINS, LIFELINE_COSTS, LAST_CHANCE_COST, ADVENTURE_TOTAL,
     scoreGuess, remainingPeekPositions, validateHardMode, dateKey, dayNumber, dailyAnswer, practiceAnswer, isValidWord,
-    rewardForAttempts, pointsForAttempts, vsRewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool,
+    rewardForAttempts, pointsForAttempts, vsRewardForAttempts, answersForDifficulty, unlockedDifficulty, progressionPool, lifelineCosts,
     adventureRoute, adventureProgress, adventureAnswer
   };
 });
