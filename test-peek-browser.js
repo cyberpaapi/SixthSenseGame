@@ -48,6 +48,7 @@ const attempts = [{ guess: "rattle", score: Core.scoreGuess("rattle", "battle") 
       await button.click();
       await page.waitForFunction(selector => document.querySelector(selector)?.disabled, mode === "practice" ? "#peek-button" : '[data-online-lifeline="peek"] button');
       const board = mode === "practice" ? "#game-board" : "#online-board";
+      await page.waitForSelector(`${board} .peeked`); // Busy also disables the button before the API response.
       assert.equal(await page.locator(`${board} .peeked`).count(), 1);
       assert.equal((await page.locator(`${board} .peeked`).textContent()).toLowerCase(), "b");
       assert.equal(await page.locator("#coin-count").textContent(), stocked ? "250" : "200");

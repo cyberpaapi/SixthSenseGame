@@ -204,7 +204,10 @@
   stats.lastDailyRewardStreak = Math.max(0, Math.floor(Number(stats.lastDailyRewardStreak) || 0));
   saveJson(STORAGE.stats, stats);
   let inputLocked = false;
-  let toastTimer = null;
+  const messages = {
+    game: { element: els.toast, timer: null, status: "" },
+    online: { element: document.querySelector("#online-live-status"), timer: null, status: "" }
+  };
   const resultConfettiTimers = new Map();
   let audioContext = null;
   let audioUnlocked = false;
@@ -396,6 +399,7 @@
   }
 
   function showScreen(screen, options = {}) {
+    if (screen !== currentScreen()) clearMessages();
     if (screen === "home") renderProgression();
     const gameVisible = screen === "game";
     const adventureVisible = screen === "adventure";
@@ -403,6 +407,7 @@
     els.gameScreen.hidden = !gameVisible;
     els.adventureScreen.hidden = !adventureVisible;
     document.body.dataset.screen = screen;
+    fitSoloBoard();
     const skipLink = document.querySelector(".skip-link");
     skipLink.href = gameVisible ? "#game-board" : adventureVisible ? "#adventure-map-title" : "#home-title";
     const destination = gameVisible ? els.gameScreen : adventureVisible ? els.adventureScreen : els.homeScreen;
@@ -417,6 +422,22 @@
   function currentScreen() {
     return document.body.dataset.screen || "home";
   }
+
+  function fitSoloBoard() {
+    const fitted = currentScreen() === "game" && !window.Capacitor?.isNativePlatform?.()
+      && matchMedia("(orientation: landscape) and (max-height:600px)").matches;
+    document.body.classList.toggle("is-fitted-solo", fitted);
+    if (!fitted) return;
+    const wrap = els.board.parentElement, bounds = wrap.getBoundingClientRect();
+    if (!bounds.height || !bounds.width) return;
+    const rows = els.board.children.length || Core.MAX_GUESSES;
+    const padding = parseFloat(getComputedStyle(wrap).paddingRight) + parseFloat(getComputedStyle(wrap).paddingLeft);
+    const size = Math.floor(Math.min(52, (bounds.width - padding - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+    els.board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
+  }
+  new ResizeObserver(fitSoloBoard).observe(els.board.parentElement);
+  new MutationObserver(fitSoloBoard).observe(els.board, { childList: true });
+  window.addEventListener("resize", fitSoloBoard);
 
   function restoreCurrentHistoryState() {
     history.pushState({ sixthSense: true, screen: currentScreen() }, "", location.href);
@@ -986,8 +1007,8 @@
 
   function submitGuess() {
     const guess = game.current;
-    if (guess.length !== Core.WORD_LENGTH) return invalid("Six letters make the signal.");
-    if (!Core.isValidWord(guess)) return invalid("That word isn’t in the common-word list.");
+    if (guess.length !== Core.WORD_LENGTH) return invalid(`Enter ${Core.WORD_LENGTH} letters.`);
+    if (!Core.isValidWord(guess)) return invalid("That word isn’t in the accepted dictionary.");
     if (settings.hard) {
       const issue = Core.validateHardMode(guess, game.guesses);
       if (issue) return invalid(issue);
@@ -1123,13 +1144,34 @@
   }
 
   function announce(message, options = {}) {
+    const target = messages[options.screen || currentScreen()] || messages.game;
     const duration = Number(options.duration) || 2600;
-    clearTimeout(toastTimer);
-    els.toast.hidden = false;
-    els.toast.textContent = message;
-    toastTimer = setTimeout(() => {
-      els.toast.hidden = true;
+    clearTimeout(target.timer);
+    paintMessage(target, message);
+    target.timer = setTimeout(() => {
+      target.timer = null;
+      paintMessage(target, target.status);
     }, duration);
+  }
+
+  function paintMessage(target, message) {
+    target.element.hidden = !message;
+    if (target.element.textContent !== message) target.element.textContent = message;
+  }
+
+  function setOnlineStatus(message) {
+    messages.online.status = message;
+    // Polling updates the underlying room status without erasing feedback.
+    if (!messages.online.timer) paintMessage(messages.online, message);
+  }
+
+  function clearMessages() {
+    Object.values(messages).forEach(target => {
+      clearTimeout(target.timer);
+      target.timer = null;
+      target.status = "";
+      paintMessage(target, "");
+    });
   }
 
   function revealClue() {
@@ -2129,6 +2171,7 @@
       spend: (amount, label = "Purchase") => spendAmount(Math.max(0, Math.floor(Number(amount) || 0)), label),
       credit: (amount, label = "Reward") => creditCoins(amount, label)
     };
+    window.SixthSenseMessages = { announce, setOnlineStatus, clear: clearMessages };
     window.SixthSenseDialogs = { showHint: showHintDialog, renderResultAvatar, celebrateResult: celebrateResultDialog };
     window.SixthSenseRewards = { offer: rewardOffer, applyReceipt: applyRewardReceipt };
     window.SixthSenseLastChance = { offer: lastChanceOffer, applyReceipt: applyLastChanceReceipt };

@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260918.17">
+  <link rel="stylesheet" href="styles.css?v=20260919.1">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -175,7 +175,9 @@
       </div>
       <div class="online-play-layout">
         <div class="online-puzzle-column">
-          <p class="online-live-status" id="online-live-status" aria-live="polite">Connecting to the room…</p>
+          <div class="message-space online-message-space" aria-live="polite" aria-atomic="true">
+            <div class="toast" id="online-live-status">Connecting to the room…</div>
+          </div>
           <div class="board-wrap online-board-wrap"><div class="board online-board" id="online-board" role="grid" aria-label="Online word board"></div></div>
           <div class="keyboard online-keyboard" id="online-keyboard" aria-label="Online on-screen keyboard"></div>
           <section class="lifeline-dock online-lifeline-dock" aria-label="Multiplayer lifelines">
@@ -559,8 +561,8 @@
   <script src="game-core.js?v=20260918.14"></script>
   <script src="progression.js?v=20260917.1"></script>
   <script src="identity.js?v=20260918.16"></script>
-  <script src="app.js?v=20260918.16"></script>
-  <script src="multiplayer.js?v=20260918.17"></script>
+  <script src="app.js?v=20260919.1"></script>
+  <script src="multiplayer.js?v=20260919.1"></script>
   <script src="mobile.js?v=20260918.14"></script>
 </body>
 </html>

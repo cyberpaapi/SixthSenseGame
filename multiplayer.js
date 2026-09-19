@@ -44,7 +44,6 @@
     versusNames: document.querySelector("#online-versus-names"),
     roomCode: document.querySelector("#online-room-code"),
     roomState: document.querySelector("#online-room-state"),
-    status: document.querySelector("#online-live-status"),
     presenceAlert: document.querySelector("#online-presence-alert"),
     roundTransition: document.querySelector("#online-round-transition"),
     roundKicker: document.querySelector("#online-round-kicker"),
@@ -327,6 +326,7 @@
     els.home.hidden = true;
     els.solo.hidden = true;
     els.screen.hidden = false;
+    window.SixthSenseMessages.clear();
     document.body.dataset.screen = "online";
     window.SixthSenseNavigation?.onlineEntered();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -336,6 +336,7 @@
   }
 
   function leaveRoom() {
+    window.SixthSenseMessages.clear();
     syncPresence(true);
     rememberSeat({ roomCode: state.roomCode, token: state.token, playerId: state.playerId });
     clearTimeout(presence.timer);
@@ -400,7 +401,8 @@
       state.snapshot = result.snapshot;
       renderSnapshot();
     } catch (error) {
-      els.status.textContent = friendlyError(error);
+      window.SixthSenseMessages.setOnlineStatus(friendlyError(error));
+      state.renderedSnapshotSignature = ""; // Restore room status on the next successful poll.
     }
     schedulePoll();
   }
@@ -437,12 +439,14 @@
     els.roomCode.textContent = room.code;
     els.roomState.textContent = room.status;
     const winner = snapshot.players.find(player => player.id === room.winnerPlayerId);
-    if (room.status === "waiting") els.status.textContent = snapshot.players.length < 2 ? "Share the room code. The match can start when another player joins." : snapshot.me.isHost ? "Everyone is here—start when ready." : "Waiting for the host to start.";
-    else if (room.status === "finished") els.status.textContent = winner ? `${winner.name} won the match!` : "Match complete.";
-    else if (snapshot.me.finished) els.status.textContent = "Match complete.";
-    else if (room.mode === "race") els.status.textContent = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : ""}`;
-    else if (room.mode === "coop") els.status.textContent = `Shared word ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount} · Solve it together.`;
-    else els.status.textContent = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : " · First solve wins the point."}`;
+    let status;
+    if (room.status === "waiting") status = snapshot.players.length < 2 ? "Share the code. Waiting for another player." : snapshot.me.isHost ? "Everyone is here—start when ready." : "Waiting for the host to start.";
+    else if (room.status === "finished") status = winner ? `${winner.name} won the match!` : "Match complete.";
+    else if (snapshot.me.finished) status = "Match complete.";
+    else if (room.mode === "race") status = `Word ${Math.min(room.wordCount, snapshot.me.currentWordIndex + 1)} of ${room.wordCount}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : ""}`;
+    else if (room.mode === "coop") status = `Shared word ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount} · Solve it together.`;
+    else status = `${room.endless ? `Round ${nextRound + 1} · Endless` : `Round ${Math.min(room.wordCount, nextRound + 1)} of ${room.wordCount}`}${room.theme === "bollywood" ? ` · ${snapshot.me.answerKind || "Bollywood"} · ${wordLength()} letters` : " · First solve wins the point."}`;
+    window.SixthSenseMessages.setOnlineStatus(status);
     els.start.hidden = !(room.status === "waiting" && snapshot.me.isHost && snapshot.players.length >= 2);
     renderBoard();
     renderKeyboard();
@@ -668,8 +672,8 @@
     if (effect.kind === "sense") {
       window.SixthSenseDialogs?.showHint(effect.clue);
     }
-    else if (effect.kind === "peek") els.status.textContent = `Peek: position ${Number(effect.position) + 1} is ${String(effect.letter).toUpperCase()}.`;
-    else if (effect.kind === "clear") els.status.textContent = `Clear removed ${effect.letters.map(letter => letter.toUpperCase()).join(", ")}.`;
+    else if (effect.kind === "peek") window.SixthSenseMessages.announce(`Position ${Number(effect.position) + 1} is ${String(effect.letter).toUpperCase()}.`);
+    else if (effect.kind === "clear") window.SixthSenseMessages.announce(`Removed ${effect.letters.map(letter => letter.toUpperCase()).join(", ")}.`);
     else if (effect.kind === "skip") showOnlineSkip(effect.answer);
     playAudio(effect.kind === "sense" ? "hint" : effect.kind);
   }
@@ -837,10 +841,7 @@
   }
 
   function setPlayStatus(message) {
-    els.status.textContent = message;
-    els.status.classList.remove("is-shaking");
-    void els.status.offsetWidth;
-    els.status.classList.add("is-shaking");
+    window.SixthSenseMessages.announce(message, { screen: "online" });
     playAudio("invalid");
   }
 
@@ -960,7 +961,7 @@
       state.snapshot = result.snapshot;
       renderSnapshot();
     } catch (error) {
-      els.status.textContent = friendlyError(error);
+      setPlayStatus(friendlyError(error));
     }
   });
   document.addEventListener("sixth-sense-request-online-leave", requestLeave);
