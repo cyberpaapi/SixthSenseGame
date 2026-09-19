@@ -1,0 +1,1415 @@
+[
+  {
+    "id": "BW-001",
+    "word": "PADOSAN",
+    "kind": "Film",
+    "hint": "Borrowed singing talent in a neighbourhood romance.",
+    "displayAnswer": "Padosan",
+    "year": 1968,
+    "reference": "Padosan",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-002",
+    "word": "ANAND",
+    "kind": "Film",
+    "hint": "A cheerful patient leaves a quieter doctor with a story.",
+    "displayAnswer": "Anand",
+    "year": 1971,
+    "reference": "Anand (1971 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-003",
+    "word": "DEEWAAR",
+    "kind": "Film",
+    "hint": "Two brothers, opposite sides of the law, one mother.",
+    "displayAnswer": "Deewaar",
+    "year": 1975,
+    "reference": "Deewaar (1975 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-004",
+    "word": "SHOLAY",
+    "kind": "Film",
+    "hint": "An unfinished score in Ramgarh needs two unlikely helpers.",
+    "displayAnswer": "Sholay",
+    "year": 1975,
+    "reference": "Sholay",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-005",
+    "word": "GOLMAAL",
+    "kind": "Film",
+    "hint": "A moustache does most of the work in a double-life comedy.",
+    "displayAnswer": "Gol Maal",
+    "year": 1979,
+    "reference": "Gol Maal",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-006",
+    "word": "MRINDIA",
+    "kind": "Film",
+    "hint": "A crowded home gains an unseen protector.",
+    "displayAnswer": "Mr. India",
+    "year": 1987,
+    "reference": "Mr. India",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-007",
+    "word": "DAMINI",
+    "kind": "Film",
+    "hint": "A witness stands firm while justice keeps getting postponed.",
+    "displayAnswer": "Damini",
+    "year": 1993,
+    "reference": "Damini",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-008",
+    "word": "BORDER",
+    "kind": "Film",
+    "hint": "A small outpost waits through the night at Longewala.",
+    "displayAnswer": "Border",
+    "year": 1997,
+    "reference": "Border (1997 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-009",
+    "word": "DHADKAN",
+    "kind": "Film",
+    "hint": "An old love returns after a marriage has begun to heal.",
+    "displayAnswer": "Dhadkan",
+    "year": 2000,
+    "reference": "Dhadkan",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-010",
+    "word": "LAGAAN",
+    "kind": "Film",
+    "hint": "A village wagers its future on an unfamiliar game.",
+    "displayAnswer": "Lagaan",
+    "year": 2001,
+    "reference": "Lagaan",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-011",
+    "word": "NAYAK",
+    "kind": "Film",
+    "hint": "A reporter gets one day to put his criticism into practice.",
+    "displayAnswer": "Nayak",
+    "year": 2001,
+    "reference": "Nayak (2001 Hindi film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-012",
+    "word": "AANKHEN",
+    "kind": "Film",
+    "hint": "A disgraced banker recruits robbers who cannot see.",
+    "displayAnswer": "Aankhen",
+    "year": 2002,
+    "reference": "Aankhen (2002 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-013",
+    "word": "COMPANY",
+    "kind": "Film",
+    "hint": "An underworld partnership grows too powerful to stay united.",
+    "displayAnswer": "Company",
+    "year": 2002,
+    "reference": "Company (2002 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-014",
+    "word": "DEVDAS",
+    "kind": "Film",
+    "hint": "Childhood love gives way to pride and self-destruction.",
+    "displayAnswer": "Devdas",
+    "year": 2002,
+    "reference": "Devdas (2002 Hindi film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-015",
+    "word": "BAGHBAN",
+    "kind": "Film",
+    "hint": "Retirement tests how much room children make for their parents.",
+    "displayAnswer": "Baghban",
+    "year": 2003,
+    "reference": "Baghban",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-016",
+    "word": "HUNGAMA",
+    "kind": "Film",
+    "hint": "One wealthy man's name causes far too many misunderstandings.",
+    "displayAnswer": "Hungama",
+    "year": 2003,
+    "reference": "Hungama (2003 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-017",
+    "word": "DHOOM",
+    "kind": "Film",
+    "hint": "The getaway vehicles become almost as famous as the robbers.",
+    "displayAnswer": "Dhoom",
+    "year": 2004,
+    "reference": "Dhoom",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-018",
+    "word": "HUMTUM",
+    "kind": "Film",
+    "hint": "Repeated encounters turn an argument into a cartoonist's romance.",
+    "displayAnswer": "Hum Tum",
+    "year": 2004,
+    "reference": "Hum Tum",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-019",
+    "word": "SWADES",
+    "kind": "Film",
+    "hint": "A scientist looks homeward when a village needs light.",
+    "displayAnswer": "Swades",
+    "year": 2004,
+    "reference": "Swades",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-020",
+    "word": "BLACK",
+    "kind": "Film",
+    "hint": "A demanding teacher reaches a girl without sight or hearing.",
+    "displayAnswer": "Black",
+    "year": 2005,
+    "reference": "Black (2005 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-021",
+    "word": "IQBAL",
+    "kind": "Film",
+    "hint": "A village bowler's ambition needs no spoken words.",
+    "displayAnswer": "Iqbal",
+    "year": 2005,
+    "reference": "Iqbal (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-022",
+    "word": "NOENTRY",
+    "kind": "Film",
+    "hint": "One romantic cover-up becomes several husbands' problem.",
+    "displayAnswer": "No Entry",
+    "year": 2005,
+    "reference": "No Entry",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-023",
+    "word": "FANAA",
+    "kind": "Film",
+    "hint": "A charming guide carries a secret darker than his poetry.",
+    "displayAnswer": "Fanaa",
+    "year": 2006,
+    "reference": "Fanaa (2006 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-024",
+    "word": "KRRISH",
+    "kind": "Film",
+    "hint": "A mountain-raised young man finds a masked destiny in Singapore.",
+    "displayAnswer": "Krrish",
+    "year": 2006,
+    "reference": "Krrish",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-025",
+    "word": "VIVAH",
+    "kind": "Film",
+    "hint": "An arranged match faces its hardest promise after a fire.",
+    "displayAnswer": "Vivah",
+    "year": 2006,
+    "reference": "Vivah",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-026",
+    "word": "DHAMAAL",
+    "kind": "Film",
+    "hint": "A dying stranger's directions start a chaotic race to Goa.",
+    "displayAnswer": "Dhamaal",
+    "year": 2007,
+    "reference": "Dhamaal",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-027",
+    "word": "PARTNER",
+    "kind": "Film",
+    "hint": "A romance coach takes on a client in love with his own boss.",
+    "displayAnswer": "Partner",
+    "year": 2007,
+    "reference": "Partner (2007 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-028",
+    "word": "WELCOME",
+    "kind": "Film",
+    "hint": "A respectable marriage needs a gangster family to change careers.",
+    "displayAnswer": "Welcome",
+    "year": 2007,
+    "reference": "Welcome (2007 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-029",
+    "word": "GHAJINI",
+    "kind": "Film",
+    "hint": "Notes and tattoos hold together a broken trail of revenge.",
+    "displayAnswer": "Ghajini",
+    "year": 2008,
+    "reference": "Ghajini (2008 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-030",
+    "word": "JANNAT",
+    "kind": "Film",
+    "hint": "Easy money draws a gambler behind cricket's scorecards.",
+    "displayAnswer": "Jannat",
+    "year": 2008,
+    "reference": "Jannat",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-031",
+    "word": "WANTED",
+    "kind": "Film",
+    "hint": "A ruthless hired gun is hiding more than his employers realise.",
+    "displayAnswer": "Wanted",
+    "year": 2009,
+    "reference": "Wanted (2009 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-032",
+    "word": "DABANGG",
+    "kind": "Film",
+    "hint": "Back-collar sunglasses and a policeman with flexible rules.",
+    "displayAnswer": "Dabangg",
+    "year": 2010,
+    "reference": "Dabangg",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-033",
+    "word": "READY",
+    "kind": "Film",
+    "hint": "A runaway bride's greedy relatives meet an elaborate family plan.",
+    "displayAnswer": "Ready",
+    "year": 2011,
+    "reference": "Ready (2011 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-034",
+    "word": "SINGHAM",
+    "kind": "Film",
+    "hint": "A village policeman takes his defiance into a corrupt city.",
+    "displayAnswer": "Singham",
+    "year": 2011,
+    "reference": "Singham",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-035",
+    "word": "BARFI",
+    "kind": "Film",
+    "hint": "A mischievous young man says plenty without speaking.",
+    "displayAnswer": "Barfi!",
+    "year": 2012,
+    "reference": "Barfi!",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-036",
+    "word": "KAHAANI",
+    "kind": "Film",
+    "hint": "A missing husband's trail winds through festive Kolkata.",
+    "displayAnswer": "Kahaani",
+    "year": 2012,
+    "reference": "Kahaani",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-037",
+    "word": "FUKREY",
+    "kind": "Film",
+    "hint": "Strange dreams become a risky source of easy money.",
+    "displayAnswer": "Fukrey",
+    "year": 2013,
+    "reference": "Fukrey",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-038",
+    "word": "HAIDER",
+    "kind": "Film",
+    "hint": "A missing father and a familiar tragedy in Kashmir.",
+    "displayAnswer": "Haider",
+    "year": 2014,
+    "reference": "Haider (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-039",
+    "word": "QUEEN",
+    "kind": "Film",
+    "hint": "A cancelled wedding becomes an unexpected solo honeymoon.",
+    "displayAnswer": "Queen",
+    "year": 2014,
+    "reference": "Queen (2013 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-040",
+    "word": "TAMASHA",
+    "kind": "Film",
+    "hint": "A holiday disguise feels more honest than everyday office life.",
+    "displayAnswer": "Tamasha",
+    "year": 2015,
+    "reference": "Tamasha (2015 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-041",
+    "word": "AIRLIFT",
+    "kind": "Film",
+    "hint": "An invasion makes an expatriate businessman responsible for thousands.",
+    "displayAnswer": "Airlift",
+    "year": 2016,
+    "reference": "Airlift",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-042",
+    "word": "DANGAL",
+    "kind": "Film",
+    "hint": "A father's unfinished ambition returns through his daughters.",
+    "displayAnswer": "Dangal",
+    "year": 2016,
+    "reference": "Dangal (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-043",
+    "word": "NEERJA",
+    "kind": "Film",
+    "hint": "A young cabin-crew member stands between hijackers and passengers.",
+    "displayAnswer": "Neerja",
+    "year": 2016,
+    "reference": "Neerja",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-044",
+    "word": "SULTAN",
+    "kind": "Film",
+    "hint": "A fallen wrestler seeks a comeback in a different fighting arena.",
+    "displayAnswer": "Sultan",
+    "year": 2016,
+    "reference": "Sultan (2016 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-045",
+    "word": "RAAZI",
+    "kind": "Film",
+    "hint": "A marriage places a daughter inside an enemy military household.",
+    "displayAnswer": "Raazi",
+    "year": 2018,
+    "reference": "Raazi",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-046",
+    "word": "SANJU",
+    "kind": "Film",
+    "hint": "A star's turbulent life, retold with Ranbir in his shoes.",
+    "displayAnswer": "Sanju",
+    "year": 2018,
+    "reference": "Sanju",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-047",
+    "word": "SIMMBA",
+    "kind": "Film",
+    "hint": "An easy-money policeman finally finds a reason to change sides.",
+    "displayAnswer": "Simmba",
+    "year": 2018,
+    "reference": "Simmba",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-048",
+    "word": "STREE",
+    "kind": "Film",
+    "hint": "A town's men trust a painted doorway message after dark.",
+    "displayAnswer": "Stree",
+    "year": 2018,
+    "reference": "Stree (2018 film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-049",
+    "word": "ANIMAL",
+    "kind": "Film",
+    "hint": "A son's hunger for his father's approval turns violently obsessive.",
+    "displayAnswer": "Animal",
+    "year": 2023,
+    "reference": "Animal (2023 Indian film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-050",
+    "word": "JAWAN",
+    "kind": "Film",
+    "hint": "A metro hijack becomes a public reckoning for powerful institutions.",
+    "displayAnswer": "Jawan",
+    "year": 2023,
+    "reference": "Jawan (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-051",
+    "word": "PATHAAN",
+    "kind": "Film",
+    "hint": "An agent returns to confront a former insider and a deadly threat.",
+    "displayAnswer": "Pathaan",
+    "year": 2023,
+    "reference": "Pathaan (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-052",
+    "word": "MUNJYA",
+    "kind": "Film",
+    "hint": "An old village spirit still wants the wedding it never had.",
+    "displayAnswer": "Munjya",
+    "year": 2024,
+    "reference": "Munjya (film)",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-053",
+    "word": "CHHAAVA",
+    "kind": "Film",
+    "hint": "A son defends a Maratha kingdom and his father's legacy.",
+    "displayAnswer": "Chhaava",
+    "year": 2025,
+    "reference": "Chhaava",
+    "batch": "Retained",
+    "sources": []
+  },
+  {
+    "id": "BW-054",
+    "word": "NEWYORK",
+    "kind": "Film",
+    "hint": "Three college friends find their lives reshaped by suspicion after September 11.",
+    "displayAnswer": "New York",
+    "year": 2009,
+    "reference": "New York (2009)",
+    "batch": "New",
+    "sources": [
+      "https://www.yashrajfilms.com/digital-and-disc/vod/new-york"
+    ]
+  },
+  {
+    "id": "BW-055",
+    "word": "HICHKI",
+    "kind": "Film",
+    "hint": "A teacher's involuntary sounds are not her classroom's biggest obstacle.",
+    "displayAnswer": "Hichki",
+    "year": 2018,
+    "reference": "Hichki (2018)",
+    "batch": "New",
+    "sources": [
+      "https://www.yashrajfilms.com/movies/hichki"
+    ]
+  },
+  {
+    "id": "BW-056",
+    "word": "DOSTANA",
+    "kind": "Film",
+    "hint": "Two men invent a relationship to share a flat, then fall for the same woman.",
+    "displayAnswer": "Dostana",
+    "year": 2008,
+    "reference": "Dostana (2008)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-057",
+    "word": "ROCKON",
+    "kind": "Film",
+    "hint": "An unfinished band's old disagreements return with a chance to play again.",
+    "displayAnswer": "Rock On!!",
+    "year": 2008,
+    "reference": "Rock On!! (2008)",
+    "batch": "New",
+    "sources": [
+      "https://www.excelmovies.com/films/rock-on/"
+    ]
+  },
+  {
+    "id": "BW-058",
+    "word": "KESARI",
+    "kind": "Film",
+    "hint": "Twenty-one soldiers face an army at an isolated frontier post.",
+    "displayAnswer": "Kesari",
+    "year": 2019,
+    "reference": "Kesari (2019), Battle of Saragarhi",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-059",
+    "word": "MASTI",
+    "kind": "Film",
+    "hint": "Three husbands' secret adventures land them in the same murder investigation.",
+    "displayAnswer": "Masti",
+    "year": 2004,
+    "reference": "Masti (2004)",
+    "batch": "New",
+    "sources": [
+      "https://www.primevideo.com/detail/0K6XCL570CKZ0L3VLE79AVSUAO"
+    ]
+  },
+  {
+    "id": "BW-060",
+    "word": "GUNDAY",
+    "kind": "Film",
+    "hint": "Two refugee boys build a coal empire before love divides their partnership.",
+    "displayAnswer": "Gunday",
+    "year": 2014,
+    "reference": "Gunday (2014)",
+    "batch": "New",
+    "sources": [
+      "https://www.yashrajfilms.com/movies/gunday"
+    ]
+  },
+  {
+    "id": "BW-061",
+    "word": "MURDER",
+    "kind": "Film",
+    "hint": "An old lover returns to a lonely wife's life, followed by a disappearance.",
+    "displayAnswer": "Murder",
+    "year": 2004,
+    "reference": "Murder (2004)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-062",
+    "word": "BHOOT",
+    "kind": "Film",
+    "hint": "A Mumbai high-rise flat comes with a previous resident's unfinished story.",
+    "displayAnswer": "Bhoot",
+    "year": 2003,
+    "reference": "Bhoot (2003)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-063",
+    "word": "RAONE",
+    "kind": "Film",
+    "hint": "A game developer's villain escapes the screen and pursues his son.",
+    "displayAnswer": "Ra.One",
+    "year": 2011,
+    "reference": "Ra.One (2011)",
+    "batch": "New",
+    "sources": [
+      "https://www.boxofficeindia.com/circuit_collection.php?area=domestic&cityid=12&movieid=28"
+    ]
+  },
+  {
+    "id": "BW-064",
+    "word": "JUDAAI",
+    "kind": "Film",
+    "hint": "A wife's dream of wealth puts a price on sharing her husband.",
+    "displayAnswer": "Judaai",
+    "year": 1997,
+    "reference": "Judaai (1997)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-065",
+    "word": "JUDWAA",
+    "kind": "Film",
+    "hint": "Separated brothers find that distance cannot quite separate their reflexes.",
+    "displayAnswer": "Judwaa",
+    "year": 1997,
+    "reference": "Judwaa (1997)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-066",
+    "word": "KHILADI",
+    "kind": "Film",
+    "hint": "A college group's fake kidnapping stops being a harmless wager.",
+    "displayAnswer": "Khiladi",
+    "year": 1992,
+    "reference": "Khiladi (1992)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-067",
+    "word": "SAAJAN",
+    "kind": "Film",
+    "hint": "A woman loves a poet's words, while another man borrows his identity.",
+    "displayAnswer": "Saajan",
+    "year": 1991,
+    "reference": "Saajan (1991)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-068",
+    "word": "MOHRA",
+    "kind": "Film",
+    "hint": "A freed prisoner's new benefactor has a dangerous use for his gratitude.",
+    "displayAnswer": "Mohra",
+    "year": 1994,
+    "reference": "Mohra (1994)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-069",
+    "word": "PARDES",
+    "kind": "Film",
+    "hint": "A promised American dream hides a very different fiance.",
+    "displayAnswer": "Pardes",
+    "year": 1997,
+    "reference": "Pardes (1997)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-070",
+    "word": "GHAYAL",
+    "kind": "Film",
+    "hint": "A boxer's search for his brother becomes a fight against a protected crime boss.",
+    "displayAnswer": "Ghayal",
+    "year": 1990,
+    "reference": "Ghayal (1990)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-071",
+    "word": "TEZAAB",
+    "kind": "Film",
+    "hint": "A dancer, an exploited daughter and the street tough who loves her.",
+    "displayAnswer": "Tezaab",
+    "year": 1988,
+    "reference": "Tezaab (1988)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-072",
+    "word": "TRIDEV",
+    "kind": "Film",
+    "hint": "A policeman, a bandit's son and a street fighter find a common enemy.",
+    "displayAnswer": "Tridev",
+    "year": 1989,
+    "reference": "Tridev (1989)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-073",
+    "word": "ZANJEER",
+    "kind": "Film",
+    "hint": "A policeman's childhood nightmare keeps returning to a horse-shaped bracelet charm.",
+    "displayAnswer": "Zanjeer",
+    "year": 1973,
+    "reference": "Zanjeer (1973)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-074",
+    "word": "SATYA",
+    "kind": "Film",
+    "hint": "A newcomer finds friendship in Mumbai's underworld, at a lasting cost.",
+    "displayAnswer": "Satya",
+    "year": 1998,
+    "reference": "Satya (1998)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-075",
+    "word": "GHATAK",
+    "kind": "Film",
+    "hint": "A wrestler's trip from Banaras becomes a confrontation with a city's feared tyrant.",
+    "displayAnswer": "Ghatak",
+    "year": 1996,
+    "reference": "Ghatak (1996)",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-076",
+    "word": "BABURAO",
+    "kind": "Character",
+    "hint": "An irritable landlord whose wrong-number calls rarely bring good news.",
+    "displayAnswer": "Baburao",
+    "year": 2000,
+    "reference": "Hera Pheri — Baburao Ganpatrao Apte",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-077",
+    "word": "GABBAR",
+    "kind": "Character",
+    "hint": "A bandit turns a simple headcount into a terrifying conversation.",
+    "displayAnswer": "Gabbar",
+    "year": 1975,
+    "reference": "Sholay — Gabbar Singh",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-078",
+    "word": "MOGAMBO",
+    "kind": "Character",
+    "hint": "An underground empire runs on fear and its master's occasional satisfaction.",
+    "displayAnswer": "Mogambo",
+    "year": 1987,
+    "reference": "Mr. India — Mogambo",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-079",
+    "word": "CIRCUIT",
+    "kind": "Character",
+    "hint": "A gangster's loyal helper treats impossible favours as everyday errands.",
+    "displayAnswer": "Circuit",
+    "year": 2003,
+    "reference": "Munna Bhai M.B.B.S. — Circuit",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-080",
+    "word": "MUNNA",
+    "kind": "Character",
+    "hint": "A medical student's favourite treatment is a hug, not a prescription.",
+    "displayAnswer": "Munna",
+    "year": 2003,
+    "reference": "Munna Bhai M.B.B.S. — Murli Prasad Sharma, nicknamed Munna",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-081",
+    "word": "RANCHO",
+    "kind": "Character",
+    "hint": "An engineering student's unusual lessons outlast the identity he borrowed.",
+    "displayAnswer": "Rancho",
+    "year": 2009,
+    "reference": "3 Idiots — Rancho",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-082",
+    "word": "CHATUR",
+    "kind": "Character",
+    "hint": "A memorised college speech becomes a lesson he never intended to give.",
+    "displayAnswer": "Chatur",
+    "year": 2009,
+    "reference": "3 Idiots — Chatur Ramalingam",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-083",
+    "word": "SIMRAN",
+    "kind": "Character",
+    "hint": "A European holiday leaves her waiting for permission on a railway platform.",
+    "displayAnswer": "Simran",
+    "year": 1995,
+    "reference": "Dilwale Dulhania Le Jayenge — Simran",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-084",
+    "word": "ANJALI",
+    "kind": "Character",
+    "hint": "The basketball-playing college friend whose unfinished romance returns at summer camp.",
+    "displayAnswer": "Anjali",
+    "year": 1998,
+    "reference": "Kuch Kuch Hota Hai — Anjali Sharma",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-085",
+    "word": "CHULBUL",
+    "kind": "Character",
+    "hint": "A swaggering policeman prefers his sunglasses behind his collar.",
+    "displayAnswer": "Chulbul",
+    "year": 2010,
+    "reference": "Dabangg — Chulbul Pandey",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-086",
+    "word": "BHUVAN",
+    "kind": "Character",
+    "hint": "A villager accepts a tax wager before he has a cricket team.",
+    "displayAnswer": "Bhuvan",
+    "year": 2001,
+    "reference": "Lagaan — Bhuvan",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-087",
+    "word": "VEERU",
+    "kind": "Character",
+    "hint": "A marriage negotiation becomes a very public performance atop a water tank.",
+    "displayAnswer": "Veeru",
+    "year": 1975,
+    "reference": "Sholay — Veeru",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-088",
+    "word": "BASANTI",
+    "kind": "Character",
+    "hint": "A talkative carriage driver has a trusted companion named Dhanno.",
+    "displayAnswer": "Basanti",
+    "year": 1975,
+    "reference": "Sholay — Basanti",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-089",
+    "word": "MURAD",
+    "kind": "Character",
+    "hint": "A chauffeur's son finds another voice in Mumbai's underground rap battles.",
+    "displayAnswer": "Murad",
+    "year": 2019,
+    "reference": "Gully Boy — Murad Ahmed",
+    "batch": "New",
+    "sources": [
+      "https://www.excelmovies.com/films/gully-boy/"
+    ]
+  },
+  {
+    "id": "BW-090",
+    "word": "SEHMAT",
+    "kind": "Character",
+    "hint": "A daughter enters a military household with a wedding and a secret assignment.",
+    "displayAnswer": "Sehmat",
+    "year": 2018,
+    "reference": "Raazi — Sehmat",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-091",
+    "word": "KACHRA",
+    "kind": "Character",
+    "hint": "An overlooked villager gives an unlikely cricket team its sharpest spin.",
+    "displayAnswer": "Kachra",
+    "year": 2001,
+    "reference": "Lagaan — Kachra",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-092",
+    "word": "FAIZAL",
+    "kind": "Character",
+    "hint": "An underestimated son inherits his family's bloody Wasseypur score.",
+    "displayAnswer": "Faizal",
+    "year": 2012,
+    "reference": "Gangs of Wasseypur – Part 2 — Faizal Khan",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-093",
+    "word": "SARDAR",
+    "kind": "Character",
+    "hint": "A coal-belt patriarch leaves his sons a dangerous inheritance of revenge.",
+    "displayAnswer": "Sardar",
+    "year": 2012,
+    "reference": "Gangs of Wasseypur – Part 1 — Sardar Khan",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-094",
+    "word": "ISHAAN",
+    "kind": "Character",
+    "hint": "An art teacher sees the imagination hidden behind his struggling schoolwork.",
+    "displayAnswer": "Ishaan",
+    "year": 2007,
+    "reference": "Taare Zameen Par — Ishaan Awasthi",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-095",
+    "word": "NAINA",
+    "kind": "Character",
+    "hint": "A studious schoolmate's mountain trip becomes a romance revisited at a wedding.",
+    "displayAnswer": "Naina",
+    "year": 2013,
+    "reference": "Yeh Jawaani Hai Deewani — Naina Talwar",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-096",
+    "word": "SHYAM",
+    "kind": "Character",
+    "hint": "A bank-job hopeful becomes the grounded tenant in a disastrous ransom scheme.",
+    "displayAnswer": "Shyam",
+    "year": 2000,
+    "reference": "Hera Pheri — Shyam",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-097",
+    "word": "MAJNU",
+    "kind": "Character",
+    "hint": "A feared gangster would much rather show someone his paintings.",
+    "displayAnswer": "Majnu",
+    "year": 2007,
+    "reference": "Welcome — Majnu Bhai",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-098",
+    "word": "LUCKY",
+    "kind": "Character",
+    "hint": "The quietest of four freeloaders still manages to make himself heard.",
+    "displayAnswer": "Lucky",
+    "year": 2006,
+    "reference": "Golmaal: Fun Unlimited — Lucky",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Golmaal%3A_Fun_Unlimited"
+    ]
+  },
+  {
+    "id": "BW-099",
+    "word": "GOPAL",
+    "kind": "Character",
+    "hint": "The bossy freeloader supplies a fake grandson's voice while his friend supplies the face.",
+    "displayAnswer": "Gopal",
+    "year": 2006,
+    "reference": "Golmaal: Fun Unlimited — Gopal",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Golmaal%3A_Fun_Unlimited"
+    ]
+  },
+  {
+    "id": "BW-100",
+    "word": "MADHAV",
+    "kind": "Character",
+    "hint": "The wisecracking freeloader keeps trying to outwit the bossiest man in his group.",
+    "displayAnswer": "Madhav",
+    "year": 2006,
+    "reference": "Golmaal: Fun Unlimited — Madhav",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Golmaal%3A_Fun_Unlimited"
+    ]
+  },
+  {
+    "id": "BW-101",
+    "word": "CHOOCHA",
+    "kind": "Character",
+    "hint": "His peculiar dreams make his friends believe there is money in sleeping.",
+    "displayAnswer": "Choocha",
+    "year": 2013,
+    "reference": "Fukrey — Choocha",
+    "batch": "New",
+    "sources": [
+      "https://www.excelmovies.com/films/fukrey/"
+    ]
+  },
+  {
+    "id": "BW-102",
+    "word": "HUNNY",
+    "kind": "Character",
+    "hint": "He turns his best friend's bizarre dreams into lottery predictions.",
+    "displayAnswer": "Hunny",
+    "year": 2013,
+    "reference": "Fukrey — Hunny",
+    "batch": "New",
+    "sources": [
+      "https://www.excelmovies.com/films/fukrey/"
+    ]
+  },
+  {
+    "id": "BW-103",
+    "word": "ZAFAR",
+    "kind": "Character",
+    "hint": "A struggling musician joins a dream-based scheme while his father's hospital bills mount.",
+    "displayAnswer": "Zafar",
+    "year": 2013,
+    "reference": "Fukrey — Zafar",
+    "batch": "New",
+    "sources": [
+      "https://www.excelmovies.com/films/fukrey/"
+    ]
+  },
+  {
+    "id": "BW-104",
+    "word": "VIRUS",
+    "kind": "Character",
+    "hint": "An engineering college's feared director treats every minute like a competition.",
+    "displayAnswer": "Virus",
+    "year": 2009,
+    "reference": "3 Idiots — Viru Sahastrabuddhe, nicknamed Virus",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-105",
+    "word": "FARHAN",
+    "kind": "Character",
+    "hint": "An engineering student keeps his real ambition behind a camera.",
+    "displayAnswer": "Farhan",
+    "year": 2009,
+    "reference": "3 Idiots — Farhan Qureshi",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-106",
+    "word": "ADITYA",
+    "kind": "Character",
+    "hint": "A defeated businessman finds a reason to keep going after a talkative train encounter.",
+    "displayAnswer": "Aditya",
+    "year": 2007,
+    "reference": "Jab We Met — Aditya Kashyap",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-107",
+    "word": "BUNNY",
+    "kind": "Character",
+    "hint": "A restless traveller must decide whether another departure is worth what he leaves behind.",
+    "displayAnswer": "Bunny",
+    "year": 2013,
+    "reference": "Yeh Jawaani Hai Deewani — Kabir Thapar, nicknamed Bunny",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-108",
+    "word": "ADITI",
+    "kind": "Character",
+    "hint": "A fiery college friend called Meow takes time to recognise her perfect match.",
+    "displayAnswer": "Aditi",
+    "year": 2008,
+    "reference": "Jaane Tu... Ya Jaane Na — Aditi",
+    "batch": "New",
+    "sources": [
+      "https://akpfilms.com/films/jaane-tu-ya-jaane-na/"
+    ]
+  },
+  {
+    "id": "BW-109",
+    "word": "KALPANA",
+    "kind": "Character",
+    "hint": "She invents a romance with a tycoon without recognising the man she has actually met.",
+    "displayAnswer": "Kalpana",
+    "year": 2008,
+    "reference": "Ghajini — Kalpana",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-110",
+    "word": "SANJAY",
+    "kind": "Character",
+    "hint": "A tycoon's revenge depends on photographs, notes and messages tattooed on his body.",
+    "displayAnswer": "Sanjay",
+    "year": 2008,
+    "reference": "Ghajini — Sanjay Singhania",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-111",
+    "word": "RADHE",
+    "kind": "Character",
+    "hint": "A reckless college tough's devotion ends behind an institution's walls.",
+    "displayAnswer": "Radhe",
+    "year": 2003,
+    "reference": "Tere Naam — Radhe Mohan",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-112",
+    "word": "RAHUL",
+    "kind": "Character",
+    "hint": "An adopted son's choice of bride sends him away from his wealthy father's home.",
+    "displayAnswer": "Rahul",
+    "year": 2001,
+    "reference": "Kabhi Khushi Kabhie Gham — Rahul Raichand",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-113",
+    "word": "POOJA",
+    "kind": "Character",
+    "hint": "The fashion-conscious younger sister sets her own rules in London.",
+    "displayAnswer": "Pooja",
+    "year": 2001,
+    "reference": "Kabhi Khushi Kabhie Gham — Pooja Sharma, nicknamed Poo",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-114",
+    "word": "ROHIT",
+    "kind": "Character",
+    "hint": "His father's old computer brings an unexpected friend from the sky.",
+    "displayAnswer": "Rohit",
+    "year": 2003,
+    "reference": "Koi... Mil Gaya — Rohit Mehra",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Koi..._Mil_Gaya"
+    ]
+  },
+  {
+    "id": "BW-115",
+    "word": "KRISHNA",
+    "kind": "Character",
+    "hint": "A mountain-raised grandson follows love to Singapore and uncovers his father's fate.",
+    "displayAnswer": "Krishna",
+    "year": 2006,
+    "reference": "Krrish — Krishna Mehra",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-116",
+    "word": "JADOO",
+    "kind": "Character",
+    "hint": "A stranded visitor's extraordinary gifts draw their strength from sunlight.",
+    "displayAnswer": "Jadoo",
+    "year": 2003,
+    "reference": "Koi... Mil Gaya — Jadoo",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Koi..._Mil_Gaya"
+    ]
+  },
+  {
+    "id": "BW-117",
+    "word": "SAKEENA",
+    "kind": "Character",
+    "hint": "A truck driver's love takes her across Partition's newly drawn divide.",
+    "displayAnswer": "Sakeena",
+    "year": 2001,
+    "reference": "Gadar: Ek Prem Katha — Sakeena",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Ameesha_Patel"
+    ]
+  },
+  {
+    "id": "BW-118",
+    "word": "RUDRA",
+    "kind": "Character",
+    "hint": "A Chanderi bookseller knows which old legend his friends should take seriously.",
+    "displayAnswer": "Rudra",
+    "year": 2018,
+    "reference": "Stree — Rudra",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-119",
+    "word": "VICKY",
+    "kind": "Character",
+    "hint": "A gifted tailor's mysterious new crush arrives with his town's most feared festival.",
+    "displayAnswer": "Vicky",
+    "year": 2018,
+    "reference": "Stree — Vicky",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-120",
+    "word": "BITTU",
+    "kind": "Character",
+    "hint": "The tailor's friend loses his girlfriend to Chanderi's new night-time threat.",
+    "displayAnswer": "Bittu",
+    "year": 2024,
+    "reference": "Stree 2 — Bittu",
+    "batch": "New",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Stree_2"
+    ]
+  },
+  {
+    "id": "BW-121",
+    "word": "SARKATA",
+    "kind": "Character",
+    "hint": "Chanderi's new terror can send its head ahead of the rest of its body.",
+    "displayAnswer": "Sarkata",
+    "year": 2024,
+    "reference": "Stree 2 — Sarkata",
+    "batch": "New",
+    "sources": [
+      "https://www.imdb.com/title/tt27510174/fullcredits/cast"
+    ]
+  },
+  {
+    "id": "BW-122",
+    "word": "MUKESH",
+    "kind": "Character",
+    "hint": "A film producer thinks a burning set will bury his secret forever.",
+    "displayAnswer": "Mukesh",
+    "year": 2007,
+    "reference": "Om Shanti Om — Mukesh Mehra",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-123",
+    "word": "RAJIV",
+    "kind": "Character",
+    "hint": "A respectable groom discovers that winning his bride means reforming her gangster brothers.",
+    "displayAnswer": "Rajiv",
+    "year": 2007,
+    "reference": "Welcome — Rajiv Saini",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-124",
+    "word": "LAKHAN",
+    "kind": "Character",
+    "hint": "A policeman's easy-money ambitions clash with his more principled elder brother.",
+    "displayAnswer": "Lakhan",
+    "year": 1989,
+    "reference": "Ram Lakhan — Lakhan Pratap Singh",
+    "batch": "New",
+    "sources": []
+  },
+  {
+    "id": "BW-125",
+    "word": "SHANTI",
+    "kind": "Character",
+    "hint": "A screen star's unfinished story waits for a junior artist's next lifetime.",
+    "displayAnswer": "Shanti",
+    "year": 2007,
+    "reference": "Om Shanti Om — Shanti Priya",
+    "batch": "New",
+    "sources": []
+  }
+]

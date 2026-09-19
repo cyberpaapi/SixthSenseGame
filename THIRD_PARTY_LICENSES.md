@@ -2,7 +2,7 @@
 
 ## Bollywood facts and references
 
-The server-only Bollywood Race bank contains film titles, performer names, dates and cast-credit facts researched from Wikipedia contributors, Box Office India and Bollywood Hungama. Each record retains its source links; `BOLLYWOOD_CONTENT.md` explains selection and limitations. Wikipedia article text is available under CC BY-SA; no article prose, film posters, performer photos, studio logos or music is reproduced here. Clues and the generic clapperboard SVG were newly authored for this game. Inclusion identifies the referenced films/performers and does not imply their endorsement.
+The server-only Bollywood Race/VS bank contains movie titles, fictional character names, dates and plot/credit facts. Records retain reference works and consulted source links where available; `BOLLYWOOD_CONTENT.md` explains selection and verification limits. Selected checks use official studio pages, streaming listings, IMDb, Wikipedia contributors and film-trade sources. Wikipedia article text is available under CC BY-SA; no article prose, film posters, performer photos, studio logos or music is reproduced here. Clues and the generic clapperboard SVG were newly authored for this game. Inclusion identifies the referenced works and does not imply endorsement.
 
 ## Bundled fonts and native dependencies
 

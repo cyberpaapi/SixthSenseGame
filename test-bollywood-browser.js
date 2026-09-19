@@ -15,7 +15,7 @@ const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Cinema QA" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
     });
-    const routeWords = ["jawan", "dangal", "pathaan"];
+    const routeWords = ["jawan", "rancho", "baburao"];
     const players = Array.from({ length: isVs ? 2 : 8 }, (_, i) => ({ id: `p${i}`, name: `Player${i}`, avatar: "fox", seat: i + 1, currentWordIndex: 0, attempts: [], score: 0, finished: false }));
     const me = { ...players[0], isHost: true, wordLength: 5, answerKind: "Film", lifelines: {} };
     const snapshot = { room: { code: "BOLLYQ", mode: isVs ? "vs" : "race", currentRound: 0, theme: "bollywood", difficulty: "easy", wordCount: 3, status: "running", revision: 1, maxGuesses: 6 }, me, players };
@@ -29,6 +29,7 @@ const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
           me.currentWordIndex++; players[0].currentWordIndex = me.currentWordIndex;
           if (isVs) { snapshot.room.currentRound = me.currentWordIndex; me.score++; players[0].score = me.score; snapshot.room.lastRoundWinnerPlayerId = me.id; }
           me.wordLength = routeWords[me.currentWordIndex]?.length || 7;
+          me.answerKind = "Character";
           me.attempts = []; me.lifelines = {};
         } else me.attempts.push({ guess: body.guess, score: Core.scoreGuess(body.guess, answer) });
         snapshot.room.revision++;
@@ -54,12 +55,15 @@ const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
     await page.click(isVs ? '[data-open-online="bollywood-vs"]' : '[data-open-online="bollywood"]');
     assert.equal(await page.locator("#online-difficulty-options").isHidden(), true);
     assert.equal(await page.locator("#bollywood-room-guide").isVisible(), true);
+    assert.match(await page.locator("#bollywood-room-guide").innerText(), /movie or fictional character/);
+    assert(!/actors|first names|579/.test(await page.locator("#bollywood-room-guide").innerText()));
     await page.click("#online-create-room");
     await page.waitForSelector(isVs ? "#online-versus-names:not([hidden])" : ".race-token");
     const create = requests.find(r => r.action === "create");
     assert.equal(create.theme, "bollywood"); assert.equal(create.mode, isVs ? "vs" : "race"); assert.equal(create.supportsVariableLength, true);
     for (const word of routeWords) {
       await page.waitForFunction(length => document.querySelector("#online-board .board-row")?.children.length === length, word.length);
+      await page.waitForFunction(kind => document.querySelector("#online-live-status").textContent.includes(kind), word === "jawan" ? "Film" : "Character");
       assert.equal(await page.locator("#online-board .board-row").count(), 6);
       assert.equal(await page.locator('[data-online-lifeline="skip"]').isHidden(), true);
       for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 844, height: 360 }]) {
@@ -79,7 +83,7 @@ const isVs = process.env.BOLLYWOOD_VARIANT === "vs";
       for (const letter of word.slice(0, -1)) await page.tap(`[data-online-key="${letter.toUpperCase()}"]`);
       assert.equal(requests.filter(r => r.action === "guess").length, before, "do not submit before the last letter");
       assert.equal((await page.locator("#online-board .board-row").first().innerText()).replace(/\s/g, "").toLowerCase(), word.slice(0, -1), "one tap enters once");
-      if (word === "pathaan") {
+      if (word === "baburao") {
         if (process.env.SIXTH_SENSE_EVIDENCE) await page.screenshot({ path: require("node:path").join(process.env.SIXTH_SENSE_EVIDENCE, "bollywood-race.png") });
         break;
       }

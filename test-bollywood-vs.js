@@ -20,7 +20,7 @@ const bank = require("./data/bollywood-answers.json");
   }
   assert.equal(api.chooseFreshAnswer("easy", [...pool].slice(0, -1), "bollywood"), [...pool].at(-1));
   assert(pool.has(api.chooseFreshAnswer("easy", [...pool], "bollywood")), "exhaustion must recycle Bollywood, not English");
-  for (const answer of ["jawan", "pathaan"]) {
+  for (const answer of ["jawan", "pathaan", "virus", "baburao"]) {
     for (const decision of ["solve", "decline"]) {
       const room = { code: "BOLLYV", mode: "vs", answer_theme: "bollywood", difficulty: "easy", max_guesses: 6, word_count: 9, endless: true, current_round: 0, status: "running", answer_words: [answer], revision: 1 };
       const me = { id: randomUUID(), current_word_index: 0, attempts: [], lifeline_state: {}, completed_rounds: [], score: 0, revision: 1 };

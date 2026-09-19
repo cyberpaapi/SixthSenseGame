@@ -5,7 +5,7 @@ const { neon } = require("@neondatabase/serverless");
 const Identities = require("../lib/identities");
 const Core = require("../game-core.js");
 const Bollywood = require("../data/bollywood-answers.json");
-// Retain clues for routes created before the owner's complete-title/first-name refinement.
+// Retain lookup for already-created routes from before the movie/character replacement.
 // This archive is never used to choose new answers; rooms expire after 24 hours.
 const BollywoodLegacy = require("../data/bollywood-legacy-20260918.json");
 const BOLLYWOOD_BY_WORD = new Map([...BollywoodLegacy, ...Bollywood].map(entry => [entry.word, entry]));
@@ -570,7 +570,7 @@ async function submitLifeline(sql, body) {
 
   let effect;
   if (kind === "sense") {
-    lifelines.clue = clueFor(room, answer) || lifelines.clue || (isBollywood(room) ? "A Hindi film or performer." : "A familiar six-letter word.");
+    lifelines.clue = clueFor(room, answer) || lifelines.clue || (isBollywood(room) ? "A Hindi movie or fictional character." : "A familiar six-letter word.");
     effect = { kind, clue: lifelines.clue };
   } else if (kind === "peek") {
     const candidates = Core.remainingPeekPositions(parseJson(me.attempts, []), (lifelines.peeked || []).map(entry => entry.position), answer.length);
