@@ -35,7 +35,8 @@ const { chromium } = require("./test-browser-runtime");
         }
         await route.fulfill({ json: { roomCode: "MESSAG", resumeToken: "fixture-seat", playerId: "self", snapshot, effect } });
       });
-      await page.goto(root);
+      await page.goto(root, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => document.fonts.ready);
       if (mode === "daily") await page.click('[data-start-mode="daily"]');
       else {
         await page.click(`[data-open-online="${mode}"]`);
@@ -71,6 +72,12 @@ const { chromium } = require("./test-browser-runtime");
           await page.waitForFunction(() => document.documentElement.scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth);
           const before = await page.locator(boardSelector).boundingBox();
           await page.evaluate(() => window.SixthSenseMessages.announce("That word isn’t in the accepted dictionary. Try another word.", { duration: 6000 }));
+          // Responsive board sizing is observer-driven; wait for its visible result.
+          await page.waitForFunction(({ selector, boardSelector }) => {
+            const bubble = document.querySelector(selector).getBoundingClientRect();
+            const board = document.querySelector(boardSelector).getBoundingClientRect();
+            return bubble.bottom <= board.top + 1;
+          }, { selector, boardSelector }, { timeout: 3000 });
           await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           const m = await page.evaluate(({ selector, boardSelector }) => {
             const bubble = document.querySelector(selector), slot = bubble.parentElement;
