@@ -7,7 +7,7 @@ const { chromium } = require("./test-browser-runtime");
   try {
     for (const mode of ["race", "vs", "bollywood", "bollywood-vs"]) {
       const bollywood = mode.startsWith("bollywood");
-      const prices = bollywood ? { sense: 75, peek: 125, clear: 100 } : { sense: 30, peek: 50, clear: 40 };
+      const prices = bollywood ? { sense: 75, peek: 50, clear: 40 } : { sense: 30, peek: 50, clear: 40 };
       const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
       const errors = [];
       page.on("pageerror", error => errors.push(error.message));
@@ -103,6 +103,6 @@ const { chromium } = require("./test-browser-runtime");
       assert.deepEqual(errors, []);
       await page.close();
     }
-    console.log("Bollywood pricing passed: Race/VS 75/125/100 prices and deductions, classic 30/50/40, ARIA, free Sense reopening, stored tokens, failed-request retry and insufficient funds.");
+    console.log("Bollywood pricing passed: Race/VS 75/50/40 prices and deductions, classic 30/50/40, ARIA, free Sense reopening, stored tokens, failed-request retry and insufficient funds.");
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-19
 
-Last verified: 2026-09-19 (Bollywood 2.5x hint pricing: core/multiplayer/progression/identity, Bollywood content/server and VS tests, dedicated four-mode browser pricing checks, both Race/VS phone/landscape suites, full browser QA, JavaScript syntax, whitespace and native/Vercel/Pages client packaging passed locally. No push, deployment, Android binary or physical-device test for this change.)
+Last verified: 2026-09-19 (Bollywood price correction: npm test and the four-mode browser pricing regression passed locally, including displayed/accessibility prices and wallet deductions. Bollywood Sense is 75; Peek/Clear are restored to 50/40. Whitespace checks passed. No push, deployment or Android binary for this change.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -113,11 +113,11 @@ Lifeline prices and behavior:
 | Lifeline | Standard / Bollywood cost | Current behavior |
 | --- | ---: | --- |
 | Sense | 30 / 75 | If stock is zero, one tap buys and consumes the token immediately and unlocks the clue. Once unlocked, the same clue can be reopened freely for that puzzle. It appears in a centered confirmable popup. |
-| Peek | 50 / 125 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a position that is neither green in any earlier guess nor already revealed. Solo and authoritative multiplayer share the same rule; Peek disables when all positions are known, without spending another item or coins. Repeated letters at different unknown positions remain eligible. |
-| Clear | 40 / 100 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
+| Peek | 50 / 50 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use reveals a position that is neither green in any earlier guess nor already revealed. Solo and authoritative multiplayer share the same rule; Peek disables when all positions are known, without spending another item or coins. Repeated letters at different unknown positions remain eligible. |
+| Clear | 40 / 40 | Can be stocked, consumed, purchased again, and reused. If stock is zero, one tap buys and uses it. Every use marks up to three new unique letters that cannot occur in the answer, until no candidates remain. |
 | Skip | 60 / unavailable | Solo only: can be stocked, consumed, purchased and reused. Reveals the answer, awards no coins, advances only after green OK; Adventure advances the current rung. Hidden and server-rejected in VS, Race and Co-op. A multiplayer Skip already pending before this release may complete its existing confirmation so active rooms do not get stuck. |
 
-Bollywood Race and VS charge 2.5 times the standard Sense, Peek and Clear prices. `Core.lifelineCosts(theme)` provides the shared prices; multiplayer passes the authoritative snapshot room theme to both the displayed/accessible price and the wallet purchase. Help lists the Bollywood prices explicitly. Existing inventory is still consumed without another purchase, and reopening an unlocked Sense stays free. A failed multiplayer request retains its purchased token for retry. Last Chance remains 125 coins in every mode.
+Bollywood Race and VS charge 2.5 times the standard Sense price (75 coins); Peek and Clear retain the standard 50- and 40-coin prices. `Core.lifelineCosts(theme)` provides the shared prices; multiplayer passes the authoritative snapshot room theme to both the displayed/accessible price and the wallet purchase. Help lists the Bollywood prices explicitly. Existing inventory is still consumed without another purchase, and reopening an unlocked Sense stays free. A failed multiplayer request retains its purchased token for retry. Last Chance remains 125 coins in every mode.
 
 Inventory, coins, points, and economy version persist in `localStorage`. Coin totals are normalized into the inclusive 0–99,999 range whenever loaded or credited, so malformed/oversized saves and repeated rewards cannot create a sixth digit. The bottom dock appears in solo and multiplayer play and shows only icons. If stock is zero, the price appears below the icon. If stock exists, the price disappears and a stock count appears on the icon. Redundant zero stock is never shown. Zero-stock lifelines buy and use atomically from the player’s perspective; Skip delays the charge until its confirmation. Economy version 9 performs the latest universal reset: every wallet saved under versions 1 through 8 is assigned the same 500-coin baseline once, then ordinary earnings and spending persist normally. Multiplayer Sense/Peek/Clear effects remain authoritative so the client receives only the purchased clue result, never the answer.
 
@@ -360,6 +360,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 19 Bollywood price correction: `npm test` and `test-bollywood-pricing.js` passed. Both Bollywood variants display and deduct 75/50/40 for Sense/Peek/Clear; standard Race/VS remain 30/50/40. The same browser checks cover accessible prices, free Sense reopening, stored tokens, failed-request retry and insufficient funds. Whitespace checks passed. No deployment, Android rebuild or full browser-suite rerun for this price-only correction.
+
 September 19 Bollywood hint pricing: `npm test`, `test-bollywood.js`, `test-bollywood-vs.js`, `test-bollywood-pricing.js`, both variants of `test-bollywood-browser.js`, and the full `test-browser.js` passed locally using port 4269. Dedicated pricing fixtures verify Race and VS at standard 30/50/40 and Bollywood 75/125/100 prices, matching ARIA labels and wallet deductions, free Sense reopening, stock retained after failed requests, no duplicate retry charge, and rejection without an API effect when funds are insufficient. The initial pricing test attempted to raise a depleted balance using a spend call; corrected the fixture to use an attainable insufficient balance. Core assertions also preserve Last Chance at 125. Syntax/whitespace and native/Vercel/Pages packaging passed; all three packages contain the versioned pricing scripts and updated help, with server data/reference docs excluded. No production deployment or signed Android build was made; coins remain device-local as documented above.
 
 September 19 Bollywood movie/character replacement: `npm test`, `test-bollywood.js` and `test-bollywood-vs.js` passed. The complete runtime pool matches the approved 125-word/kind/clue reference: 75 Film, 50 Character, 98 recent, 27 classic; all unique 5–7-letter words with one short clue. Tests exercise character type and hidden-answer snapshots, purchased/reopened Sense, old-room lookup, actor exclusion from new routes, both character/movie VS solve and forfeit paths, and exhausted-pool recycling. Both Race and VS browser fixtures passed updated copy, Film to Character status, 5/6/7-column touch/autosubmit, six/seven rows, 320px phone/landscape/banner-reduced fit and 44px keys without page errors. The full browser suite also passed solo playthrough, results, Adventure, multiplayer fixtures, desktop/dark layouts and overflow on local port 4269 (the initial invocation used an inactive default port, then was corrected). Earlier review-page checks passed filters/search/empty state and 390px layout. JavaScript syntax and whitespace passed; all three native/Vercel/Pages client builds contain the updated copy and omit both server banks and reference docs. No production room, physical-device or Android binary acceptance is claimed; deployment remains pending.
@@ -524,6 +526,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-19 — Keep Peek and Clear at standard prices
+
+- Per the owner’s correction, restored Bollywood Peek to 50 coins and Clear to 40; only Sense keeps its 2.5x multiplier at 75 coins. Updated help and existing price regressions.
+- Bumped the shared core cache URL to `20260919.3`; pricing remains shared by the dock and wallet. Checks passed locally as recorded above; not deployed.
 
 ### 2026-09-19 — Bollywood hint price multiplier
 

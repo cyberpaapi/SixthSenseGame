@@ -88,9 +88,7 @@
   const LIFELINE_COSTS = Object.freeze({ sense: 30, peek: 50, clear: 40, skip: 60 });
   const BOLLYWOOD_LIFELINE_COSTS = Object.freeze({
     ...LIFELINE_COSTS,
-    sense: LIFELINE_COSTS.sense * 2.5,
-    peek: LIFELINE_COSTS.peek * 2.5,
-    clear: LIFELINE_COSTS.clear * 2.5
+    sense: LIFELINE_COSTS.sense * 2.5
   });
   const LAST_CHANCE_COST = 125;
   const ADVENTURE_TOTAL = ANSWERS.length;

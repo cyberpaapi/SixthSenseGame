@@ -5,7 +5,7 @@ const Core = require("./game-core.js");
 const GuessBank = require("./word-bank.js");
 const GuessBankSet = new Set(GuessBank);
 
-assert.deepEqual(Core.lifelineCosts("bollywood"), { sense: 75, peek: 125, clear: 100, skip: 60 });
+assert.deepEqual(Core.lifelineCosts("bollywood"), { sense: 75, peek: 50, clear: 40, skip: 60 });
 assert.deepEqual(Core.lifelineCosts(), { sense: 30, peek: 50, clear: 40, skip: 60 });
 assert.strictEqual(Core.lifelineCosts("classic"), Core.LIFELINE_COSTS);
 assert.strictEqual(Core.lifelineCosts("unknown"), Core.LIFELINE_COSTS);
