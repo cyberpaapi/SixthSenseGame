@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-09-19
+Last updated: 2026-09-21
 
-Last verified: 2026-09-19 (Bollywood price correction: npm test and the four-mode browser pricing regression passed locally, including displayed/accessibility prices and wallet deductions. Bollywood Sense is 75; Peek/Clear are restored to 50/40. Whitespace checks passed. No push, deployment or Android binary for this change.)
+Last verified: 2026-09-21 (Pushed the approved Bollywood movie/character bank and final Sense/Peek/Clear prices of 75/50/40 to origin/main through 6902bec. Both public websites serve the latest HTML and game-core/app/multiplayer assets matching local committed source. Prior local gameplay/pricing test results remain recorded below; no new Android binary or physical-device test.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -360,6 +360,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 21 publication: pushed commits `2e53c90`, `bc5e7cd` and `6902bec` to GitHub main. Vercel reported successful deployment. Both Vercel and GitHub Pages returned HTTP 200 for the updated HTML and runtime files; the public core/app/multiplayer contents match local source after line-ending normalization. Public help shows Sense 75 with standard Peek/Clear prices, and the core URL is `20260919.3`. This is publication/asset verification, not a new production multiplayer playthrough or Android release.
+
 September 19 Bollywood price correction: `npm test` and `test-bollywood-pricing.js` passed. Both Bollywood variants display and deduct 75/50/40 for Sense/Peek/Clear; standard Race/VS remain 30/50/40. The same browser checks cover accessible prices, free Sense reopening, stored tokens, failed-request retry and insufficient funds. Whitespace checks passed. No deployment, Android rebuild or full browser-suite rerun for this price-only correction.
 
 September 19 Bollywood hint pricing: `npm test`, `test-bollywood.js`, `test-bollywood-vs.js`, `test-bollywood-pricing.js`, both variants of `test-bollywood-browser.js`, and the full `test-browser.js` passed locally using port 4269. Dedicated pricing fixtures verify Race and VS at standard 30/50/40 and Bollywood 75/125/100 prices, matching ARIA labels and wallet deductions, free Sense reopening, stock retained after failed requests, no duplicate retry charge, and rejection without an API effect when funds are insufficient. The initial pricing test attempted to raise a depleted balance using a spend call; corrected the fixture to use an attainable insufficient balance. Core assertions also preserve Last Chance at 125. Syntax/whitespace and native/Vercel/Pages packaging passed; all three packages contain the versioned pricing scripts and updated help, with server data/reference docs excluded. No production deployment or signed Android build was made; coins remain device-local as documented above.
@@ -526,6 +528,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-21 — Publish approved Bollywood changes
+
+- Pushed the three existing content/pricing commits at the owner’s request. The final build has the approved movie/character bank and Bollywood Sense at 75 coins, Peek at 50 and Clear at 40.
+- Verified updated public HTML/runtime assets on both websites; recorded publication evidence above. Unrelated local artwork and spreadsheet files were excluded.
 
 ### 2026-09-19 — Keep Peek and Clear at standard prices
 
