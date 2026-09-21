@@ -15,7 +15,7 @@ const { chromium } = require("./test-browser-runtime");
         localStorage.setItem("sixth-sense.visited.v1", "yes");
         localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Price QA" }));
         localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 9, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
+        localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ coins: 500, economyVersion: 10, inventory: { sense: 0, peek: 0, clear: 0, skip: 0 } }));
       });
       const player = { id: "self", name: "Price QA", avatar: "fox", seat: 1, currentWordIndex: 0, attempts: [], score: 0, finished: false };
       const snapshot = {

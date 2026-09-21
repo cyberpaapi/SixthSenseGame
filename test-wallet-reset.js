@@ -7,7 +7,7 @@ const { chromium } = require("./test-browser-runtime");
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN || undefined });
   const root = process.env.SIXTH_SENSE_URL || "http://127.0.0.1:4269";
   try {
-    for (const version of [undefined, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+    for (const version of [undefined, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
       const page = await browser.newPage({ reducedMotion: "reduce" });
       await page.goto(root);
       const original = {
@@ -30,8 +30,8 @@ const { chromium } = require("./test-browser-runtime");
         settings: JSON.parse(localStorage.getItem("sixth-sense.settings.v1")),
         game: JSON.parse(localStorage.getItem("sixth-sense.practice.v1"))
       }));
-      assert.equal(state.stats.coins, version === 9 ? 9876 : 500);
-      assert.equal(state.stats.economyVersion, 9);
+      assert.equal(state.stats.coins, version === 10 ? 9876 : 500);
+      assert.equal(state.stats.economyVersion, 10);
       for (const field of ["played", "wins", "currentStreak", "maxStreak", "totalPoints", "totalSolves", "completedWords", "inventory", "adventure", "rewardedClaims"]) assert.deepEqual(state.stats[field], original[field], `${field} must survive reset`);
       assert.equal(state.settings.avatar, "dragon");
       assert.deepEqual(state.settings.unlockedAvatars, ["dragon"]);
@@ -42,7 +42,7 @@ const { chromium } = require("./test-browser-runtime");
       await page.keyboard.type("planet");
       await page.waitForSelector("#result-modal[open]");
       const earned = await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.stats.v1")).coins);
-      assert.equal(earned, (version === 9 ? 9876 : 500) + 140);
+      assert.equal(earned, (version === 10 ? 9876 : 500) + 140);
       await page.reload();
       assert.equal(await page.locator("#coin-count").textContent(), String(earned), "reset must not repeat after earning/reload");
       await page.close();
@@ -50,6 +50,6 @@ const { chromium } = require("./test-browser-runtime");
     const fresh = await browser.newPage();
     await fresh.goto(root);
     assert.equal(await fresh.locator("#coin-count").textContent(), "500");
-    console.log("Wallet reset passed: legacy versions including v8, zero/high balances, v9 preservation, progress/inventory/cosmetics/receipt preservation, actual earnings and reload persistence, fresh 500 baseline.");
+    console.log("Wallet reset passed: legacy versions including v9, zero/high balances, v10 preservation, progress/inventory/cosmetics/receipt preservation, actual earnings and reload persistence, fresh 500 baseline.");
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

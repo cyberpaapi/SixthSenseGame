@@ -20,7 +20,7 @@ const { chromium } = require("./test-browser-runtime");
           localStorage.setItem("sixth-sense.visited.v1", "yes");
           localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "Aryan" }));
           localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ avatar, unlockedAvatars: ["dragon"], effects: false, music: false }));
-          localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 9, coins: 250, totalPoints: 1200 }));
+          localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ economyVersion: 10, coins: 250, totalPoints: 1200 }));
           const words = won ? ["rattle", "castle"] : ["rattle", "castle", "bright", "silver", "purple", "orange", "signal"];
           localStorage.setItem("sixth-sense.practice.v1", JSON.stringify({
             version: 3, mode: "practice", answer: "planet", clue: "A world orbiting a star.",
