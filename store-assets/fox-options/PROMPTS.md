@@ -1,0 +1,16 @@
+# Happy fox icon concepts — September 21, 2026
+
+Generated with the built-in image_gen tool. These are unselected previews; no launcher, store listing or native bundle has been changed. The user requested a happy fox above SIXTH SENSE letter blocks. Option order matches the conversation. The selected design must be exported with an opaque background and safe icon margins before use.
+
+## Option 1
+
+Use case: logo-brand. Create one polished square mobile game app icon concept for Sixth Sense. Primary request: a HAPPY orange fox with the SIXTH SENSE letter blocks underneath it. Style: premium glossy 3D casual puzzle game, soft furry cheeks, huge friendly eyes and joyful open-mouth smile; fox upper body above the blocks, two little paws resting on the top row. Exact text on individual chunky rounded colorful blocks in TWO centered rows: S I X T H above S E N S E. One letter per block, FIVE blocks each row, exact spelling, large white letters legible at small icon size. Clean vivid purple background, orange fox, jewel candy red yellow turquoise violet blocks, soft studio lighting. Make fox and typography fill icon with generous safe margins. All fox ears and blocks fully inside image. Opaque square edge-to-edge background. No ads, no other text, no hats, no confetti, no camera/aperture mark, no watermark. This is option A, but do NOT print option labels.
+
+## Option 2
+
+Use case: logo-brand. Create one polished square mobile game app icon concept for Sixth Sense. A HAPPY smiling orange fox above chunky letter blocks saying SIXTH SENSE below it. Distinct visual direction: elegant bold mascot illustration with subtle dimensional shading, very clean sculpted shapes, cream muzzle, pointed upright ears, bright expressive eyes, confident cheerful grin, cozy curled tail visible to one side. Exact text: two aligned rows of FIVE colorful rounded blocks, first row S I X T H, second S E N S E. White thick uppercase letters one per block, perfectly spelled and readable. Restrained deep aubergine purple background with a soft lavender glow, orange fox, turquoise gold and violet letter blocks. Centered compact emblem filling square with safe margins and no cropping. All opaque, designed for Play Store at small size. No extra words, no ads, no badge or border, no camera/aperture symbol, no party props, no watermark. Option B but don't print any option label.
+
+## Option 3
+
+Use case: logo-brand. Create one square polished mobile puzzle game icon for Sixth Sense. HAPPY laughing baby orange fox mascot sitting directly above the SIXTH SENSE letter blocks, paws hugging the top row. Different visual direction: tactile smooth clay/toy-like 3D, oversized cheerful fox head and ears, smiling crescent eyes, white soft muzzle, warm orange fur shaped in simple clean tufts. Two straight centered rows of colorful chunky toy blocks under fox: EXACT first row S I X T H; EXACT second row S E N S E; FIVE letters/blocks in each row, white rounded uppercase lettering, easy to read at 512px. Bright lavender-purple opaque background with subtle light falloff, cheerful turquoise coral yellow purple blocks. Strong silhouette, friendly playful quality, icon fills frame but keep ears and all blocks within safe margin. No ads, no subtitle, no extra words, no camera/aperture symbol, no hats, no watermark. Option C but do not show option label.
+
