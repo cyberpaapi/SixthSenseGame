@@ -17,6 +17,7 @@ fs.rmSync(destination, { recursive: true, force: true });
 fs.mkdirSync(destination, { recursive: true });
 // Allow-list the shipped client. Never bundle the repository, API, credentials or drafts.
 const files = ["index.html", "styles.css", "identity.js", "app.js", "game-core.js", "progression.js", "answer-bank.js", "word-bank.js", "multiplayer.js", "manifest.webmanifest", "favicon.svg", "mobile.js", "privacy.html", "economy.json"];
+if (process.argv.includes("--web")) files.push("delete-account.html");
 for (const name of files) {
   const source = path.join(root, name);
   if (!fs.existsSync(source)) throw new Error(`Missing client file: ${name}`);

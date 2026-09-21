@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-21
 
-Last verified: 2026-09-21 (Teen-content cleanup: npm test, Bollywood server suites, policy check, syntax/whitespace, Android sync, debug APK/AAB assembly and lint passed. Packaged files match the cleaned source and the age prompt does not advertise ad exemptions. Browser guest Daily and purchased Sense smoke check passed. Vercel and Pages deployed bafcf58 successfully and public bank/app bytes match source. IARC declaration and listing text draft saved. Upload-key-signed 1.0.2/code 3 AAB built in Studio and verified against the original signer; packaged content checks passed. No full browser rerun, physical-device acceptance, new Play upload or approval.)
+Last verified: 2026-09-21 (Teen-content cleanup: npm test, Bollywood server suites, policy check, syntax/whitespace, Android sync, debug APK/AAB assembly and lint passed. Packaged files match the cleaned source and the age prompt does not advertise ad exemptions. Browser guest Daily and purchased Sense smoke check passed. Vercel and Pages deployed bafcf58 successfully and public bank/app bytes match source. IARC declaration and listing text draft saved. Upload-key-signed 1.0.2/code 3 AAB built in Studio and verified against the original signer; packaged content checks passed. Signed code 3 accepted by Play and saved in Alpha draft; reviewer access, 13+ audience and Advertising ID declarations saved. Deletion-request web build/whitespace checks passed. Data safety/store assets remain in progress; no review submission or approval.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -371,6 +371,8 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
+September 21 closed-test preparation in progress: Play accepted signed version 3 (1.0.2), which replaced version 1 in the saved Alpha draft. Two dedicated reviewer profiles and recovery-code access instructions were saved privately in Console; credentials are not tracked. Ages 13–15/16–17/18+ and Advertising ID usage (analytics, advertising, fraud prevention) were saved. Data safety and store graphics remain in progress; no review submission. Added a public account/data deletion request page using the existing support-email process; web packaging includes it and the already-signed native bundle is unchanged. Web build and whitespace checks passed. Deployment verification follows separately.
+
 September 21 signed closed-test build: Android Studio Generate Signed App Bundle completed `bundleRelease` successfully in 27 seconds (150 tasks: 47 executed, 103 up-to-date). Jarsigner reported `jar verified`; the non-debug certificate SHA-256 matches the original version-1 bundle (`8D:82:1C:AB:1B:86:91:70:52:B6:90:9A:D7:EC:B4:67:EB:EF:F0:CA:F7:AD:55:9C:1B:2D:E9:9D:A5:5B:E0:89`). Jarsigner also emitted self-signed/no-timestamp and ZIP stream-order warnings; no file was modified to suppress them, and Play acceptance remains unverified. Release merged manifest is 1.0.2/code 3; the AAB contains that version name and sample AdMob app ID. ZIP integrity, source equality for answer-bank/app/multiplayer/music, neutral age prompt and exclusion of signing/server-only data passed. Signed output and delivery copy match. No new device run or Play upload was performed.
 
 September 21 release follow-up: `bafcf58` pushed to main. Vercel status succeeded and Pages workflow `35628120919` succeeded; both public answer-bank.js and app.js matched local source, HTML uses `20260921.2`, and the age prompt has no ad-exemption copy. Revised IARC summary and 78-character short / 1,320-character full listing copy saved in Console; no review submission. No new production room or physical-device test is claimed.
@@ -547,6 +549,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-21 — Prepare closed-test declarations and public deletion requests
+
+- Uploaded signed code 3 and saved the updated Alpha draft, dedicated reviewer access, target age groups and Advertising ID declaration.
+- Added `delete-account.html` to web builds: a public, clearly labelled email-based account/data deletion request path, matching the existing in-app Settings support/privacy routes. This is a manually handled request process, not an automatic deletion endpoint; support must verify ownership and remove associated server-held records when fulfilling requests.
+- Exported a 512px app icon from the existing Android icon composition and generated a 1024×500 feature graphic with the built-in image tool. Store screenshot capture and Data safety completion remain in progress. No Play review submission or new native binary change.
 
 ### 2026-09-21 — Generate the signed closed-test bundle
 
