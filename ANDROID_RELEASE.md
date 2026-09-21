@@ -25,7 +25,16 @@ September 21: latest web client synchronized with the reviewed teen-content clea
 - `release/SixthSense-v1.0.2-debug.apk`: 36,653,316 bytes; SHA-256 `7b26aa48de2c9c16a368e0de314dd5ac2383e37a9590a6300cdeaf0958143fe9`.
 - `release/SixthSense-v1.0.2-debug-NOT-FOR-PLAY.aab`: 35,358,678 bytes; SHA-256 `2721b7e601194f8f12ac9d6b9823777672226922cb16980f179f853ae3c54ba9`.
 
-These are debug-signed QA artifacts, **not Play-uploadable releases**. The existing upload-key-signed `android/app/release/app-release.aab` is still version 1. Generate a new **release** App Bundle in Studio using the existing upload key and private passwords; version 3 is configured and synced. `android/keystore.properties` is absent, and no signing passwords were extracted or fabricated.
+These debug-signed QA artifacts are **not Play-uploadable releases**.
+
+The signed release was subsequently generated in Android Studio on September 21 using the existing saved upload key:
+
+- **Upload file:** `release/SixthSense-v1.0.2-closed-test.aab` (identical to `android/app/release/app-release.aab`).
+- Version 1.0.2 / code 3; 33,032,313 bytes; SHA-256 `9914768d0f42f899d870ecd1301d9c86658b5d4a0df0206f1006d11646cb022a`.
+- Studio: BUILD SUCCESSFUL in 27s, 150 tasks (47 executed, 103 up-to-date). Jarsigner verified the archive and its non-debug certificate matches the original uploaded version-1 bundle. It emitted self-signed/no-timestamp and ZIP stream-order warnings; Play acceptance is still unverified.
+- ZIP integrity, packaged source equality (answer bank, app, multiplayer, music), neutral age prompt and exclusion of signing/server-only configuration passed. Release manifest is code 3 and the archive contains version 1.0.2 and the Google sample AdMob app ID.
+
+This signed bundle is for internal/closed testing, with sample ads. It has **not been uploaded**. `android/keystore.properties` remains absent; Studio used its saved passwords without extracting them.
 
 The corresponding web/backend commit `bafcf58` deployed successfully to Vercel and GitHub Pages on September 21. Both public bank/app files match the cleaned source. Existing old rooms may retain removed answer words until their 24-hour expiry.
 
@@ -39,7 +48,7 @@ Privacy URL, Ads=Yes, no government/financial/health features, Word category and
 
 Includes GitHub dark-tile fix f799897, six standard tries plus one Last Chance, 125-coin pricing, round coin rendering, rewarded extra-try receipts, neutral age-screen wording and immersive Android display. The neutral age question remains to configure teen privacy protections; the under-13 ad-exemption message was removed. UMP and eligibility protections remain. Existing saved guesses and already-purchased extra attempts are retained.
 
-The September 17 debug APK also includes darker dark-theme backgrounds and runtime 20260917.1, with the correct 88-second Tea and Tangrams loop. `release/SixthSense-v1.0.1-debug.apk` (also copied to `release/SixthSense-debug.apk`) is 36,289,797 bytes, SHA-256 `B03DDD551EF61095EB0E02F387DE32C0F6DCE7A2E852DE24DA80AC141ACBDDB7`; Android sync, assembly and lint passed. The debug APK is for device QA. **The existing signed app-release.aab is still versionCode 1 and does not contain this update.** Regenerate a signed internal bundle using the existing upload key, then upload versionCode 2 to the testing track. Android Studio was closed during this update; no signing credentials were extracted or recreated.
+Historical September 17 status: the debug APK also includes darker dark-theme backgrounds and runtime 20260917.1, with the correct 88-second Tea and Tangrams loop. `release/SixthSense-v1.0.1-debug.apk` (also copied to `release/SixthSense-debug.apk`) is 36,289,797 bytes, SHA-256 `B03DDD551EF61095EB0E02F387DE32C0F6DCE7A2E852DE24DA80AC141ACBDDB7`; Android sync, assembly and lint passed. The debug APK is for device QA. At that time the signed app-release.aab was still versionCode 1. This is superseded by the signed versionCode 3 above; upload that current file. Android Studio was closed during this update; no signing credentials were extracted or recreated.
 
 The matching multiplayer backend/client was deployed to Vercel on September 17. New server snapshots advertise the six-try limit and reward capability; clients retain compatibility with legacy seven-try servers. Existing rooms keep their original seven-try contract via the migrated max_guesses column; newly created rooms use six. Extra tries remain server-authorized, with native earned callbacks and room/round/batch-scoped retries. There is still no AdMob SSV or tamper-proof wallet. The public privacy page and purchase endpoint are deployed; purchase readiness correctly returns unavailable until Play server credentials are configured.
 
