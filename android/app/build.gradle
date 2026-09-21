@@ -17,8 +17,8 @@ android {
         applicationId "com.sensei.sixthsense"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -42,6 +42,7 @@ android {
             manifestPlaceholders = [admobAppId: 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'String', 'BANNER_AD_ID', '"ca-app-pub-3940256099942544/6300978111"'
             buildConfigField 'String', 'REWARDED_AD_ID', '"ca-app-pub-3940256099942544/5224354917"'
+            buildConfigField 'String', 'INTERSTITIAL_AD_ID', '"ca-app-pub-3940256099942544/1033173712"'
             buildConfigField 'String', 'VERIFY_PURCHASE_URL', '"https://sixth-sense-game.vercel.app/api/play-purchase"'
             buildConfigField 'String', 'REMOVE_ADS_PRODUCT', '"remove_banner_ads"'
         }
@@ -50,6 +51,7 @@ android {
             manifestPlaceholders = [admobAppId: internalRelease ? 'ca-app-pub-3940256099942544~3347511713' : setting('admobAppId', '')]
             buildConfigField 'String', 'BANNER_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/6300978111' : setting('bannerAdId', '')) + '"'
             buildConfigField 'String', 'REWARDED_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/5224354917' : setting('rewardedAdId', '')) + '"'
+            buildConfigField 'String', 'INTERSTITIAL_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/1033173712' : setting('interstitialAdId', '')) + '"'
             buildConfigField 'String', 'VERIFY_PURCHASE_URL', '"' + setting('verifyPurchaseUrl', '') + '"'
             buildConfigField 'String', 'REMOVE_ADS_PRODUCT', '"remove_banner_ads"'
             minifyEnabled true
@@ -94,6 +96,7 @@ tasks.register('validateReleaseSettings') {
             if (!(setting(key, '') ==~ /ca-app-pub-\d{16}\/\d{10}/)) throw new GradleException("Invalid ${key}.")
         }
         if (!setting('verifyPurchaseUrl', '').startsWith('https://')) throw new GradleException('Purchase verification requires HTTPS.')
+        if (!internalRelease && (!(setting('interstitialAdId', '') ==~ /ca-app-pub-\d{16}\/\d{10}/) || setting('interstitialAdId', '').contains('3940256099942544'))) throw new GradleException('Set a real interstitialAdId before production.')
         if (!internalRelease && setting('releaseChecklistApproved', '') != 'true') throw new GradleException('Complete ANDROID_RELEASE.md before approving a production release. Use releaseChannel=internal for Play testing.')
         def injectedStore = providers.gradleProperty('android.injected.signing.store.file').orNull
         if (injectedStore != null) {

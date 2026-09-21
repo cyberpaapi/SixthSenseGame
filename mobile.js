@@ -16,6 +16,44 @@
   let state = {}, busy = false, recovering = false, bannerVisible = null, rewardFeedback = "", offerId = "";
   document.body.classList.add("is-native-app");
   document.querySelector("#mobile-store").hidden = false;
+  const catalog = window.SixthSenseStoreCatalog || {};
+  let recoveringPurchases = false, storeFeedback = "";
+  const productButtons = new Map();
+  for (const [id, product] of Object.entries(catalog)) {
+    if (id === "remove_banner_ads") continue;
+    const card = document.createElement("div"); card.className = "store-product";
+    const art = document.createElement("img"); art.src = `assets/shop/${product.art}.webp`; art.alt = ""; art.width = art.height = 160;
+    const copy = document.createElement("div"), title = document.createElement("strong"), detail = document.createElement("p"), button = document.createElement("button");
+    title.textContent = product.title; detail.textContent = product.description; button.type = "button"; button.dataset.productId = id;
+    button.addEventListener("click", async () => {
+      storeFeedback = "";
+      try { await native.purchaseProduct({ productId: id }); }
+      catch (error) { storeFeedback = error.message; render(); }
+    });
+    copy.append(title, detail, button); card.append(art, copy); document.querySelector("#store-products").append(card); productButtons.set(id, button);
+  }
+  const wallet = document.querySelector("#coin-wallet");
+  wallet.setAttribute("role", "button"); wallet.tabIndex = 0;
+  const openShop = () => {
+    if (busy) return;
+    const dialog = document.querySelector("#settings-modal");
+    if (!dialog.open) dialog.showModal();
+    document.querySelector("#mobile-store").scrollIntoView({ block: "start" });
+    purchase.focus({ preventScroll: true });
+  };
+  wallet.addEventListener("click", openShop);
+  wallet.addEventListener("keydown", event => { if (["Enter", " "].includes(event.key)) { event.preventDefault(); openShop(); } });
+
+  window.SixthSenseAds = {
+    atBreak: async details => {
+      if (busy || document.hidden || typeof native.showInterstitial !== "function") return;
+      busy = true;
+      window.SixthSenseAppLifecycle.pause(); signalRewardAd(true);
+      try { state = await native.showInterstitial(details); }
+      catch (_) { /* Ads never prevent opening the earned result. */ }
+      finally { busy = false; signalRewardAd(false); window.SixthSenseAppLifecycle.resume(); render(); }
+    }
+  };
 
   let adCloseTimer;
   function signalRewardAd(active) {
@@ -25,10 +63,18 @@
   }
 
   function render() {
-    purchase.textContent = state.owned ? "Banner ads removed ✓" : state.price ? `Remove banner ads · ${state.price}` : "Remove banner ads · unavailable";
-    purchase.disabled = state.owned || !state.eligible || !state.price || state.purchaseBusy;
+    purchase.textContent = state.owned ? "Automatic ads removed ✓" : state.price ? `Remove Ads · ${state.price}` : "Remove Ads · unavailable";
+    purchase.disabled = state.owned || !state.eligible || !state.price || state.purchaseBusy || Boolean(state.pendingPurchases?.length);
     privacyOptions.hidden = !state.privacyOptionsRequired;
-    storeMessage.textContent = state.message || "One-time purchase. Optional rewarded ads remain available.";
+    storeMessage.textContent = storeFeedback || state.message || "Remove Ads covers banners and automatic ads. Optional rewarded ads remain available.";
+    const coins = window.SixthSenseEconomy?.state().coins || 0;
+    for (const [id, button] of productButtons) {
+      const product = catalog[id], offer = state.products?.[id];
+      const full = coins + product.coins > window.SixthSenseCore.MAX_COINS;
+      button.textContent = offer?.owned ? "Owned ✓" : full ? "Spend coins to make room" : offer?.price ? `Buy · ${offer.price}` : "Unavailable";
+      button.disabled = !state.eligible || !offer?.price || offer.owned || full || state.purchaseBusy || Boolean(state.pendingPurchases?.length);
+      button.setAttribute("aria-label", `${product.title}: ${button.textContent}`);
+    }
     let offer;
     try { offer = window.SixthSenseRewards?.offer(); } catch (_) { rewardMessage.textContent = "Free up storage before claiming a reward."; }
     const visible = Boolean(offer && state.eligible);
@@ -64,6 +110,18 @@
       else rewardFeedback = "Reward saved. Free up device storage and reopen the app to collect it.";
     }
     finally { recovering = false; render(); }
+  }
+  async function recoverPurchases() {
+    if (recoveringPurchases || busy || !state.pendingPurchases?.length) return;
+    recoveringPurchases = true;
+    try {
+      for (const receipt of state.pendingPurchases) {
+        window.SixthSensePurchases.applyReceipt(receipt);
+        await native.acknowledgePurchaseDelivery({ claimId: receipt.claimId });
+      }
+      storeFeedback = ""; state = await native.getState();
+    } catch (error) { storeFeedback = error.message?.includes("coins") || error.message?.includes("Inventory") ? error.message : "Your purchase is saved. Free up storage or reconnect, then use Restore purchases."; }
+    finally { recoveringPurchases = false; render(); }
   }
   function updateBanner() {
     const visible = ["home", "game", "online"].includes(document.body.dataset.screen) && !document.querySelector("dialog[open]") && !state.owned && state.eligible && !document.hidden;
@@ -131,10 +189,12 @@
     finally { busy = false; signalRewardAd(false); window.SixthSenseAppLifecycle.resume(); render(); }
   });
   purchase.addEventListener("click", async () => {
-    try { await native.purchaseRemoveAds(); } catch (error) { storeMessage.textContent = error.message; }
+    storeFeedback = "";
+    try { await native.purchaseRemoveAds(); } catch (error) { storeFeedback = error.message; render(); }
   });
   document.querySelector("#restore-purchases-button").addEventListener("click", async () => {
-    try { await native.restorePurchases(); } catch (error) { storeMessage.textContent = error.message; }
+    storeFeedback = "";
+    try { await native.restorePurchases(); await recoverPurchases(); } catch (error) { storeFeedback = error.message; render(); }
   });
   privacyOptions.addEventListener("click", async () => {
     try { state = await native.privacyOptions(); render(); } catch (error) { storeMessage.textContent = error.message; }
@@ -145,11 +205,12 @@
     document.querySelector("#privacy-modal").showModal();
   }));
   document.addEventListener("sixth-sense-result-rendered", render);
+  document.addEventListener("sixth-sense-economy-change", render);
   new MutationObserver(updateBanner).observe(document.body, { attributes: true, attributeFilter: ["data-screen", "open"], subtree: true });
   document.addEventListener("visibilitychange", updateBanner);
   app.addListener("appStateChange", ({ isActive }) => {
     document.dispatchEvent(new CustomEvent("sixth-sense-native-active", { detail: isActive }));
-    if (isActive) { if (!busy) window.SixthSenseAppLifecycle.resume(); native.getState().then(next => { state = next; render(); recover(); }); }
+    if (isActive) { if (!busy) window.SixthSenseAppLifecycle.resume(); native.getState().then(next => { state = next; render(); recover(); recoverPurchases(); }); }
     else window.SixthSenseAppLifecycle.pause();
   });
   app.addListener("backButton", () => {
@@ -163,13 +224,13 @@
   });
   ageDialog.addEventListener("cancel", event => event.preventDefault());
   ageDialog.querySelectorAll("[data-age-band]").forEach(button => button.addEventListener("click", async () => {
-    ageDialog.close(); state = await native.initialize({ ageBand: button.dataset.ageBand }); render(); recover();
+    ageDialog.close(); state = await native.initialize({ ageBand: button.dataset.ageBand }); render(); recover(); recoverPurchases();
   }));
-  native.addListener("stateChanged", next => { state = next; render(); if (!busy) recover(); });
+  native.addListener("stateChanged", next => { state = next; render(); if (!busy) { recover(); recoverPurchases(); } });
   native.getState().then(async next => {
     state = next;
     if (!state.ageBand) ageDialog.showModal();
     else state = await native.initialize({ ageBand: state.ageBand });
-    render(); await recover();
+    render(); await recover(); await recoverPurchases();
   }).catch(() => { storeMessage.textContent = "Store services unavailable. You can keep playing."; });
 })();

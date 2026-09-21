@@ -16,6 +16,7 @@
     "android:open": "cap open android",
     "test:mobile": "node test-mobile.js",
     "test:purchases": "node test-play-purchase.js",
+    "test:store": "node test-store-server.js && node test-store-browser.js",
     "test:last-chance": "node test-last-chance-server.js && node test-last-chance-mobile.js && node test-last-chance-online.js"
   },
   "dependencies": {

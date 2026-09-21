@@ -181,7 +181,7 @@
     economyVersion: ECONOMY_VERSION
   });
   stats.coins = Number.isFinite(Number(stats.coins)) ? clampCoinTotal(stats.coins) : Core.STARTING_COINS;
-  if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION) stats.coins = Core.STARTING_COINS;
+  if (hadSavedStats && storedEconomyVersion < WALLET_RESET_VERSION && !Object.keys(stats.purchaseClaims || {}).length) stats.coins = Core.STARTING_COINS;
   stats.economyVersion = Math.max(ECONOMY_VERSION, storedEconomyVersion);
   stats.totalPoints = Number.isFinite(Number(stats.totalPoints)) ? Math.max(0, Math.floor(Number(stats.totalPoints))) : 0;
   stats.distribution = Array.from({ length: Math.max(Core.MAX_GUESSES + 1, Math.min(8, stats.distribution?.length || 0)) }, (_, index) => Number(stats.distribution?.[index]) || 0);
@@ -848,7 +848,7 @@
     if (stats.economyVersion === savedVersion && savedVersion >= version && stats.coins === clampCoinTotal(saved.coins)) return;
     // Another updated tab may already have reset and earned/spent coins.
     // Adopt that balance instead of replaying the same reset.
-    stats.coins = savedVersion >= version ? clampCoinTotal(saved.coins) : Core.STARTING_COINS;
+    stats.coins = savedVersion >= version || Object.keys(saved.purchaseClaims || {}).length ? clampCoinTotal(saved.coins) : Core.STARTING_COINS;
     stats.economyVersion = Math.max(version, savedVersion);
     if (savedVersion < version) saveJson(STORAGE.stats, { ...saved, coins: stats.coins, economyVersion: stats.economyVersion });
     renderEconomy();
@@ -1046,6 +1046,7 @@
 
   function completeGame(won) {
     let reward = 0;
+    let adventureBreak = null;
     let points = 0;
     let streakReward = 0;
     if (won && !game.rewarded && !game.adventureReplay) {
@@ -1103,7 +1104,10 @@
       game.modeRecorded = true;
     }
     if (mode === "adventure" && (won || game.skipped) && !game.modeRecorded && !game.adventureReplay) {
-      if (Number(game.adventureLevel) === stats.adventure.level) stats.adventure.level = Math.min(Core.ADVENTURE_TOTAL, stats.adventure.level + 1);
+      if (Number(game.adventureLevel) === stats.adventure.level) {
+        stats.adventure.level = Math.min(Core.ADVENTURE_TOTAL, stats.adventure.level + 1);
+        adventureBreak = { placement: "adventure", eventId: `${game.adventureSeed}:${game.adventureLevel}` };
+      }
       game.modeRecorded = true;
     }
     saveJson(STORAGE.stats, stats);
@@ -1120,7 +1124,11 @@
     renderStats();
     updateResultControls();
     renderResult(won, reward, streakReward, points);
-    setTimeout(() => {
+    const completedGame = game;
+    setTimeout(async () => {
+      if (game !== completedGame || currentScreen() !== "game") return;
+      if (adventureBreak) await window.SixthSenseAds?.atBreak(adventureBreak);
+      if (game !== completedGame || currentScreen() !== "game") return;
       openCurrentResult(won);
       playEffect(won ? "win" : "lose");
     }, 680);
@@ -1435,6 +1443,29 @@
     renderEconomy(); renderStats();
     if (els.resultDialog.open) renderResult(game.status === "won");
     return credited;
+  }
+
+  function applyPurchaseReceipt(receipt) {
+    const product = window.SixthSenseStoreCatalog?.[receipt?.productId];
+    const id = receipt?.claimId;
+    if (!product || !/^[a-f0-9]{64}$/.test(id || "") || receipt.coins !== product.coins ||
+        Object.keys(receipt.inventory || {}).length !== Object.keys(product.inventory).length ||
+        Object.entries(product.inventory).some(([kind, count]) => receipt.inventory?.[kind] !== count)) throw Error("Invalid store receipt.");
+    const ledger = stats.purchaseClaims || {};
+    if (Object.hasOwn(ledger, id)) return;
+    // Never silently truncate a paid pack at the wallet cap. Retain its native
+    // receipt until enough space exists; buying is also disabled near the cap.
+    if (stats.coins + product.coins > Core.MAX_COINS) throw Error("Spend some coins, then use Restore purchases to collect the full pack.");
+    const inventory = { ...stats.inventory };
+    for (const [kind, count] of Object.entries(product.inventory)) {
+      if (!Number.isSafeInteger(inventory[kind] + count)) throw Error("Inventory is full. Use some lifelines, then restore purchases.");
+      inventory[kind] += count;
+    }
+    const next = { ...stats, coins: stats.coins + product.coins, inventory,
+      purchaseClaims: { ...ledger, [id]: receipt.productId } };
+    localStorage.setItem(STORAGE.stats, JSON.stringify(next));
+    stats = next;
+    renderEconomy(); renderStats(); renderLifelines();
   }
 
   function renderProgression() {
@@ -2174,6 +2205,7 @@
     window.SixthSenseMessages = { announce, setOnlineStatus, clear: clearMessages };
     window.SixthSenseDialogs = { showHint: showHintDialog, renderResultAvatar, celebrateResult: celebrateResultDialog };
     window.SixthSenseRewards = { offer: rewardOffer, applyReceipt: applyRewardReceipt };
+    window.SixthSensePurchases = { applyReceipt: applyPurchaseReceipt };
     window.SixthSenseLastChance = { offer: lastChanceOffer, applyReceipt: applyLastChanceReceipt };
     window.SixthSenseAppLifecycle = {
       pause: () => { musicSuspended = true; stopMusic(); stopResultAudio(); stopResultConfetti(); },

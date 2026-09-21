@@ -8,7 +8,7 @@
   <title>Sixth Sense — A daily six-letter puzzle</title>
   <link rel="icon" id="app-favicon" href="assets/logo-option-1.png" type="image/png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260919.1">
+  <link rel="stylesheet" href="styles.css?v=20260921.3">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -387,8 +387,14 @@
         <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, and crowd reactions</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
       </div>
       <section id="mobile-store" class="mobile-store" hidden aria-label="Ads and purchases">
-        <button type="button" id="remove-ads-button" disabled>Remove banner ads</button>
+        <h3>Your game shop</h3>
+        <div class="store-product store-remove-ads">
+          <img src="assets/shop/remove-ads.webp" width="160" height="160" alt="" loading="lazy">
+          <div><strong>Remove Ads</strong><p>No banners or automatic ads. Reward ads stay optional.</p><button type="button" id="remove-ads-button" disabled>Remove Ads</button></div>
+        </div>
+        <div id="store-products" class="store-products"></div>
         <p id="store-message" role="status">One-time purchase. Optional rewarded ads remain available.</p>
+        <p>Coin and lifeline packs are saved on this installation. They do not transfer or return after clearing app data or reinstalling. Permanent ad removal restores through Google Play. Keep your Play receipt for support.</p>
         <button type="button" id="restore-purchases-button">Restore purchases</button>
         <button type="button" id="ad-privacy-options" hidden>Ad privacy choices</button>
         <button type="button" data-open-privacy>Privacy policy</button>
@@ -562,8 +568,9 @@
   <script src="game-core.js?v=20260919.3"></script>
   <script src="progression.js?v=20260917.1"></script>
   <script src="identity.js?v=20260918.16"></script>
-  <script src="app.js?v=20260921.2"></script>
-  <script src="multiplayer.js?v=20260919.2"></script>
-  <script src="mobile.js?v=20260918.14"></script>
+  <script src="app.js?v=20260921.3"></script>
+  <script src="multiplayer.js?v=20260921.3"></script>
+  <script src="store-catalog.js?v=20260921.3"></script>
+  <script src="mobile.js?v=20260921.3"></script>
 </body>
 </html>

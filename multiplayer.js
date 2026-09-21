@@ -459,7 +459,7 @@
     return true;
   }
 
-  function showMatchResult() {
+  async function showMatchResult() {
     const snapshot = state.snapshot;
     const winner = snapshot.players.find(player => player.id === snapshot.room.winnerPlayerId);
     const me = snapshot.me;
@@ -469,6 +469,8 @@
     const progress = snapshot.room.mode === "vs" ? Number(me.score) || 0 : Math.min(Number(me.currentWordIndex) || 0, snapshot.room.wordCount);
     const points = progress * 100;
     state.finishedResultShown = true;
+    await window.SixthSenseAds?.atBreak({ placement: "multiplayer", eventId: `${snapshot.room.code}:${me.id}` });
+    if (state.snapshot?.room.code !== snapshot.room.code || els.screen.hidden) return;
     els.resultKicker.textContent = won ? "Match complete" : "Final signal";
     els.resultTitle.textContent = isCoop ? "Team victory!" : won ? "Victory!" : "Match complete";
     els.resultCopy.textContent = isCoop ? "Every signal connected. Your team completed the shared route." : won ? "You carried the strongest signal to the finish." : winner ? `${winner.name} reached the finish first. Your progress still earned points.` : "The room has completed.";

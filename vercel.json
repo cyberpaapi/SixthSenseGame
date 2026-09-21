@@ -2,6 +2,9 @@
   "buildCommand": "node scripts/build-mobile.js --web",
   "outputDirectory": "www",
   "functions": {
+    "api/play-store.js": {
+      "maxDuration": 30
+    },
     "api/play-purchase.js": {
       "maxDuration": 30
     },

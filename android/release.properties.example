@@ -2,6 +2,7 @@
 admobAppId=REPLACE_WITH_ADMOB_APP_ID
 bannerAdId=REPLACE_WITH_BANNER_UNIT_ID
 rewardedAdId=REPLACE_WITH_REWARDED_UNIT_ID
+interstitialAdId=REPLACE_WITH_INTERSTITIAL_UNIT_ID
 verifyPurchaseUrl=https://sixth-sense-game.vercel.app/api/play-purchase
 # Internal builds keep release signing/optimization but use Google sample ads.
 # Rebuild with production after completing the checklist before public release.

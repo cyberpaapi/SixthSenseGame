@@ -1562,6 +1562,15 @@ body:is(.is-native-app,.is-fitted-online,.is-fitted-solo)[data-screen="online"] 
   :is(.is-native-app,.is-fitted-online,.is-fitted-solo) .online-game-head { padding-bottom:2px; }
 }
 .mobile-store { margin-top:18px; display:grid; gap:8px; }
+.store-products { display:grid; gap:12px; }
+.store-product { display:grid; grid-template-columns:88px minmax(0,1fr); align-items:center; gap:12px; padding:12px; border:1px solid #a887d9; border-radius:18px; background:rgba(133,79,222,.1); }
+.store-product img { width:88px; height:88px; object-fit:contain; }
+.store-product strong { font-size:17px; }
+.store-product p { margin:6px 0 10px; line-height:1.4; }
+.store-product button { min-width:0; white-space:normal; }
+.is-native-app .coin-wallet[role=button] { cursor:pointer; }
+.is-native-app .coin-wallet[role=button]:focus-visible { outline:3px solid #51d9f5; outline-offset:3px; }
+@media(max-width:360px) { .store-product { grid-template-columns:64px minmax(0,1fr); gap:8px; padding:10px; } .store-product img { width:64px; height:64px; } }
 @media (orientation:landscape) and (max-height:340px) {
   :is(.is-native-app,.is-fitted-online,.is-fitted-solo) .online-game-head { position:absolute; top:6px; right:12px; width:220px; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr); z-index:1; }
   :is(.is-native-app,.is-fitted-online,.is-fitted-solo) .online-game-head h1 { font-size:12px; }
