@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-21
 
-Last verified: 2026-09-21 (Teen-content cleanup: npm test, Bollywood server suites, policy check, syntax/whitespace, Android sync, debug APK/AAB assembly and lint passed. Packaged files match the cleaned source and the age prompt does not advertise ad exemptions. Browser guest Daily and purchased Sense smoke check passed. No new upload-key-signed AAB, full browser rerun, physical-device acceptance or Play approval.)
+Last verified: 2026-09-21 (Teen-content cleanup: npm test, Bollywood server suites, policy check, syntax/whitespace, Android sync, debug APK/AAB assembly and lint passed. Packaged files match the cleaned source and the age prompt does not advertise ad exemptions. Browser guest Daily and purchased Sense smoke check passed. Vercel and Pages deployed bafcf58 successfully and public bank/app bytes match source. IARC declaration and listing text draft saved. No new upload-key-signed AAB, full browser rerun, physical-device acceptance or Play approval.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -261,7 +261,7 @@ Saved solo puzzles with retained answers receive current clues and preserve gues
 
 Android source version is 1.0.2 / code 3. Local debug APK and debug AAB include the latest client, corrected 88-second music loop, current Bollywood bank/prices, identities, coin generation 10 and neutral age prompt. The prompt reads “Choose your age group. We use it for privacy settings, and it stays on this device.” It has no “ads disabled under 13” message; age-based native privacy/eligibility behavior remains. The upload-key-signed `android/app/release/app-release.aab` is still the old version 1 unless separately rebuilt in Studio. No signing secrets were read or recreated; `android/keystore.properties` is absent.
 
-Play Console browser setup: Alpha targets India and uses self-join Google Group `sixthsense-alphacode-testers@googlegroups.com`, at https://groups.google.com/g/sixthsense-alphacode-testers . Anyone on the web can join through the direct URL; conversation visibility is members-only and posting/member-list visibility is owners-only. No invitations/messages were sent. Draft `1.0.0 - Closed Alpha` contains the previously uploaded version 1 bundle, not the cleaned build. Saved privacy URL, Ads=Yes, no government/financial/health features, Word game category and support contact; dashboard showed 6/11 setup tasks complete. IARC terms were accepted with explicit owner approval; the questionnaire is a saved unfinished draft, not an issued rating. Sign-in details, target audience, Data safety, listing assets/copy, new signed bundle and release submission remain. No closed release was sent for review; dashboard showed zero closed testers, so the required 14-day period has not started. The future opt-in URL is https://play.google.com/apps/testing/com.sensei.sixthsense and is not yet an active installation path.
+Play Console browser setup: Alpha targets India and uses self-join Google Group `sixthsense-alphacode-testers@googlegroups.com`, at https://groups.google.com/g/sixthsense-alphacode-testers . Anyone on the web can join through the direct URL; conversation visibility is members-only and posting/member-list visibility is owners-only. No invitations/messages were sent. Draft `1.0.0 - Closed Alpha` contains the previously uploaded version 1 bundle, not the cleaned build. Saved privacy URL, Ads=Yes, no government/financial/health features, Word game category and support contact; dashboard showed 6/11 setup tasks complete. IARC terms were accepted with explicit owner approval. After cleanup, the revised questionnaire and summary were saved to Publishing overview, pending review; the preview showed IARC Generic 3+, ESRB Everyone 10+, PEGI 3, and higher ratings in some other regions. This is not Play approval. It declares textual non-graphic violence and rare medical/alcohol/tobacco references, plus digital purchases without loot boxes or cash rewards. Gambling themes are No under Google’s imagery/activity definition; native voice/chat/media exchange and location sharing are absent. Short/full listing descriptions were saved as a draft for version 1.0.2. Sign-in details, target audience, Data safety, listing graphics, new signed bundle and release submission remain. No closed release was sent for review; dashboard showed zero closed testers, so the required 14-day period has not started. The future opt-in URL is https://play.google.com/apps/testing/com.sensei.sixthsense and is not yet an active installation path.
 
 
 ### Bollywood Race and VS exception
@@ -370,6 +370,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+September 21 release follow-up: `bafcf58` pushed to main. Vercel status succeeded and Pages workflow `35628120919` succeeded; both public answer-bank.js and app.js matched local source, HTML uses `20260921.2`, and the age prompt has no ad-exemption copy. Revised IARC summary and 78-character short / 1,320-character full listing copy saved in Console; no review submission. No new production room or physical-device test is claimed.
 
 September 21 content cleanup: `npm test` (including complete server selection and legacy clue/redaction regression), `test-bollywood.js`, `test-bollywood-vs.js`, `python scripts/apply_answer_safety.py --check`, syntax and whitespace passed. Android sync, `assembleDebug`, `bundleDebug` and `lintDebug` passed on Zulu 21. Archive checks verified 10,106 cleaned answers, source equality, neutral age text and exclusion of server-only banks/policy files. A real browser UI smoke check opened Daily as a guest and purchased a Sense clue. Full browser suites and physical devices were not retested. Full WordNet regeneration was not run because the system Python lacks nltk/wordfreq; the dependency-free safety application/check was run. The old progression hash test initially failed as expected after removal; its new baseline preserves surviving answer order and tiers. See ANDROID_RELEASE.md for artifact paths/hashes and signing blocker.
 
@@ -543,6 +545,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-09-21 — Verify content cleanup publication and save store declarations
+
+- Verified successful Vercel/Pages publication of `bafcf58` and byte-equivalent cleaned public assets.
+- Saved revised IARC answers/summary for the cleaned build and a store-copy draft. The old version 1 bundle must be replaced with signed version 3 before review. Listing graphics, access/audience/Data safety and release submission remain; the closed-test timer has not started.
 
 ### 2026-09-21 — Prepare closed testing and clean teen-facing content
 

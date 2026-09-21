@@ -27,11 +27,13 @@ September 21: latest web client synchronized with the reviewed teen-content clea
 
 These are debug-signed QA artifacts, **not Play-uploadable releases**. The existing upload-key-signed `android/app/release/app-release.aab` is still version 1. Generate a new **release** App Bundle in Studio using the existing upload key and private passwords; version 3 is configured and synced. `android/keystore.properties` is absent, and no signing passwords were extracted or fabricated.
 
+The corresponding web/backend commit `bafcf58` deployed successfully to Vercel and GitHub Pages on September 21. Both public bank/app files match the cleaned source. Existing old rooms may retain removed answer words until their 24-hour expiry.
+
 ### Play Console and tester group
 
 Alpha is configured for India and `sixthsense-alphacode-testers@googlegroups.com`. Share https://groups.google.com/g/sixthsense-alphacode-testers so testers can join themselves. The draft `1.0.0 - Closed Alpha` contains the old version 1 bundle. Replace it with the signed version 3 before review. The future opt-in URL is https://play.google.com/apps/testing/com.sensei.sixthsense ; it is not currently an active installation path.
 
-Privacy URL, Ads=Yes, no government/financial/health features, Word category and support contact were saved; dashboard showed 6/11 completed. IARC terms were explicitly approved by the owner; questionnaire is unfinished and must reflect the cleaned release, including remaining non-graphic crime/violence, gambling and alcohol/tobacco references. Sign-in details, target audience (intended 13+), Data safety and store listing remain. No closed release was submitted, and zero closed testers were opted in. Internal testers must leave the internal test before enrolling in the closed test. No 14-day clock has started.
+Privacy URL, Ads=Yes, no government/financial/health features, Word category and support contact were saved; dashboard showed 6/11 completed. IARC terms were explicitly approved by the owner; the revised questionnaire/summary for the cleaned release is saved to Publishing overview, pending review. Preview: IARC Generic 3+, ESRB Everyone 10+, PEGI 3; other regions differ. Textual violence and rare medical/alcohol/tobacco references are declared, plus digital purchases with no random paid items. Gambling imagery/activity and native communication features are absent. Short/full listing copy for version 1.0.2 is saved as a draft. Sign-in details, target audience (intended 13+), Data safety and listing graphics remain. No closed release was submitted, and zero closed testers were opted in. Internal testers must leave the internal test before enrolling in the closed test. No 14-day clock has started.
 
 ## Previous update — version 1.0.1 (versionCode 2)
 
