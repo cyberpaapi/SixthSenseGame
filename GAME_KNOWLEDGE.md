@@ -4,7 +4,7 @@
 
 Last updated: 2026-09-21
 
-Last verified: 2026-09-21 (Reset generation 10: npm test, wallet migration through v9, current-v10 preservation and live-policy browser checks passed locally, including 30-second delivery, cross-tab repair and preserved progress/earnings. Syntax and whitespace passed. Public delivery verification pending publication; no Android update.)
+Last verified: 2026-09-21 (Reset generation 10: npm test, wallet migration through v9, current-v10 preservation and live-policy browser checks passed locally, including 30-second delivery, cross-tab repair and preserved progress/earnings. Syntax and whitespace passed. Vercel and Pages deployed 706ff61 successfully; real zero/high wallets left open before deployment reset to 500 on both sites without reload, preserving progress. No Android update.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -360,7 +360,7 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-September 21 reset generation 10: `npm test`, `test-wallet-reset.js` and `test-live-wallet-reset.js` passed locally. Coverage includes zero/high balances across legacy generations through v9, preserved v10 earnings after reload, progress/inventory/cosmetics/receipt retention, new 500 baseline, foreground and periodic checks, offline recovery and stale-tab write repair. App syntax and whitespace passed. Four isolated production pages were opened before publication to verify delivery on both websites; their results will be recorded after deployment. No full browser-suite rerun or Android release for this generation-only change.
+September 21 reset generation 10: `npm test`, `test-wallet-reset.js` and `test-live-wallet-reset.js` passed locally. Coverage includes zero/high balances across legacy generations through v9, preserved v10 earnings after reload, progress/inventory/cosmetics/receipt retention, new 500 baseline, foreground and periodic checks, offline recovery and stale-tab write repair. App syntax and whitespace passed. Production commit `706ff61` deployed successfully on Vercel and GitHub Pages (Pages run `35588057665`). Both public policies returned generation 10 / startingCoins 500. `WALLET_RESET_TARGET=10 node test-production-wallet-reset.js` kept four isolated public pages open across publication: balances 0 and 9,876 on each site became exactly 500 without reload or mocked policy; played count and inventory were retained. This confirms tested client delivery, not an enumeration of every offline or legacy device. No full browser-suite rerun or Android release for this generation-only change.
 
 September 21 publication: pushed commits `2e53c90`, `bc5e7cd` and `6902bec` to GitHub main. Vercel reported successful deployment. Both Vercel and GitHub Pages returned HTTP 200 for the updated HTML and runtime files; the public core/app/multiplayer contents match local source after line-ending normalization. Public help shows Sense 75 with standard Peek/Clear prices, and the core URL is `20260919.3`. This is publication/asset verification, not a new production multiplayer playthrough or Android release.
 
