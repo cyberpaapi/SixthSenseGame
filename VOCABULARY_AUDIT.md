@@ -1,8 +1,16 @@
 # Sixth Sense vocabulary audit
 
-Verified: 2026-09-05
+Verified: 2026-09-21 (targeted content cleanup)
 
-## Result
+## September 21 teen-content cleanup
+
+The owner approved cleanup before closed-test submission. Removed 81 additional unsuitable answer candidates and replaced 62 clues with reviewed, non-adult meanings. Current totals: **10,106 answers**, split **4,046 Normal / 2,226 Hard / 3,834 Extreme**. Accepted guesses remain **15,232**; frequency thresholds are unchanged. Neutral biology, gender/equality terminology and innocent similar spellings remain.
+
+`answer_safety.json` is the versioned answer-only policy; `clue_overrides.json` supplies reviewed definitions; `answer-safety-audit.json` contains the exact before/after audit. Run `python scripts/apply_answer_safety.py` to apply the policy or add `--check` to validate it without changes. `npm test` and client packaging reject known unsuitable clues/answers. The full WordNet generator honors the same exclusions/patterns, but full regeneration was not run in this cleanup because its dependencies are absent in system Python.
+
+Surviving answer order and tier membership are retained. The smaller bank changes Daily selection and shuffled Adventure routes; current progression counters remain. Existing multiplayer routes expire within 24 hours and may still contain removed answers, though old unsuitable clue text is suppressed. This is targeted editorial review and regression screening, not a formal content rating or a claim that every dictionary sense was reviewed. Non-graphic violence, gambling and alcohol/tobacco references remain.
+
+## Earlier vocabulary audit (historical counts)
 
 Sixth Sense recognizes **15,232 realistically acceptable six-letter guesses**. **10,187** clueable, answer-safe words are available as puzzles in three ordered tiers.
 

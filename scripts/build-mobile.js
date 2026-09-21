@@ -2,6 +2,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const root = path.resolve(__dirname, "..");
+const answers = require("../answer-bank");
+const safety = require("./answer_safety.json");
+const excluded = new Set(safety.excludedAnswers);
+const blockedClues = safety.blockedCluePatterns.map(pattern => new RegExp(pattern, "i"));
+if (answers.some(entry => excluded.has(entry.word) || blockedClues.some(pattern => pattern.test(entry.clue)))) {
+  throw new Error("Answer content requires review before packaging. Run npm test and scripts/apply_answer_safety.py.");
+}
 const destination = path.join(root, "www");
 if (path.dirname(destination) !== root || path.basename(destination) !== "www") throw new Error("Unexpected generated output directory");
 if (fs.existsSync(destination) && fs.lstatSync(destination).isSymbolicLink()) throw new Error("Refusing to overwrite a linked output directory");

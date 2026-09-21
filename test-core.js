@@ -4,6 +4,20 @@ const assert = require("assert");
 const Core = require("./game-core.js");
 const GuessBank = require("./word-bank.js");
 const GuessBankSet = new Set(GuessBank);
+const AnswerSafety = require("./scripts/answer_safety.json");
+const blockedClues = AnswerSafety.blockedCluePatterns.map(pattern => new RegExp(pattern, "i"));
+assert.deepEqual(Core.ANSWERS.filter(item => AnswerSafety.excludedAnswers.includes(item.word)), []);
+assert.deepEqual(Core.ANSWERS.filter(item => blockedClues.some(pattern => pattern.test(item.clue))), [], "adult/slur definitions must not return to the puzzle bank");
+for (const [word, meaning] of [["peeler", /kitchen tool/], ["sultry", /humid/], ["colons", /Punctuation/], ["mating", /mechanical parts/], ["shrimp", /sea creature/]]) {
+  assert.match(Core.ANSWERS.find(item => item.word === word).clue, meaning);
+}
+for (const word of ["female", "gender", "sexism", "gamete", "sexton", "sextet"]) {
+  assert(Core.ANSWERS.some(item => item.word === word), "neutral biology, equality and similar spellings must remain available");
+}
+assert(Core.WORDS.has("ravish"), "the answer cleanup must not narrow accepted guesses");
+const sourceHtml = require("node:fs").readFileSync(require("node:path").join(__dirname, "index.html"), "utf8");
+const agePrompt = sourceHtml.split('id="age-band-modal"')[1].split("</dialog>")[0];
+assert.doesNotMatch(agePrompt, /ads|adverts|advertising|disabled|exempt/i, "the age question must not advertise ad exemptions");
 
 assert.deepEqual(Core.lifelineCosts("bollywood"), { sense: 75, peek: 50, clear: 40, skip: 60 });
 assert.deepEqual(Core.lifelineCosts(), { sense: 30, peek: 50, clear: 40, skip: 60 });
@@ -13,8 +27,8 @@ assert(Object.isFrozen(Core.lifelineCosts("bollywood")));
 assert.equal(Core.LAST_CHANCE_COST, 125, "Last Chance is not a hint purchase");
 
 assert.equal(Core.ANSWERS.length, new Set(Core.ANSWERS.map(item => item.word)).size, "answer words must be unique");
-assert.equal(Core.ANSWERS.length, 10187, "answer bank must contain every clueable answer-safe word");
-assert.deepEqual(Object.fromEntries(Object.entries(Core.ANSWER_TIERS).map(([tier, words]) => [tier, words.length])), { easy: 4058, medium: 2246, extreme: 3883 });
+assert.equal(Core.ANSWERS.length, 10106, "answer bank must contain every clueable answer-safe word");
+assert.deepEqual(Object.fromEntries(Object.entries(Core.ANSWER_TIERS).map(([tier, words]) => [tier, words.length])), { easy: 4046, medium: 2226, extreme: 3834 });
 assert(Core.ANSWERS.every(item => ["easy", "medium", "extreme"].includes(item.tier)), "every answer must have a multiplayer difficulty tier");
 assert.deepEqual(Core.ANSWERS.filter(item => item.word.length !== 6), [], "every answer must have six letters");
 assert.deepEqual(Core.ANSWERS.filter(item => !item.clue || typeof item.clue !== "string"), [], "every answer must have a Sense clue");
@@ -83,19 +97,19 @@ assert.equal(Core.practiceAnswer(null, () => 0, allEasy).tier, "medium", "solved
 const adventureRouteA = Core.adventureRoute(123456);
 const adventureRouteARepeat = Core.adventureRoute(123456);
 const adventureRouteB = Core.adventureRoute(654321);
-assert.equal(Core.ADVENTURE_TOTAL, 10187);
+assert.equal(Core.ADVENTURE_TOTAL, 10106);
 assert.strictEqual(adventureRouteA, adventureRouteARepeat, "a saved Adventure seed must reproduce the identical cached route");
 assert.equal(adventureRouteA.length, Core.ADVENTURE_TOTAL);
 assert.equal(new Set(adventureRouteA.map(item => item.word)).size, Core.ADVENTURE_TOTAL, "Adventure must contain every answer exactly once");
-assert(adventureRouteA.slice(0, 4058).every(item => item.tier === "easy"), "all Normal levels must come first");
-assert(adventureRouteA.slice(4058, 6304).every(item => item.tier === "medium"), "Hard levels must follow Normal");
-assert(adventureRouteA.slice(6304).every(item => item.tier === "extreme"), "Hard/Extreme levels must come last");
+assert(adventureRouteA.slice(0, 4046).every(item => item.tier === "easy"), "all Normal levels must come first");
+assert(adventureRouteA.slice(4046, 6272).every(item => item.tier === "medium"), "Hard levels must follow Normal");
+assert(adventureRouteA.slice(6272).every(item => item.tier === "extreme"), "Hard/Extreme levels must come last");
 assert.notDeepEqual(adventureRouteA.slice(0, 20).map(item => item.word), adventureRouteB.slice(0, 20).map(item => item.word), "different players should receive differently shuffled routes");
-assert.deepEqual(Core.adventureProgress(0), { level: 0, total: 10187, tier: "easy", tierIndex: 0, tierLevel: 0, tierTotal: 4058, complete: false });
-assert.deepEqual(Core.adventureProgress(4058), { level: 4058, total: 10187, tier: "medium", tierIndex: 1, tierLevel: 0, tierTotal: 2246, complete: false });
-assert.deepEqual(Core.adventureProgress(6304), { level: 6304, total: 10187, tier: "extreme", tierIndex: 2, tierLevel: 0, tierTotal: 3883, complete: false });
-assert.equal(Core.adventureProgress(10187).complete, true);
-assert.equal(Core.adventureAnswer(4058, 123456).tier, "medium");
+assert.deepEqual(Core.adventureProgress(0), { level: 0, total: 10106, tier: "easy", tierIndex: 0, tierLevel: 0, tierTotal: 4046, complete: false });
+assert.deepEqual(Core.adventureProgress(4046), { level: 4046, total: 10106, tier: "medium", tierIndex: 1, tierLevel: 0, tierTotal: 2226, complete: false });
+assert.deepEqual(Core.adventureProgress(6272), { level: 6272, total: 10106, tier: "extreme", tierIndex: 2, tierLevel: 0, tierTotal: 3834, complete: false });
+assert.equal(Core.adventureProgress(10106).complete, true);
+assert.equal(Core.adventureAnswer(4046, 123456).tier, "medium");
 assert.equal(Core.dateKey(new Date("2026-08-26T12:00:00Z")), "2026-08-26");
 assert.equal(Core.STARTING_COINS, 500);
 assert.equal(Core.MAX_COINS, 99999);

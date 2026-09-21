@@ -375,8 +375,8 @@
   function loadModeGame(gameMode, forceNew) {
     const saved = loadJson(STORAGE[gameMode], {});
     const adventureLevelMatches = gameMode !== "adventure" || Number(saved.adventureLevel) === stats.adventure.level;
-    if (!forceNew && adventureLevelMatches && saved.mode === gameMode && saved.answer && saved.clue && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
-      return restoreGame(emptyGame({ word: saved.answer, clue: ANSWER_CLUES.get(saved.answer) || saved.clue }, gameMode), saved);
+    if (!forceNew && adventureLevelMatches && saved.mode === gameMode && ANSWER_CLUES.has(saved.answer) && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
+      return restoreGame(emptyGame({ word: saved.answer, clue: ANSWER_CLUES.get(saved.answer) }, gameMode), saved);
     }
     if (gameMode === "adventure") {
       const next = emptyGame(Core.adventureAnswer(stats.adventure.level, stats.adventure.seed), gameMode);

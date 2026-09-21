@@ -1,0 +1,402 @@
+{
+  "date": "2026-09-21",
+  "baseline": "f93944ecfa43453f9a18b8bc378138704e899e31",
+  "removedAnswers": [
+    "damned",
+    "peters",
+    "doping",
+    "junkie",
+    "seduce",
+    "ripper",
+    "bitchy",
+    "libido",
+    "sexier",
+    "necked",
+    "nudist",
+    "farted",
+    "broads",
+    "behead",
+    "harlot",
+    "gigolo",
+    "pimped",
+    "risque",
+    "testis",
+    "boners",
+    "gonads",
+    "sexing",
+    "spliff",
+    "enemas",
+    "fuckup",
+    "smutty",
+    "pornos",
+    "ravish",
+    "amours",
+    "ribald",
+    "nudism",
+    "estrus",
+    "unsexy",
+    "boobed",
+    "kafirs",
+    "vulvar",
+    "bidets",
+    "gelded",
+    "floozy",
+    "cocain",
+    "anuses",
+    "pisser",
+    "lecher",
+    "sexpot",
+    "leches",
+    "lewdly",
+    "rapers",
+    "deuced",
+    "incubi",
+    "vulvas",
+    "fagged",
+    "flatus",
+    "bosomy",
+    "vulval",
+    "hymens",
+    "shiksa",
+    "cockup",
+    "weewee",
+    "penial",
+    "lochia",
+    "sonsie",
+    "bagnio",
+    "bawdry",
+    "bedamn",
+    "daggas",
+    "damner",
+    "eroses",
+    "ganjas",
+    "honkie",
+    "maimer",
+    "minxes",
+    "musths",
+    "nudest",
+    "oglers",
+    "opiums",
+    "ridgel",
+    "ridgil",
+    "semens",
+    "shikse",
+    "vulvae",
+    "yentas"
+  ],
+  "clueChanges": [
+    {
+      "word": "female",
+      "before": "Adjective · Relating to women or girls, or the sex that typically produces eggs in animals.",
+      "after": "Adjective · Relating to women or girls, or to the egg-producing members of a species."
+    },
+    {
+      "word": "virgin",
+      "before": "Noun · A person who has never had sex.",
+      "after": "Adjective · Untouched or unused, as in a stretch of wilderness."
+    },
+    {
+      "word": "cattle",
+      "before": "Noun · Domesticated bovine animals as a group regardless of sex or age.",
+      "after": "Plural noun · Farm animals such as cows and bulls."
+    },
+    {
+      "word": "shrimp",
+      "before": "Noun · Disparaging terms for small people.",
+      "after": "Noun · A small sea creature with a curved body and a hard outer shell."
+    },
+    {
+      "word": "cursed",
+      "before": "Past-tense verb · Utter obscenities or profanities.",
+      "after": "Adjective · Said to be affected by a spell that brings bad luck."
+    },
+    {
+      "word": "sexist",
+      "before": "Noun · A man with a chauvinistic belief in the inferiority of women.",
+      "after": "Adjective · Unfairly judging or treating someone because of their gender."
+    },
+    {
+      "word": "sexism",
+      "before": "Noun · Discriminatory or abusive behavior towards members of the opposite sex.",
+      "after": "Noun · Unfair treatment of people because of their gender."
+    },
+    {
+      "word": "clowns",
+      "before": "Plural noun · A rude or vulgar fool.",
+      "after": "Plural noun · Performers who wear funny costumes to make people laugh."
+    },
+    {
+      "word": "mating",
+      "before": "Verb (-ing form) · Engage in sexual intercourse.",
+      "after": "Verb (-ing form) · Fitting two matching mechanical parts together."
+    },
+    {
+      "word": "mayhem",
+      "before": "Noun · The willful and unlawful crippling or mutilation of another person.",
+      "after": "Noun · Noisy confusion and disorder."
+    },
+    {
+      "word": "warped",
+      "before": "Past-tense verb · Make false by mutilation or addition; as of a message or story.",
+      "after": "Adjective · Bent or twisted out of the proper shape."
+    },
+    {
+      "word": "spores",
+      "before": "Plural noun · A small usually single-celled asexual reproductive body produced by many nonflowering plants and fungi and some bacteria and protozoans and that are capable of developing into a new individual without sexual fusion.",
+      "after": "Plural noun · Tiny cells from which fungi, mosses or ferns can grow."
+    },
+    {
+      "word": "curses",
+      "before": "Verb form · Utter obscenities or profanities.",
+      "after": "Plural noun · Spells believed to bring bad luck."
+    },
+    {
+      "word": "swears",
+      "before": "Verb form · Utter obscenities or profanities.",
+      "after": "Verb form · Makes a solemn promise that something is true."
+    },
+    {
+      "word": "earthy",
+      "before": "Adjective · Conspicuously and tastelessly indecent.",
+      "after": "Adjective · Resembling soil in color, smell or texture."
+    },
+    {
+      "word": "unisex",
+      "before": "Adjective · Not distinguished on the basis of sex.",
+      "after": "Adjective · Designed for people of any gender."
+    },
+    {
+      "word": "sultry",
+      "before": "Adjective · Sexually exciting or gratifying.",
+      "after": "Adjective · Hot and humid, with little moving air."
+    },
+    {
+      "word": "toying",
+      "before": "Noun · Playful behavior intended to arouse sexual interest.",
+      "after": "Verb (-ing form) · Playing with an object or casually considering an idea."
+    },
+    {
+      "word": "frigid",
+      "before": "Adjective · Sexually unresponsive.",
+      "after": "Adjective · Extremely cold."
+    },
+    {
+      "word": "spacey",
+      "before": "Adjective · Stupefied by (or as if by) some narcotic drug.",
+      "after": "Adjective · Distracted or not paying close attention to what is happening."
+    },
+    {
+      "word": "ablaze",
+      "before": "Adjective · Keenly excited (especially sexually) or indicating excitement; - Bram Stoker.",
+      "after": "Adjective · Shining brightly with light or color."
+    },
+    {
+      "word": "opiate",
+      "before": "Noun · A narcotic drug that contains opium or an opium derivative.",
+      "after": "Noun · Something that soothes the mind or dulls awareness."
+    },
+    {
+      "word": "wanton",
+      "before": "Noun · Lewd or lascivious woman.",
+      "after": "Adjective · Reckless and done without regard for the consequences."
+    },
+    {
+      "word": "chaste",
+      "before": "Adjective · Morally pure (especially not having experienced sexual intercourse).",
+      "after": "Adjective · Simple and restrained in style, without elaborate decoration."
+    },
+    {
+      "word": "darned",
+      "before": "Adjective · Expletives used informally as intensifiers.",
+      "after": "Past-tense verb · Repaired a hole in fabric by weaving thread across it."
+    },
+    {
+      "word": "peeler",
+      "before": "Noun · A performer who provides erotic entertainment by undressing to music.",
+      "after": "Noun · A kitchen tool used to remove the skin from vegetables."
+    },
+    {
+      "word": "aflame",
+      "before": "Adjective · Keenly excited (especially sexually) or indicating excitement; - Bram Stoker.",
+      "after": "Adjective · Burning brightly."
+    },
+    {
+      "word": "peewee",
+      "before": "Noun · Disparaging terms for small people.",
+      "after": "Adjective · Very small in size."
+    },
+    {
+      "word": "cussed",
+      "before": "Past-tense verb · Utter obscenities or profanities.",
+      "after": "Adjective · Stubborn and determined to be difficult."
+    },
+    {
+      "word": "huffed",
+      "before": "Past-tense verb · Inhale recreational drugs.",
+      "after": "Past-tense verb · Blew air out forcefully in annoyance."
+    },
+    {
+      "word": "ragtag",
+      "before": "Noun · Disparaging terms for the common people.",
+      "after": "Adjective · Made up of an untidy assortment of different people or things."
+    },
+    {
+      "word": "glamor",
+      "before": "Noun · Alluring beauty or charm (often with sex-appeal).",
+      "after": "Noun · An attractive quality that makes something seem exciting or special."
+    },
+    {
+      "word": "suckle",
+      "before": "Verb · Suck milk from the mother's breasts.",
+      "after": "Verb · Feed on milk directly from a mother animal."
+    },
+    {
+      "word": "barest",
+      "before": "Adjective form · Completely unclothed.",
+      "after": "Superlative adjective · Having the least covering, decoration or detail."
+    },
+    {
+      "word": "nipper",
+      "before": "Noun · A young person of either sex.",
+      "after": "Noun · A small child; an informal expression."
+    },
+    {
+      "word": "cloaca",
+      "before": "Noun · (zoology) the cavity (in birds, reptiles, amphibians, most fish, and monotremes but not mammals) at the end of the digestive tract into which the intestinal, genital, and urinary tracts open.",
+      "after": "Noun · A shared outlet for several internal passages in birds and reptiles."
+    },
+    {
+      "word": "colons",
+      "before": "Plural noun · The part of the large intestine between the cecum and the rectum; it extracts moisture from food residues before they are excreted.",
+      "after": "Plural noun · Punctuation marks made of two dots, one above the other."
+    },
+    {
+      "word": "satyrs",
+      "before": "Plural noun · Man with strong sexual desires.",
+      "after": "Plural noun · Mythological woodland creatures with human bodies and goat-like legs."
+    },
+    {
+      "word": "cupids",
+      "before": "Plural noun · A symbol for love in the form of a cherubic naked boy with wings and a bow and arrow.",
+      "after": "Plural noun · Winged figures with bows and arrows that symbolize love."
+    },
+    {
+      "word": "cruddy",
+      "before": "Adjective · Characterized by obscenity.",
+      "after": "Adjective · Dirty, unpleasant or of poor quality."
+    },
+    {
+      "word": "gamete",
+      "before": "Noun · A mature sexual reproductive cell having a single set of unpaired chromosomes.",
+      "after": "Noun · A reproductive cell containing half the usual number of chromosomes."
+    },
+    {
+      "word": "peeper",
+      "before": "Noun · A viewer who enjoys seeing the sex acts or sex organs of others.",
+      "after": "Noun · A small frog known for its high-pitched call."
+    },
+    {
+      "word": "groins",
+      "before": "Plural noun · The crease at the junction of the inner part of the thigh with the trunk together with the adjacent region and often including the external genitals.",
+      "after": "Plural noun · Curved edges formed where two vaulted ceilings meet."
+    },
+    {
+      "word": "binger",
+      "before": "Noun · Someone addicted to crack cocaine.",
+      "after": "Noun · Someone who watches many episodes of a show in one sitting."
+    },
+    {
+      "word": "kookie",
+      "before": "Adjective · Informal or slang terms for mentally irregular.",
+      "after": "Adjective · Unconventional or amusingly eccentric."
+    },
+    {
+      "word": "bonked",
+      "before": "Past-tense verb · Have sexual intercourse with.",
+      "after": "Past-tense verb · Bumped something, often by accident."
+    },
+    {
+      "word": "chewer",
+      "before": "Noun · Someone who chews (especially someone who chews tobacco).",
+      "after": "Noun · Someone who breaks down food with their teeth before swallowing."
+    },
+    {
+      "word": "garble",
+      "before": "Verb · Make false by mutilation or addition; as of a message or story.",
+      "after": "Verb · Mix up a message so that it becomes difficult to understand."
+    },
+    {
+      "word": "labium",
+      "before": "Noun · A liplike structure that bounds a bodily orifice (especially any of the four labiate folds of a woman's vulva).",
+      "after": "Noun · The lower mouthpart of an insect."
+    },
+    {
+      "word": "frisks",
+      "before": "Plural noun · The act of searching someone for concealed weapons or illegal drugs.",
+      "after": "Verb form · Moves about in a lively, playful way."
+    },
+    {
+      "word": "miosis",
+      "before": "Noun · (genetics) cell division that produces reproductive cells in sexually reproducing organisms; the nucleus divides into four nuclei each containing half the chromosome number (leading to gametes in animals and spores in plants).",
+      "after": "Noun · The narrowing of the pupil of an eye."
+    },
+    {
+      "word": "dafter",
+      "before": "Adjective form · Informal or slang terms for mentally irregular.",
+      "after": "Comparative adjective · Sillier or more foolish."
+    },
+    {
+      "word": "pusses",
+      "before": "Plural noun · Obscene terms for female genitals.",
+      "after": "Plural noun · Cats; an informal name for household felines."
+    },
+    {
+      "word": "blamer",
+      "before": "Adjective form · Expletives used informally as intensifiers.",
+      "after": "Noun · Someone who says another person is responsible for a mistake."
+    },
+    {
+      "word": "gamier",
+      "before": "Adjective form · Suggestive of sexual impropriety.",
+      "after": "Comparative adjective · Having a stronger flavor like wild meat."
+    },
+    {
+      "word": "gamins",
+      "before": "Plural noun · (sometimes offensive) a homeless boy who has been abandoned and roams the streets.",
+      "after": "Plural noun · Mischievous children who spend much of their time outdoors."
+    },
+    {
+      "word": "mioses",
+      "before": "Plural noun · (genetics) cell division that produces reproductive cells in sexually reproducing organisms; the nucleus divides into four nuclei each containing half the chromosome number (leading to gametes in animals and spores in plants).",
+      "after": "Plural noun · Instances of the pupils of the eyes becoming smaller."
+    },
+    {
+      "word": "miotic",
+      "before": "Noun · A drug that causes miosis (constriction of the pupil of the eye).",
+      "after": "Adjective · Causing the pupil of an eye to become smaller."
+    },
+    {
+      "word": "oomphs",
+      "before": "Plural noun · Attractiveness to the opposite sex.",
+      "after": "Plural noun · Bursts of energy, enthusiasm or impact."
+    },
+    {
+      "word": "ootids",
+      "before": "Plural noun · Mature ovum after penetration by sperm but before the formation of a zygote.",
+      "after": "Plural noun · Developing egg cells produced during a stage of cell division."
+    },
+    {
+      "word": "seizer",
+      "before": "Noun · A kidnapper who drugs men and takes them for compulsory service aboard a ship.",
+      "after": "Noun · Someone or something that grabs and holds an object."
+    },
+    {
+      "word": "vamper",
+      "before": "Noun · A seductive woman who uses her sex appeal to exploit men.",
+      "after": "Noun · A musician who improvises a repeating accompaniment."
+    }
+  ],
+  "retainedAnswers": 10106,
+  "acceptedGuessesUnchanged": true,
+  "limitations": "Targeted content review and regression screening, not a formal age rating or exhaustive human review of all dictionary senses. Non-graphic violence, gambling and alcohol/tobacco references remain; declare them accurately."
+}

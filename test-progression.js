@@ -26,7 +26,7 @@ assert.equal(P.mastery(18000).level, 7);
 const overrides = require("./scripts/clue_overrides.json");
 const bank = require("./answer-bank");
 assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(bank.map(item => [item.word, item.tier]))).digest("hex"),
-  "9fb86c30b3a47bb6e2fbfa529bb2d034a72d0aa0015760d5a7dfbf0af1caca27", "clue refresh must preserve all existing answers, tier membership, and Adventure order");
+  "dd02567ed6dce22cea47ae5fc64d8b2f31d335b0d4202148baeebed8b5116900", "reviewed September 21 answer membership, surviving order, and tiers must remain stable");
 for (const [word, clue] of Object.entries(overrides)) {
   assert.equal(word.length, 6);
   assert.equal(bank.find(item => item.word === word)?.clue, clue, `${word} must use reviewed wording`);

@@ -27,8 +27,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("sixth-sense.online.identity.v1"))), { name: "FoxPilot" });
     await page.waitForSelector("#help-modal[open]");
     await page.click(".modal-got-it");
-    assert.equal(await page.evaluate(() => window.SixthSenseCore.ANSWERS.length), 10187);
-    assert.deepEqual(await page.evaluate(() => Object.fromEntries(Object.entries(window.SixthSenseCore.ANSWER_TIERS).map(([tier, words]) => [tier, words.length]))), { easy: 4058, medium: 2246, extreme: 3883 });
+    assert.equal(await page.evaluate(() => window.SixthSenseCore.ANSWERS.length), 10106);
+    assert.deepEqual(await page.evaluate(() => Object.fromEntries(Object.entries(window.SixthSenseCore.ANSWER_TIERS).map(([tier, words]) => [tier, words.length]))), { easy: 4046, medium: 2226, extreme: 3834 });
     assert.equal(await page.evaluate(() => window.SixthSenseCore.WORDS.size), 15232);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("rattle")), true);
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("raffle")), true);
@@ -456,7 +456,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       localStorage.setItem("sixth-sense.visited.v1", "yes");
       localStorage.setItem("sixth-sense.online.identity.v1", JSON.stringify({ name: "ZoneFox" }));
       localStorage.setItem("sixth-sense.settings.v1", JSON.stringify({ music: false, effects: false }));
-      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ adventure: { seed: 123456, level: 4058 } }));
+      localStorage.setItem("sixth-sense.stats.v1", JSON.stringify({ adventure: { seed: 123456, level: 4046 } }));
     });
     await zonePage.goto(baseUrl, { waitUntil: "networkidle" });
     await zonePage.click("[data-open-adventure-map]");

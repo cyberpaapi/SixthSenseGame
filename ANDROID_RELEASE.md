@@ -1,6 +1,6 @@
 # Sixth Sense Android release
 
-Developer: **Sensei**. Support: **aryanchandwani@gmail.com**. Audience: **13+**.
+Play Console developer: **AlphaCodeAI**; existing in-app publisher copy: **Sensei**. Support: **aryanchandwani@gmail.com**. Audience: **13+**.
 
 September 16 account setup: the owner reports Play Console verification complete (`silversabre9@gmail.com`) and an AdMob account created (`aryanchandwani@gmail.com`). The following public identifiers are saved in the local, git-ignored `android/release.properties`; debug continues using Google sample IDs. Production ad serving has not been tested or approved by this configuration change.
 
@@ -16,7 +16,24 @@ Music update (`20260916.1`): **Tea and Tangrams** now loops the original 0:00–
 
 The Android source is in `android/`, built with Capacitor 8, Java 21 and target/compile SDK 36. Package ID: `com.sensei.sixthsense` (check availability before the first Play upload; the uploaded package ID cannot later be changed). Solo gameplay, artwork, sound effects and fonts are bundled. Multiplayer uses the existing Vercel/Neon authority over HTTPS. No Cloudflare integration is required. A custom domain/Cloudflare DNS is optional; do not migrate the working room service just to package Android.
 
-## Current update — version 1.0.1 (versionCode 2)
+## Current update — version 1.0.2 (versionCode 3)
+
+September 21: latest web client synchronized with the reviewed teen-content cleanup (81 answers removed; 62 clues rewritten; 10,106 answers remain), movie/character Bollywood modes, global usernames, current lifeline prices, economy generation 10, 88-second music loop and immersive display. The age question is neutral and does not advertise under-13 ad exemptions. The age/privacy behavior is retained.
+
+`npm test`, Bollywood server suites, safety check, Android sync, debug APK/AAB assembly and lint passed. Packaged answer-bank equality and age-prompt text were checked in both archives. No full browser rerun or physical-device acceptance for this build. Artifacts:
+
+- `release/SixthSense-v1.0.2-debug.apk`: 36,653,316 bytes; SHA-256 `7b26aa48de2c9c16a368e0de314dd5ac2383e37a9590a6300cdeaf0958143fe9`.
+- `release/SixthSense-v1.0.2-debug-NOT-FOR-PLAY.aab`: 35,358,678 bytes; SHA-256 `2721b7e601194f8f12ac9d6b9823777672226922cb16980f179f853ae3c54ba9`.
+
+These are debug-signed QA artifacts, **not Play-uploadable releases**. The existing upload-key-signed `android/app/release/app-release.aab` is still version 1. Generate a new **release** App Bundle in Studio using the existing upload key and private passwords; version 3 is configured and synced. `android/keystore.properties` is absent, and no signing passwords were extracted or fabricated.
+
+### Play Console and tester group
+
+Alpha is configured for India and `sixthsense-alphacode-testers@googlegroups.com`. Share https://groups.google.com/g/sixthsense-alphacode-testers so testers can join themselves. The draft `1.0.0 - Closed Alpha` contains the old version 1 bundle. Replace it with the signed version 3 before review. The future opt-in URL is https://play.google.com/apps/testing/com.sensei.sixthsense ; it is not currently an active installation path.
+
+Privacy URL, Ads=Yes, no government/financial/health features, Word category and support contact were saved; dashboard showed 6/11 completed. IARC terms were explicitly approved by the owner; questionnaire is unfinished and must reflect the cleaned release, including remaining non-graphic crime/violence, gambling and alcohol/tobacco references. Sign-in details, target audience (intended 13+), Data safety and store listing remain. No closed release was submitted, and zero closed testers were opted in. Internal testers must leave the internal test before enrolling in the closed test. No 14-day clock has started.
+
+## Previous update — version 1.0.1 (versionCode 2)
 
 Includes GitHub dark-tile fix f799897, six standard tries plus one Last Chance, 125-coin pricing, round coin rendering, rewarded extra-try receipts, neutral age-screen wording and immersive Android display. The neutral age question remains to configure teen privacy protections; the under-13 ad-exemption message was removed. UMP and eligibility protections remain. Existing saved guesses and already-purchased extra attempts are retained.
 

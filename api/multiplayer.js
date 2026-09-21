@@ -10,7 +10,7 @@ const Bollywood = require("../data/bollywood-answers.json");
 const BollywoodLegacy = require("../data/bollywood-legacy-20260918.json");
 const BOLLYWOOD_BY_WORD = new Map([...BollywoodLegacy, ...Bollywood].map(entry => [entry.word, entry]));
 const isBollywood = room => ["race", "vs"].includes(room.mode) && room.answer_theme === "bollywood";
-const clueFor = (room, answer) => isBollywood(room) ? BOLLYWOOD_BY_WORD.get(answer)?.clue : ANSWER_CLUES.get(answer);
+const clueFor = (room, answer) => isBollywood(room) ? BOLLYWOOD_BY_WORD.get(answer)?.clue : ANSWER_CLUES.get(answer) || "A six-letter word. This clue is no longer available.";
 const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

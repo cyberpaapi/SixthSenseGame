@@ -21,13 +21,14 @@ from pathlib import Path
 
 from nltk.corpus import wordnet as wn
 from wordfreq import zipf_frequency
+from apply_answer_safety import EXCLUDED, unsafe_clue
 
 
 ENABLE_URL = "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt"
 ENABLE_SHA256 = "3f16130220645692ed49c7134e24a18504c2ca55b3c012f7290e3e77c63b1a89"
 NORMAL_MIN_ZIPF = 2.75
 HARD_MIN_ZIPF = 2.0
-EXPECTED_NORMAL_COUNT = 4_058
+EXPECTED_NORMAL_COUNT = 4_046
 WORD_LENGTH = 6
 REQUIRED_ANSWERS = {"raffle", "rattle"}
 REQUIRED_NORMAL = {
@@ -123,6 +124,7 @@ ANSWER_ONLY_EXCLUSIONS = {
     "whores",
     "whitey",
 }
+ANSWER_ONLY_EXCLUSIONS |= EXCLUDED
 
 PROPER_CLUE_PATTERNS = (
     r"\btrade name\b",
@@ -187,7 +189,11 @@ def ranked_synsets(word: str):
 
 
 def clue_for(word: str) -> str | None:
+    if word in ANSWER_ONLY_EXCLUSIONS:
+        return None
     if word in CLUE_OVERRIDES:
+        if unsafe_clue(CLUE_OVERRIDES[word]):
+            raise RuntimeError(f"Review unsafe clue override: {word}")
         return CLUE_OVERRIDES[word]
     for synset in ranked_synsets(word):
         definition = re.sub(r"\s+", " ", synset.definition()).strip()
@@ -199,6 +205,7 @@ def clue_for(word: str) -> str | None:
             len(definition) < 8
             or contains_answer(definition, word)
             or clue_looks_proper(definition)
+            or unsafe_clue(definition)
         ):
             continue
         clue = definition[0].upper() + definition[1:]
@@ -254,6 +261,7 @@ def reusable_old_clue(clue: str | None, word: str) -> bool:
         and re.search(r";\s*;", clue) is None
         and not contains_answer(clue, word)
         and not clue_looks_proper(clue)
+        and not unsafe_clue(clue)
     )
 
 
@@ -303,6 +311,8 @@ def main() -> int:
     if args.refresh_clues:
         source = (project / "answer-bank.js").read_text(encoding="utf-8")
         entries = [json.loads(raw) for raw in re.findall(r'^\s*(\{.+\}),?$', source, re.MULTILINE)]
+        if any(entry['word'] in ANSWER_ONLY_EXCLUSIONS for entry in entries):
+            raise RuntimeError("Apply scripts/apply_answer_safety.py before refreshing clues")
         baseline = read_old_banks(project, args.baseline_ref)[0] if args.baseline_ref else {}
         # The original hand-written starter clues are deliberate, not WordNet output.
         changes, unresolved = [], []
@@ -337,7 +347,7 @@ def main() -> int:
     scored: list[tuple[float, str]] = []
     for word in accepted:
         clue = CLUE_OVERRIDES.get(word) or curated.get(word) or clue_for(word)
-        if clue and word not in ANSWER_ONLY_EXCLUSIONS:
+        if clue and not unsafe_clue(clue) and word not in ANSWER_ONLY_EXCLUSIONS:
             clue_map[word] = clue
             scored.append((zipf_frequency(word, "en"), word))
     scored.sort(key=lambda item: (-item[0], item[1]))

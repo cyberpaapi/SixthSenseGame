@@ -22,9 +22,9 @@ Then open `http://localhost:4173`.
 
 - Seven home modes: Daily, Adventure, private-room Race, one-on-one VS, Co-op, Bollywood Race and Bollywood VS
 - Globally unique usernames with server-side reservation and private recovery codes for another browser/device; coins and solo progress remain device-local
-- A persistent 10,187-level Adventure signal trail with a per-device randomized route, vertical eight-level paging, replayable completed rungs, and individually chained future rungs
+- A persistent 10,106-level Adventure signal trail with a per-device randomized route, vertical eight-level paging, replayable completed rungs, and individually chained future rungs
 - Separate home and play screens, keeping the puzzle view focused
-- 10,187 clueable answers in Normal (4,058), Hard (2,246), and Extreme (3,883) player-facing tiers
+- 10,106 clueable answers in Normal (4,046), Hard (2,226), and Extreme (3,834) player-facing tiers
 - Silent solo progression from Normal into Hard and then Extreme as each tier is completed
 - 15,232 independently validated six-letter guesses from a proper-name-safe word-game lexicon
 - Correct repeated-letter scoring
