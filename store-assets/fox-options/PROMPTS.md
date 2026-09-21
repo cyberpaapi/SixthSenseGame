@@ -1,6 +1,6 @@
 # Happy fox icon concepts — September 21, 2026
 
-Generated with the built-in image_gen tool. These are unselected previews; no launcher, store listing or native bundle has been changed. The user requested a happy fox above SIXTH SENSE letter blocks. Option order matches the conversation. The selected design must be exported with an opaque background and safe icon margins before use.
+Generated with the built-in image_gen tool. The owner selected the option-1 happy furry fox direction on September 21. The exact attached selection and production adaptations are recorded in `../fox-selected/README.md`; the three original previews remain here for provenance. The user requested a happy fox above SIXTH SENSE letter blocks. Option order matches the conversation. The selected design now has opaque Play/web exports and a separate adaptive launcher foreground with safe margins.
 
 ## Option 1
 

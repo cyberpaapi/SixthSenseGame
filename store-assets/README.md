@@ -1,5 +1,9 @@
 # Sixth Sense Play Store assets
 
+Current September 21 selection: the owner approved the happy furry orange fox above SIXTH / SENSE blocks. The current 512×512 opaque `app-icon-512.png` exports the exact attached selection, and `feature-graphic-1024x500.png` is a matching generated purple graphic. Production sources, prompts and deterministic Android/web export details are in `fox-selected/README.md`. Both exports contain no ads. They are prepared locally; their replacement in the Play Console draft is not yet confirmed.
+
+## Earlier aperture preparation (superseded)
+
 Prepared September 21, 2026. App icon is a 512×512 RGB export matching the existing Android `game_icon.xml` composition (violet background, current `game_logo.png` inset). Feature graphic is a 1024×500 RGB export of built-in image generation; both meet the Console pixel/file limits. No game artwork was replaced.
 
 Feature reference inputs: `assets/logo-sixth-sense-clay-v1.png` (wordmark) and `assets/logo-option-1.png` (aperture symbol). Generated original remains at `C:/Users/Aryan/.codex/generated_images/01a085cd-5c83-7763-bb25-738c9f3dff40/exec-65de421d-1a93-409d-be7c-7939f4b1abc5.png`.
@@ -12,6 +16,6 @@ The generated graphic is promotional illustration, not an app screenshot. Phone 
 
 ## September 21 owner revision
 
-The owner rejected the existing aperture logo and requested a happy fox above SIXTH SENSE letter blocks. `fox-options/option-1.png`, `option-2.png`, and `option-3.png` are unselected built-in image-generation concepts; exact prompts are in `fox-options/PROMPTS.md`. No launcher or native artwork has changed. Option 1 needs more top safe margin, and option 3 needs an opaque background for its final Play icon export. The old icon was uploaded to the Console library but never added to the listing.
+The owner rejected the existing aperture logo and requested a happy fox above SIXTH SENSE letter blocks. `fox-options/option-1.png`, `option-2.png`, and `option-3.png` are unselected built-in image-generation concepts; exact prompts are in `fox-options/PROMPTS.md`. The owner has since selected option 1; the launcher/splash/web icon references are updated. A separate transparent adaptive export supplies safe margins, while the Play icon preserves the chosen source. Option 3 remains an unused alternative. The old icon was uploaded to the Console library but never added to the listing.
 
 The owner requested no ads in store screenshots. Genuine 1080×1920 captures from the 1.0.2 debug build on the API 36 QA emulator include the Sense clue, victory, and Adventure map; these screens hide native banners through normal app behavior. Captures are unretouched, not AI-generated UI. The gameplay capture with a Google test banner is excluded and retained only in ignored `release/` as QA evidence. No store screenshots have been uploaded yet.
