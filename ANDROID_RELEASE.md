@@ -53,6 +53,8 @@ The corresponding web/backend commit `bafcf58` deployed successfully to Vercel a
 
 ### Play Console and tester group
 
+September 24 confirmed status: Console reports the app update published September 22, app status Closed testing, and the closed-release publication task complete. The dashboard still shows zero opted-in testers; no qualifying 14-day period is claimed. The Group's member-only visibility was found to conflict with its public self-join setting and was changed to Anyone on the web. Google confirmed the save and warned it may take time to propagate. Conversations/member-list privacy remains unchanged; independent nonmember joining/installing has not yet been verified. The September 22 submission checkpoint below is historical and superseded by this publication status.
+
 September 22: Alpha is configured for India and `sixthsense-alphacode-testers@googlegroups.com`. Share https://groups.google.com/g/sixthsense-alphacode-testers so testers can join themselves, then https://play.google.com/apps/testing/com.sensei.sixthsense to opt in and install once approved/available. Use the same Google account throughout. Existing internal testers must leave the internal test before enrolling in the closed test.
 
 The selected fox icon, matching feature graphic and three genuine 1080x1920 ad-free screenshots are now uploaded and added to the saved default English listing. Generated icon/feature art is declared with the Console AI labels; the screenshot files are actual unretouched native captures. Existing descriptions remain accurate for code 3. Required listing validation passed; the release preview showed Ready to release, code 3 (1.0.2), target SDK 36 and a 30.6 MB install download.
