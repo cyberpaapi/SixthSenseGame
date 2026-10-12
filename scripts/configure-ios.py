@@ -19,6 +19,12 @@ envs = ["IOS_ADMOB_APP_ID", "IOS_BANNER_AD_ID", "IOS_REWARDED_AD_ID", "IOS_INTER
 if production and os.environ.get("IOS_RELEASE_APPROVED") != "true":
     raise SystemExit("Complete IOS_RELEASE.md acceptance before approving a production build.")
 values = dict(samples)
+testing_app_id = os.environ.get("IOS_ADMOB_APP_ID", "")
+if not production and testing_app_id:
+    if not re.fullmatch(r"ca-app-pub-\d{16}~\d{10}", testing_app_id):
+        raise SystemExit("IOS_ADMOB_APP_ID must be an AdMob app ID.")
+    # UMP privacy messages belong to the real iOS app; ad units remain Google's samples.
+    values["GADApplicationIdentifier"] = testing_app_id
 for (key, sample), env in zip(samples.items(), envs):
     if production:
         value = os.environ.get(env, "")

@@ -1,11 +1,11 @@
 # Sixth Sense iOS release
 
-Updated October 12, 2026. Implementation is on `codex/ios-app`; the native app compiled on GitHub's macOS runner with Xcode 26.3 (run 38221491911). Simulator UI acceptance and physical-device acceptance are pending. The owner has an iPhone and has not yet enrolled in the Apple Developer Program. No signed IPA, TestFlight upload or App Store approval is claimed.
+Updated October 12, 2026. Implementation is committed on `codex/ios-app` in draft PR #1. Xcode 26.3 compilation, native persistence/cadence checks and iPhone 16 Pro Max / iOS 26.2 UI checks passed in GitHub run 38225990851. Actual screenshots are saved in `store-assets/ios/screenshots/`, with touch/landscape evidence in `store-assets/ios/qa/`. The owner has an iPhone but has not enrolled in the Apple Developer Program. Signing, physical-device/sandbox acceptance and authenticated in-app account deletion remain pending; no IPA, TestFlight upload or App Store approval is claimed.
 
 ## Implemented source
 
 - Capacitor 8.5.1, iPhone/iOS 15+, bundled offline client and original selected-fox 1024px icon. Existing Vercel/Neon multiplayer and all game rules remain shared.
-- Local Swift package `native/sensei-ios`: native banner below the WebView, UMP before ad requests, age eligibility, contextual ad requests without ATT/IDFA permission, sample iOS ad IDs for testing, optional earned-only 3x rewards and Last Chance, durable receipts, whole-match and every-third-new-Adventure interstitial cadence. Missing automatic ads never delay results.
+- Local Swift package `native/sensei-ios`: native banner below the WebView, UMP before ad requests, age eligibility, contextual ad requests without ATT/IDFA permission, sample iOS ad units for testing, optional earned-only 3x rewards and Last Chance, durable receipts, whole-match and every-third-new-Adventure interstitial cadence. Missing automatic ads never delay results.
 - StoreKit 2: six approved products, localized Apple prices, cancellation/pending handling, verified current permanent entitlements, transaction updates and restore. No Android purchase cross-restore. Supplies are installation-local, not a cloud wallet.
 - `/api/apple-store`: Apple's official signature verifier plus a fresh App Store Server API transaction lookup, separate Production/Sandbox validation, product/type/quantity/revocation checks, appAccountToken installation binding, hashed transaction IDs and idempotent Neon supply grants. Native finishes transactions after durable client delivery. Complete Pack supplies are one-time on the original installation; ad removal restores separately.
 - GitHub `iOS build and TestFlight`: unsigned macOS simulator build without credentials, plus a manual signed upload job restricted to main and the `ios-release` environment. Signing files live only on the ephemeral runner and are removed even after failure. Build artifacts exclude credentials.
@@ -38,7 +38,7 @@ GitHub environment `ios-release` is created and restricted to the `main` branch,
 Environment variables:
 - `APPLE_TEAM_ID`
 - `IOS_ADMOB_APP_ID`, `IOS_BANNER_AD_ID`, `IOS_REWARDED_AD_ID`, `IOS_INTERSTITIAL_AD_ID`
-- `IOS_RELEASE_APPROVED=true` only after real purchase/ad/privacy/device acceptance. Testing builds use sample IDs regardless.
+- `IOS_RELEASE_APPROVED=true` only after real purchase/ad/privacy/device acceptance. Testing builds always use sample ad-unit IDs. If `IOS_ADMOB_APP_ID` is configured, the testing build uses that real iOS app ID so UMP can fetch your privacy messages; without it, the Google sample app ID only supports initial scaffolding and privacy/ad acceptance remains unverified.
 
 Environment secrets:
 - `APPLE_CERTIFICATE_BASE64`: base64 Apple Distribution certificate including private key (.p12).
@@ -76,7 +76,7 @@ python scripts/configure-ios.py
 - Exercise UMP regional states, minor/ad eligibility, sample banner space, reward cancel/fail/earn/restart, no duplicate grant, ad away-alert suppression, interstitial cadence and paid ad removal.
 - Sandbox purchase each product; cancel, pending approval, restore, revoke/refund, offline/reconnect, storage failure, full wallet, interrupted delivery and reinstall. Check one-time Complete Pack supplies and cross-device permanent restore.
 - Confirm current SDK privacy manifests, actual data collection and App Store privacy answers. No ATT prompt means no authorized cross-app tracking; keep contextual requests and review AdMob settings accordingly. Add required SKAdNetwork buyer IDs if enabling additional demand.
-- Review content rating from actual word clues/Bollywood references, rights to supplied music and generated art, privacy/support URLs and an in-app account deletion route acceptable to App Review. Current email-based username deletion needs Apple review assessment.
+- Review content rating from actual word clues/Bollywood references, rights to supplied music and generated art, and privacy/support URLs. Implement authenticated account deletion initiated in-app before submission. The current support-email-only username deletion route is insufficient under Apple's account-deletion guidance: https://developer.apple.com/support/offering-account-deletion-in-your-app/ . This is a remaining implementation gate, not merely an owner declaration.
 - Supply actual iPhone store screenshots with no ad creative; Android captures must not be represented as iOS captures.
 - Configure public app-ads.txt/store association, then real iOS IDs and production release approval. Complete public App Review separately.
 

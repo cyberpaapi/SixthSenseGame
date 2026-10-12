@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-12",
+  "sourceCommit": "b0645be",
+  "run": "https://github.com/cyberpaapi/SixthSenseGame/actions/runs/38225990851",
+  "device": "iPhone 16 Pro Max simulator / iOS 26.2",
+  "method": "Unretouched XCUIScreen screenshots of the compiled iOS app; real under-13 eligibility keeps ad creative out. QA tap capture shows WZXED exactly once.",
+  "files": [
+    {
+      "file": "screenshots/01-home.png",
+      "sha256": "0b698a555a0a2787f2392143624ae98462a687396c7194fb36887db0504e2619",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "screenshots/02-adventure.png",
+      "sha256": "cbb431b19614fc269345c58c6fad5518d7207fe961b7f6792a83ce5aaff55601",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "screenshots/03-puzzle.png",
+      "sha256": "dc192bacaea1997e1c4c38a72571d49a3738aed8490c56fb20c45b024c03e87c",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "screenshots/04-clue.png",
+      "sha256": "a5d7e3f40f86899f4b63827b3d2ff82e7182b58d6ddbee89e434a83614b5d368",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "qa/05-landscape.png",
+      "sha256": "dff59f34e8eea730e383ec3f55aa8834aa6600c31e6817cfd19878b3e23e4fa0",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "qa/06-touch-input.png",
+      "sha256": "abdb81476a09e2bcddc025af97d66667e3c005ecfbd5a4ebc8d455ab4b9f0646",
+      "pixels": [
+        1320,
+        2868
+      ],
+      "mode": "RGB"
+    }
+  ]
+}

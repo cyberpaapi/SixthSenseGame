@@ -45,18 +45,14 @@ manifests must be present in the archive. Missing declarations block release.
 
 ## Screenshots
 
-The CI `AppScreenshots` test captures real iPhone simulator pixels in the selected
-Pro Max simulator, exports attachments and retains artifacts for seven days.
-It uses the actual Under 13 eligibility path to keep ads out of captures; this
-is a screenshot/test account setting, not a change to release monetization.
-Inspect the home, Adventure, puzzle and clue captures before copying approved
-portrait PNGs here. Landscape is QA evidence, not mixed into the portrait set.
-No Android screenshot or generated gameplay mockup should be uploaded as iPhone UI.
+The native UI run 38225990851 passed on October 12, 2026. `screenshots/` contains four inspected, unretouched 1320×2868 RGB iPhone captures: home, Adventure, puzzle and clue. `qa/` contains landscape and W/Z/X/E/D touch evidence, not store-listing selections. `capture-provenance.json` records the source commit, run, dimensions and hashes. No images have been uploaded to App Store Connect.
+
+The actual Under 13 eligibility path keeps ads out of the captures; release monetization is unchanged. The successful UI run covers age/guest onboarding, Adventure launch, single letter taps/deletion, Sense, rotation and persisted age after restart. This does not replace physical-device, ads, purchase or multiplayer acceptance.
 
 ## Submission gates still requiring acceptance
 
 Apple enrollment and app record; signing and TestFlight processing; iPhone and
 sandbox purchase/ad/privacy matrix; actual screenshot inspection; in-app account
-deletion acceptable under Apple's rules (the current support-email route may
-need direct authenticated deletion); final public privacy policy and app-ads.txt;
+deletion initiated in-app (the current support-email-only route still needs
+authenticated deletion implementation); final public privacy policy and app-ads.txt;
 production ad IDs. Public review and approval are separate from successful upload.
