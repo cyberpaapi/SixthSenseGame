@@ -44,4 +44,10 @@ story.write_text(story.read_text().replace('customClass="CAPBridgeViewController
 project = root / "ios/App/App.xcodeproj/project.pbxproj"
 text = project.read_text().replace('TARGETED_DEVICE_FAMILY = "1,2";', 'TARGETED_DEVICE_FAMILY = 1;').replace('MARKETING_VERSION = 1.0;', 'MARKETING_VERSION = 1.0.3;')
 project.write_text(text)
+config_path = root / "ios/App/App/capacitor.config.json"
+if config_path.exists():
+    import json
+    config = json.loads(config_path.read_text())
+    config.setdefault("plugins", {})["SystemBars"] = {"hidden": True}
+    config_path.write_text(json.dumps(config, indent=2))
 print("Configured iOS", info["SenseiReleaseChannel"], "channel; signing credentials excluded.")

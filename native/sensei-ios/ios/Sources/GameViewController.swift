@@ -2,13 +2,11 @@ import Capacitor
 import UIKit
 
 // A real native banner sits outside the WebView, never over a keyboard or lifeline.
-@objc(GameViewController)
 public final class GameViewController: CAPBridgeViewController {
     private var webBottom: NSLayoutConstraint?
     private weak var banner: UIView?
     var onLayout: (() -> Void)?
     public override var prefersStatusBarHidden: Bool { true }
-    public override var prefersHomeIndicatorAutoHidden: Bool { true }
 
     public override func capacitorDidLoad() {
         guard let web = webView else { return }
@@ -24,7 +22,7 @@ public final class GameViewController: CAPBridgeViewController {
             web.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             web.trailingAnchor.constraint(equalTo: container.trailingAnchor), webBottom!
         ])
-        bridge?.registerPluginInstance(SenseiMonetizationPlugin())
+        // Capacitor discovers the package plugin exactly once from its generated class list.
     }
 
     func showBanner(_ next: UIView?) {

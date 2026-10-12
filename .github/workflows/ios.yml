@@ -40,12 +40,27 @@ jobs:
           set -o pipefail
           xcodebuild -version
           xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-artifacts/DerivedData CODE_SIGNING_ALLOWED=NO build 2>&1 | tee ios-build.log
+      - name: Exercise native onboarding and capture genuine iPhone screens
+        run: |
+          set -o pipefail
+          gem install xcodeproj -v 1.27.0 --user-install --no-document
+          ruby scripts/add-ios-ui-tests.rb
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; ds=[d for group in json.load(sys.stdin)["devices"].values() for d in group if "iPhone" in d["name"] and "Pro Max" in d["name"]]; print(ds[-1]["udid"])')
+          xcodebuild -project ios/App/App.xcodeproj -scheme AppScreenshots -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios-artifacts/DerivedData -resultBundlePath ios-artifacts/Screenshots.xcresult CODE_SIGNING_ALLOWED=NO test 2>&1 | tee ios-ui-tests.log
+      - name: Export simulator screenshot attachments
+        if: always()
+        run: |
+          if [ -d ios-artifacts/Screenshots.xcresult ]; then
+            xcrun xcresulttool export attachments --path ios-artifacts/Screenshots.xcresult --output-path ios-artifacts/screenshots
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ios-simulator-${{ github.sha }}
           path: |
             ios-build.log
+            ios-ui-tests.log
+            ios-artifacts/screenshots
             ios-artifacts/DerivedData/Build/Products/Debug-iphonesimulator/App.app
             ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
           retention-days: 7
