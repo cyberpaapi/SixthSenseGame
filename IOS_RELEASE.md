@@ -1,6 +1,6 @@
 # Sixth Sense iOS release
 
-Updated October 12, 2026. Implementation is on `codex/ios-app`; native cloud compilation and device acceptance are pending. The owner has an iPhone and has not yet enrolled in the Apple Developer Program. No signed IPA, TestFlight upload or App Store approval is claimed.
+Updated October 12, 2026. Implementation is on `codex/ios-app`; the native app compiled on GitHub's macOS runner with Xcode 26.3 (run 38221491911). Simulator UI acceptance and physical-device acceptance are pending. The owner has an iPhone and has not yet enrolled in the Apple Developer Program. No signed IPA, TestFlight upload or App Store approval is claimed.
 
 ## Implemented source
 

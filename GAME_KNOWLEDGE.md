@@ -4,11 +4,11 @@
 
 Last updated: 2026-10-12
 
-Last verified: 2026-10-12 (Play production-access application acknowledged; approval pending. iOS source checkpoint: core rules, identity/content, Apple delivery and invalid-signature tests, asset sync and whitespace passed; npm audit zero. macOS compilation, screenshots, physical iPhone, sandbox purchases and signed upload pending. Existing Android release/monetization limitations remain.)
+Last verified: 2026-10-12 (Play production-access application acknowledged; approval pending. iOS app compiled with Xcode 26.3 in GitHub run 38221491911. Core rules, identity/content, Apple delivery and invalid-signature tests, shared browser/mobile/shop/Last Chance/banner tests, asset sync and whitespace passed; npm audit zero. Simulator UI acceptance, physical iPhone, sandbox purchases and signed upload pending. Existing Android release/monetization limitations remain.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
-Current source branch: `main`
+Current source branch: `codex/ios-app` (iOS implementation); deployed browser baseline remains `main`.
 
 Current delivery: static browser game published primarily at `https://sixth-sense-game.vercel.app/` and secondarily at `https://cyberpaapi.github.io/SixthSenseGame/`; local development URL `http://127.0.0.1:4173/`
 
@@ -78,7 +78,7 @@ The app opens on the home screen. Game-adjacent marketing, mode selection, and s
 
 ### iOS port status
 
-October 12 implementation is in progress on `codex/ios-app`: a Capacitor 8.5.1 iPhone target (iOS 15+) and local Swift package provide native AdMob/UMP, below-WebView banners, earned reward receipts, whole-match/every-third-Adventure interstitials and StoreKit 2 using the same six-product catalog. Apple verifies native permanent entitlements; supplies additionally require `/api/apple-store`, fresh App Store Server API transaction verification and an installation-bound Neon delivery ledger. Optional rewards remain after ad removal. No local flag grants ownership. The cloud workflow has unsigned simulator compilation and a separately gated manual TestFlight job with ephemeral signing. Source uses sample iOS ads, contextual requests and no ATT prompt; production remains gated. Windows packaging, core rules and Apple delivery/signature-rejection tests pass; native compilation, screenshots, real purchases and device acceptance are not yet verified. `IOS_RELEASE.md` tracks exact setup/acceptance. The owner has an iPhone but has not enrolled in the Apple Developer Program; no signing credentials, iOS AdMob IDs, Apple catalog or TestFlight upload exists.
+October 12 implementation is in progress on `codex/ios-app`: a Capacitor 8.5.1 iPhone target (iOS 15+) and local Swift package provide native AdMob/UMP, below-WebView banners, earned reward receipts, whole-match/every-third-Adventure interstitials and StoreKit 2 using the same six-product catalog. Apple verifies native permanent entitlements; supplies additionally require `/api/apple-store`, fresh App Store Server API transaction verification and an installation-bound Neon delivery ledger. Optional rewards remain after ad removal. No local flag grants ownership. The cloud workflow has unsigned simulator compilation and a separately gated manual TestFlight job with ephemeral signing. Source uses sample iOS ads, contextual requests and no ATT prompt; production remains gated. Windows packaging, core rules, Apple delivery/signature-rejection and shared browser regression tests pass. Native Xcode 26.3 compilation passed in GitHub run 38221491911; simulator UI screenshots, real purchases and physical-device acceptance are not yet verified. Pending native supply receipts are cleared after confirmed prior delivery or revocation, including recovery after an interrupted acknowledgement. `IOS_RELEASE.md` tracks exact setup/acceptance. The owner has an iPhone but has not enrolled in the Apple Developer Program; no signing credentials, iOS AdMob IDs, Apple catalog or TestFlight upload exists.
 
 ### Android ads and purchases
 
@@ -1239,3 +1239,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Added macOS-executed Swift checks for installation continuity, every-third-Adventure cadence, full-match deduplication, earned receipt restart and rejected-write atomicity. Native state validates JSON before atomic replacement.
 - Retained the plugin with a direct guarded linker reference without double registration. Unknown iOS release channels now fail closed. The plugin privacy manifest declares purchase history and installation identifiers for app functionality; full app/SDK App Store privacy answers remain a release review item.
 - Simulator UI run is still in progress. No new physical-device or signing evidence is claimed.
+
+### 2026-10-12 — Recover interrupted Apple delivery acknowledgement
+
+- Clear stale native pending purchase entries when Apple's verified transaction has already been delivered, or has been revoked, so a restart cannot permanently block future checkout. Unexpected receipt-less responses remain retriable errors.
+- Bounded simulator UI execution to 15 minutes with a three-minute individual test limit, disabled parallel simulator cloning and added explicit boot diagnostics after the first UI run stalled.
+- Apple server tests, shared phone/desktop/browser regressions and Android purchase verification tests passed; npm audit remains zero. Production-without-approval and unknown iOS channels correctly fail configuration, and testing configuration succeeds. Updated current status to reflect the successful native cloud compile; simulator UI and device acceptance remain pending.

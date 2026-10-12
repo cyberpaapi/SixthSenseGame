@@ -105,12 +105,7 @@ final class AppleStore {
         }
         if transaction.revocationDate != nil {
             ownedIds.remove(transaction.productID)
-            let revoked = state.purchases.filter { $0.value["transactionId"] as? String == String(transaction.id) }.map(\.key)
-            revoked.forEach { authorizedClaims.remove($0) }
-            try state.update { values in
-                var pending = values["purchases"] as? [String: [String: Any]] ?? [:]
-                revoked.forEach { pending.removeValue(forKey: $0) }; values["purchases"] = pending
-            }
+            try clearPending(transaction.id)
             await transaction.finish(); return
         }
         if Self.permanent.contains(transaction.productID) { ownedIds.insert(transaction.productID) }
@@ -119,7 +114,7 @@ final class AppleStore {
         // Supplies always require a fresh Apple-server check and durable grant ledger.
         let response = try await verify(jws: result.jwsRepresentation, action: "verify")
         if response["invalid"] as? Bool == true {
-            ownedIds.remove(transaction.productID); await transaction.finish(); return
+            ownedIds.remove(transaction.productID); try clearPending(transaction.id); await transaction.finish(); return
         }
         if let receipt = response["receipt"] as? [String: Any], let claim = receipt["claimId"] as? String {
             try state.update { values in
@@ -129,8 +124,23 @@ final class AppleStore {
             }
             transactions[claim] = transaction
             authorizedClaims.insert(claim)
-        } else { await transaction.finish() }
+        } else {
+            guard response["delivered"] as? Bool == true || response["suppliesOnOriginalDevice"] as? Bool == true else {
+                throw storeError("Purchase verification needs a retry.")
+            }
+            // Recover a crash after server delivery but before native receipt cleanup.
+            try clearPending(transaction.id)
+            await transaction.finish()
+        }
         changed()
+    }
+    private func clearPending(_ transactionId: UInt64) throws {
+        let claims = state.purchases.filter { $0.value["transactionId"] as? String == String(transactionId) }.map(\.key)
+        try state.update { values in
+            var pending = values["purchases"] as? [String: [String: Any]] ?? [:]
+            claims.forEach { pending.removeValue(forKey: $0) }; values["purchases"] = pending
+        }
+        claims.forEach { authorizedClaims.remove($0); transactions.removeValue(forKey: $0) }
     }
     func acknowledge(_ claim: String) async throws {
         guard let pending = state.purchases[claim], let jws = pending["jws"] as? String else { return }
