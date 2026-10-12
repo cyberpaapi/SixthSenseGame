@@ -1233,3 +1233,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - GitHub run 38221491911 compiled the native iPhone app successfully with Xcode 26.3. The subsequent UI-test target failed to build because its generated product name was empty; assigned an explicit test product name.
 - Connected the scene delegate to the custom game controller so banner layout is actually used; removed the unused main-storyboard launch route. Added Apple purchase/privacy disclosures and draft App Store metadata/reviewer instructions, with account, device, deletion-policy and sandbox gates explicit.
 - This is compile evidence only; genuine simulator captures, device acceptance and signed upload remain pending. Shared browser and server checks remain passed as recorded above.
+
+### 2026-10-12 — Native persistence tests and release guards
+
+- Added macOS-executed Swift checks for installation continuity, every-third-Adventure cadence, full-match deduplication, earned receipt restart and rejected-write atomicity. Native state validates JSON before atomic replacement.
+- Retained the plugin with a direct guarded linker reference without double registration. Unknown iOS release channels now fail closed. The plugin privacy manifest declares purchase history and installation identifiers for app functionality; full app/SDK App Store privacy answers remain a release review item.
+- Simulator UI run is still in progress. No new physical-device or signing evidence is claimed.

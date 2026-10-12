@@ -5,7 +5,10 @@ from pathlib import Path
 import re
 
 root = Path(__file__).resolve().parent.parent
-production = os.environ.get("IOS_RELEASE_CHANNEL", "testing") == "production"
+channel = os.environ.get("IOS_RELEASE_CHANNEL", "testing")
+if channel not in ("testing", "production"):
+    raise SystemExit("IOS_RELEASE_CHANNEL must be testing or production.")
+production = channel == "production"
 samples = {
     "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511",
     "SenseiBannerAdID": "ca-app-pub-3940256099942544/2934735716",

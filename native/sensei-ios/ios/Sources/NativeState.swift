@@ -5,8 +5,8 @@ import Foundation
 final class NativeState {
     private let url: URL
     private(set) var values: [String: Any]
-    init() throws {
-        var directory = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    init(directory testDirectory: URL? = nil) throws {
+        var directory = try testDirectory ?? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("SixthSense", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         var resource = URLResourceValues(); resource.isExcludedFromBackup = true
@@ -19,6 +19,9 @@ final class NativeState {
     }
     func update(_ mutation: (inout [String: Any]) -> Void) throws {
         var next = values; mutation(&next)
+        guard JSONSerialization.isValidJSONObject(next) else {
+            throw NSError(domain: "SixthSenseStorage", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid native state."])
+        }
         try JSONSerialization.data(withJSONObject: next).write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         values = next
     }

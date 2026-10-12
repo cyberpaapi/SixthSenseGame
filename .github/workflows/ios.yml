@@ -35,6 +35,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test && npm run test:apple-store
+      - name: Test native receipt persistence and ad cadence
+        run: |
+          xcrun swiftc native/sensei-ios/ios/Sources/NativeState.swift scripts/test-ios-state.swift -o "$RUNNER_TEMP/native-state-tests"
+          "$RUNNER_TEMP/native-state-tests"
       - run: npm run ios:sync
       - run: python3 scripts/configure-ios.py
       - name: Compile native iPhone app without signing

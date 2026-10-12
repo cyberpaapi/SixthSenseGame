@@ -22,7 +22,10 @@ public final class GameViewController: CAPBridgeViewController {
             web.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             web.trailingAnchor.constraint(equalTo: container.trailingAnchor), webBottom!
         ])
-        // Capacitor discovers the package plugin exactly once from its generated class list.
+        // Keep a direct linker reference, but never instantiate a second registered plugin.
+        if bridge?.plugin(withName: "SenseiMonetization") == nil {
+            bridge?.registerPluginInstance(SenseiMonetizationPlugin())
+        }
     }
 
     func showBanner(_ next: UIView?) {
