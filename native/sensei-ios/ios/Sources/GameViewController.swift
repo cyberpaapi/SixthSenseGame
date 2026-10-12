@@ -19,8 +19,8 @@ public final class GameViewController: CAPBridgeViewController {
         webBottom = web.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         NSLayoutConstraint.activate([
             web.topAnchor.constraint(equalTo: container.topAnchor),
-            web.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            web.trailingAnchor.constraint(equalTo: container.trailingAnchor), webBottom!
+            web.leadingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.leadingAnchor),
+            web.trailingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.trailingAnchor), webBottom!
         ])
         // Keep a direct linker reference, but never instantiate a second registered plugin.
         if bridge?.plugin(withName: "SenseiMonetization") == nil {

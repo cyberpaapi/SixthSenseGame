@@ -1500,7 +1500,7 @@ body[data-screen="online"] :is(.progress-panel,.player-progress-list,.race-cours
 .reward-ad-offer { margin:10px 0; }
 /* The native ad sits outside the WebView, below these lifeline docks. */
 body:is(.is-native-app,.is-fitted-online,.is-fitted-solo):is([data-screen="game"], [data-screen="online"]) { height:100dvh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-:is(.is-native-app,.is-fitted-online,.is-fitted-solo) .topbar { flex:0 0 auto; padding-top:calc(6px + var(--native-safe-top,0px))!important; }
+:is(.is-native-app,.is-fitted-online,.is-fitted-solo) .topbar { flex:0 0 auto; padding-top:calc(6px + var(--native-safe-top,env(safe-area-inset-top,0px)))!important; }
 body:is(.is-native-app,.is-fitted-online,.is-fitted-solo)[data-screen="game"] .game-card { padding-block:8px; justify-content:flex-start; }
 :is(.is-native-app,.is-fitted-online,.is-fitted-solo) .board-wrap { flex:1 1 0; min-height:0; width:100%; align-items:center; }
 :is(.is-native-app,.is-fitted-online,.is-fitted-solo) .board { --tile-size:var(--native-tile-size,32px)!important; flex:none; gap:4px!important; }

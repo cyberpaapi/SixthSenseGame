@@ -83,6 +83,7 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
             if saved.age.isEmpty { try saved.update { $0["ageBand"] = age } }
             guard self.eligible, !self.initializing else { return }
             self.initializing = true
+            defer { self.initializing = false }
             await self.store?.start()
             await self.updateConsent()
         }
@@ -142,7 +143,15 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
             }
         }
     }
-    @objc func prepareReward(_ call: CAPPluginCall) { run(call) { self.loadAds() } }
+    @objc func prepareReward(_ call: CAPPluginCall) {
+        run(call) {
+            if self.eligible && !self.started && !self.initializing {
+                self.initializing = true
+                defer { self.initializing = false }
+                await self.updateConsent()
+            } else { self.loadAds() }
+        }
+    }
     @objc func showReward(_ call: CAPPluginCall) {
         Task { @MainActor in
             guard let saved, canAdvertise, foreground, fullScreenCall == nil, store?.busy != true,

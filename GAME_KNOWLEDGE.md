@@ -1251,3 +1251,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Fresh native installs now complete age onboarding before showing the username/help dialog, including slow bridge replies; unavailable native services still allow solo play. Previously the delayed username modal could cover the age selector. The same ordering applies to Android and iOS; browser onboarding is unchanged.
 - Added browser regressions for fresh/delayed/existing age and service/storage errors; all passed, along with core/identity/content checks. Native persistence/cadence and Xcode compilation passed in run 38222909823. UI test teardown now preserves the final screen and accessibility hierarchy for diagnosis.
 - Created the GitHub ios-release environment with a main-only branch policy and IOS_RELEASE_APPROVED=false. No signing secrets or Apple upload were configured. Apple membership and real device/sandbox acceptance remain owner/account-dependent.
+
+### 2026-10-12 — iPhone safe areas and consent recovery
+
+- Fitted headers use WebKit's top safe-area inset when Android's explicit native inset is absent. The iPhone WebView respects horizontal safe areas in landscape so notch placement cannot cover the keyboard or controls. Backgrounds still fill the native view.
+- Reset the native initialization guard after completion and retry consent setup on a later reward preparation if startup connectivity prevented ads. Ad eligibility and consent requirements remain enforced.
+- Shared browser and reserved-banner layout suites passed after these changes. Native Swift compilation/UI acceptance for this exact revision remains pending in the PR workflow. Draft PR #1 contains the implementation; no production branch merge or Apple upload has occurred.
