@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-09-24
+Last updated: 2026-10-12
 
-Last verified: 2026-09-24 (Closed Alpha 1.0.2 remains active and available to selected testers, with India targeted and the correct self-join Group selected. Enrolled the owner's account through the official web opt-in; verified You are a tester and an enabled Install button on the correct Play listing. No physical installation was performed. Refreshed Group roster contains two members including the owner, with no pending members. The affected non-developer account is now directly verified as opted in, but both its download links return Not found. Its registered phone and India storefront were verified. Support report submitted with explicit approval; Console confirms Ticket submitted / Pending / Case ID pending. Multiple-user impact included; issue unresolved. Owner confirms the same account throughout and a OnePlus 13; Device catalog confirms the India variant is supported in all active tracks. Earlier dashboard zero-opt-in count predates owner enrollment. Documentation whitespace passed; no runtime/native changes or game-test rerun. Code 4 signing and live monetization setup remain pending.)
+Last verified: 2026-10-12 (Play production-access application acknowledged; approval pending. iOS source checkpoint: core rules, identity/content, Apple delivery and invalid-signature tests, asset sync and whitespace passed; npm audit zero. macOS compilation, screenshots, physical iPhone, sandbox purchases and signed upload pending. Existing Android release/monetization limitations remain.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -78,7 +78,7 @@ The app opens on the home screen. Game-adjacent marketing, mode selection, and s
 
 ### iOS port status
 
-On September 16 the user authorized an iOS port with GitHub-hosted standard macOS builds while developing on Windows. `IOS_RELEASE.md` records the owner inputs, staged implementation, verification requirements and current limitations. No iOS native target, monetization bridge, signing workflow or TestFlight upload exists yet. The shared game/backend can be reused; Android native ads and Play purchases require iOS-specific counterparts. Apple membership status, test iPhone access, iOS AdMob IDs, signing and store configuration remain unconfirmed.
+October 12 implementation is in progress on `codex/ios-app`: a Capacitor 8.5.1 iPhone target (iOS 15+) and local Swift package provide native AdMob/UMP, below-WebView banners, earned reward receipts, whole-match/every-third-Adventure interstitials and StoreKit 2 using the same six-product catalog. Apple verifies native permanent entitlements; supplies additionally require `/api/apple-store`, fresh App Store Server API transaction verification and an installation-bound Neon delivery ledger. Optional rewards remain after ad removal. No local flag grants ownership. The cloud workflow has unsigned simulator compilation and a separately gated manual TestFlight job with ephemeral signing. Source uses sample iOS ads, contextual requests and no ATT prompt; production remains gated. Windows packaging, core rules and Apple delivery/signature-rejection tests pass; native compilation, screenshots, real purchases and device acceptance are not yet verified. `IOS_RELEASE.md` tracks exact setup/acceptance. The owner has an iPhone but has not enrolled in the Apple Developer Program; no signing credentials, iOS AdMob IDs, Apple catalog or TestFlight upload exists.
 
 ### Android ads and purchases
 
@@ -1208,3 +1208,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Added a 3×3 set of nine generated logo choices with persistent selection; logo option 1 is the current default.
 - Removed verbose “Read the signs” and genre-disclaimer marketing copy from the visible home experience because the user wanted a cleaner, more visual presentation.
 - Kept original terminology, imagery, copy, and layout so the game participates in the letter-deduction genre without infringing Wordle branding.
+
+### 2026-10-12 — iOS implementation and Google production-access application
+
+- At the owner's request, submitted the Play production-access application after Console marked the 12-testers/14-days requirement complete. Recruitment answers mention friends and paid testers, direct positive feedback and repeated play, and the earlier access investigation. Console acknowledged receipt at 12:42 PM and estimates review usually within seven days. This is an application, not production approval or a public release; no release was promoted.
+- Began the authorized iOS port: generated Capacitor target, selected-fox icon, native ads/consent/reward recovery, StoreKit catalog/restore/delivery, separate Apple verification API, cloud simulator build and protected manual signing/upload workflow. Kept existing game and Android logic intact. Apple enrollment is not active; owner has an iPhone.
+- Verification checkpoint: core/multiplayer/progression/identity/content suites, Apple catalog/delivery/replay/ownership/refund fixtures, real malformed/unsigned Apple signature rejection, native asset sync and whitespace passed. npm audit reports zero vulnerabilities after a compatible transitive fix. Native cloud compilation/device and App Store acceptance remain pending; no signed iOS release is claimed.

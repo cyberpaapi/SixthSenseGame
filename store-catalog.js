@@ -4,7 +4,7 @@
   else root.SixthSenseStoreCatalog = catalog;
 })(typeof window !== "undefined" ? window : globalThis, function () {
   "use strict";
-  // INR amounts are Console setup guidance only. Checkout always uses Play's current localized offer.
+  // INR amounts are store setup guidance only. Checkout uses the current native storefront price.
   return Object.freeze({
     remove_banner_ads: Object.freeze({ title: "Remove Ads", inr: 799, permanent: true, coins: 0, inventory: {}, art: "remove-ads", description: "Permanently remove banners and automatic ads. Optional reward ads stay available." }),
     coins_500: Object.freeze({ title: "Coin Pouch", inr: 99, coins: 500, inventory: {}, art: "coins-small", description: "500 coins" }),

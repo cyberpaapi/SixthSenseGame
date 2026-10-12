@@ -1,0 +1,92 @@
+name: iOS build and TestFlight
+on:
+  push:
+    branches: [main, 'codex/ios-*']
+    paths: ['ios/**', 'native/sensei-ios/**', '*.js', '*.html', '*.css', 'assets/**', 'package*.json', 'scripts/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', 'native/sensei-ios/**', '*.js', '*.html', '*.css', 'package*.json', '.github/workflows/ios.yml']
+  workflow_dispatch:
+    inputs:
+      upload_testflight:
+        description: 'Sign and upload to TestFlight (requires Apple setup)'
+        type: boolean
+        default: false
+      channel:
+        description: 'Testing uses sample ads; production requires release acceptance'
+        type: choice
+        options: [testing, production]
+        default: testing
+permissions:
+  contents: read
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test && npm run test:apple-store
+      - run: npm run ios:sync
+      - run: python3 scripts/configure-ios.py
+      - name: Compile native iPhone app without signing
+        run: |
+          set -o pipefail
+          xcodebuild -version
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-artifacts/DerivedData CODE_SIGNING_ALLOWED=NO build 2>&1 | tee ios-build.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-simulator-${{ github.sha }}
+          path: |
+            ios-build.log
+            ios-artifacts/DerivedData/Build/Products/Debug-iphonesimulator/App.app
+            ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+          retention-days: 7
+  testflight:
+    if: github.event_name == 'workflow_dispatch' && inputs.upload_testflight && github.ref == 'refs/heads/main'
+    needs: simulator
+    runs-on: macos-15
+    timeout-minutes: 40
+    environment: ios-release
+    env:
+      IOS_RELEASE_CHANNEL: ${{ inputs.channel }}
+      IOS_RELEASE_APPROVED: ${{ vars.IOS_RELEASE_APPROVED }}
+      IOS_ADMOB_APP_ID: ${{ vars.IOS_ADMOB_APP_ID }}
+      IOS_BANNER_AD_ID: ${{ vars.IOS_BANNER_AD_ID }}
+      IOS_REWARDED_AD_ID: ${{ vars.IOS_REWARDED_AD_ID }}
+      IOS_INTERSTITIAL_AD_ID: ${{ vars.IOS_INTERSTITIAL_AD_ID }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_PROFILE_BASE64: ${{ secrets.APPLE_PROFILE_BASE64 }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run ios:sync
+      - run: python3 scripts/configure-ios.py
+      - name: Install private signing material
+        run: python3 scripts/ios-signing.py prepare
+      - name: Archive and export
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/SixthSense.xcarchive" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$APPLE_TEAM_ID" PROVISIONING_PROFILE_SPECIFIER="$IOS_PROFILE_NAME" CODE_SIGN_IDENTITY='Apple Distribution' CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" archive
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/SixthSense.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/ios-export"
+      - name: Upload signed build to TestFlight
+        run: |
+          xcrun altool --upload-app --type ios --file "$RUNNER_TEMP/ios-export/App.ipa" --apiKey "$APP_STORE_CONNECT_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+      - name: Remove signing material
+        if: always()
+        run: python3 scripts/ios-signing.py cleanup

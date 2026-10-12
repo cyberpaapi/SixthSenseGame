@@ -2,6 +2,10 @@
   "buildCommand": "node scripts/build-mobile.js --web",
   "outputDirectory": "www",
   "functions": {
+    "api/apple-store.js": {
+      "maxDuration": 60,
+      "includeFiles": "lib/apple-roots/*.cer"
+    },
     "api/play-store.js": {
       "maxDuration": 30
     },
