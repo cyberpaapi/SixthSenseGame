@@ -19,6 +19,7 @@ final class GameScreenshots: XCTestCase {
         XCTAssertTrue(guest.waitForExistence(timeout: 15)); tap(guest)
         let close = app.buttons["Close how to play"]
         if close.waitForExistence(timeout: 5) { tap(close) }
+        app.swipeDown() // Return the home page to its header after the username keyboard.
         capture("01-home")
         let adventure = app.buttons["Continue adventure"]
         if !adventure.isHittable { app.swipeUp() }
@@ -28,6 +29,9 @@ final class GameScreenshots: XCTestCase {
         tap(play)
         let sense = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Sense")).matching(NSPredicate(format: "label CONTAINS %@", "30")).firstMatch
         XCTAssertTrue(sense.waitForExistence(timeout: 10)); capture("03-puzzle")
+        for letter in ["W", "Z", "X", "E", "D"] { tap(app.buttons["Letter \(letter), untested"]) }
+        capture("06-touch-input") // Visually verify one entry for each of the five physical taps.
+        for _ in 0..<5 { tap(app.buttons["Delete letter"]) }
         tap(sense)
         let ok = app.buttons["OK"]
         XCTAssertTrue(ok.waitForExistence(timeout: 10)); capture("04-clue")

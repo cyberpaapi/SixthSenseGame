@@ -26,6 +26,7 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
     private var message = ""
     private var observers: [NSObjectProtocol] = []
     private var consentGeneration = 0
+    private var lastSafeTop = -1
     private var controller: GameViewController? { bridge?.viewController as? GameViewController }
     private var eligible: Bool { saved != nil && !(saved?.age.isEmpty ?? true) && saved?.age != "under13" }
     private var foreground: Bool { UIApplication.shared.applicationState == .active }
@@ -39,7 +40,12 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
                 self.saved = try NativeState()
                 self.store = AppleStore(state: self.saved!) { [weak self] in self?.changed() }
             } catch { self.message = "Device storage is unavailable. Free up space to use ads or purchases." }
-            self.controller?.onLayout = { [weak self] in self?.updateBanner() }
+            self.controller?.onLayout = { [weak self] in
+                guard let self else { return }
+                let top = Int(self.controller?.view.safeAreaInsets.top ?? 0)
+                if top != self.lastSafeTop { self.lastSafeTop = top; self.changed() }
+                else { self.updateBanner() }
+            }
             self.observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
                 Task { @MainActor in
                     guard let self else { return }
@@ -54,6 +60,7 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
     @MainActor private func status() -> JSObject {
         let offers = store?.offers ?? [:]
         let data: [String: Any] = ["ageBand": saved?.age ?? "", "eligible": eligible, "owned": store?.owned ?? false,
+                "safeTop": Int(controller?.view.safeAreaInsets.top ?? 0),
                 "price": (offers["remove_banner_ads"] as? [String: Any])?["price"] ?? "", "products": offers,
                 "billingReady": store?.ready ?? false, "purchaseBusy": store?.busy ?? false,
                 "pendingPurchases": store?.receipts ?? [], "pendingReward": saved?.reward ?? [:],

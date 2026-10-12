@@ -65,6 +65,12 @@
   }
 
   function render() {
+    if (Number.isFinite(state.safeTop) && state.safeTop >= 0) {
+      const inset = `${state.safeTop}px`;
+      if (document.documentElement.style.getPropertyValue("--native-safe-top") !== inset) {
+        document.documentElement.style.setProperty("--native-safe-top", inset);
+      }
+    }
     purchase.textContent = state.owned ? "Automatic ads removed ✓" : state.price ? `Remove Ads · ${state.price}` : "Remove Ads · unavailable";
     purchase.disabled = state.owned || !state.eligible || !state.price || state.purchaseBusy || Boolean(state.pendingPurchases?.length);
     privacyOptions.hidden = !state.privacyOptionsRequired;

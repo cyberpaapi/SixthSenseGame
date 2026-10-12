@@ -8,9 +8,9 @@ const { chromium } = require("./test-browser-runtime");
     for (const scenario of ["fresh", "slow", "existing", "unavailable", "initialize-failed"]) {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
       await page.addInitScript(scenario => {
-        const state = { ageBand: scenario === "existing" ? "18+" : "", eligible: false, products: {}, pendingPurchases: [], pendingReward: {} };
+        const state = { ageBand: scenario === "existing" ? "18+" : "", safeTop: 62, eligible: false, products: {}, pendingPurchases: [], pendingReward: {} };
         const native = {
-          addListener: async () => {}, setBanner: async () => {},
+          addListener: async (event, handler) => { if (event === "stateChanged") window.__nativeRotate = () => handler({ ...state, safeTop: 0 }); }, setBanner: async () => {},
           getState: async () => {
             if (scenario === "slow") await new Promise(resolve => setTimeout(resolve, 1200));
             if (scenario === "unavailable") throw new Error("Native service unavailable");
@@ -33,6 +33,11 @@ const { chromium } = require("./test-browser-runtime");
       }
       await page.getByRole("button", { name: "Play solo as a guest", exact: true }).click();
       assert.equal(await page.locator("dialog[open]").count(), 0, scenario + " reaches home without trapped dialogs");
+      if (scenario !== "unavailable") {
+        assert.equal(await page.evaluate(() => document.documentElement.style.getPropertyValue("--native-safe-top")), "62px");
+        await page.evaluate(() => window.__nativeRotate());
+        assert.equal(await page.evaluate(() => document.documentElement.style.getPropertyValue("--native-safe-top")), "0px", "rotation refreshes the native safe inset");
+      }
       await page.close();
     }
     console.log("Native onboarding passed: fresh/delayed/existing age, service failure and storage failure all reach solo play without stacked dialogs.");
