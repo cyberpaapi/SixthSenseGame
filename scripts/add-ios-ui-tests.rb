@@ -14,6 +14,7 @@ test.build_configurations.each do |config|
   config.build_settings['SWIFT_VERSION'] = '5.0'
   config.build_settings['TEST_TARGET_NAME'] = 'App'
   config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.sensei.sixthsense.uitests'
+  config.build_settings['PRODUCT_NAME'] = 'AppUITests'
   config.build_settings['TARGETED_DEVICE_FAMILY'] = '1'
 end
 project.save

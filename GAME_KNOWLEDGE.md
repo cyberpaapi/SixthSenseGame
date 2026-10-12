@@ -1227,3 +1227,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Second cloud compile identified two Swift API mismatches; converted native dictionaries recursively to Capacitor JSValue and selected Google's parentalGuidance content rating. Explicitly disabled ad personalization. Pinned Xcode 26.3 on the standard macOS runner to meet Apple's current SDK floor.
 - Apple supplies now wait for a fresh server verification after restart, independently of permanent-entitlement restoration. Invalid catalog product types are hidden. Exported the selected fox into native splash sizes.
 - macOS rerun and screenshot capture remain pending; no signing/account setup has been claimed.
+
+### 2026-10-12 — Successful Xcode build; simulator launch follow-up
+
+- GitHub run 38221491911 compiled the native iPhone app successfully with Xcode 26.3. The subsequent UI-test target failed to build because its generated product name was empty; assigned an explicit test product name.
+- Connected the scene delegate to the custom game controller so banner layout is actually used; removed the unused main-storyboard launch route. Added Apple purchase/privacy disclosures and draft App Store metadata/reviewer instructions, with account, device, deletion-policy and sandbox gates explicit.
+- This is compile evidence only; genuine simulator captures, device acceptance and signed upload remain pending. Shared browser and server checks remain passed as recorded above.

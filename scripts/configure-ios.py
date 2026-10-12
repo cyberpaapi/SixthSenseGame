@@ -37,6 +37,9 @@ info.update({
 })
 # iPhone first; avoid claiming iPad acceptance/screenshots before testing it.
 info.pop("UISupportedInterfaceOrientations~ipad", None)
+info.pop("UIMainStoryboardFile", None)
+for scene in info.get("UIApplicationSceneManifest", {}).get("UISceneConfigurations", {}).get("UIWindowSceneSessionRoleApplication", []):
+    scene.pop("UISceneStoryboardFile", None)
 with path.open("wb") as f:
     plistlib.dump(info, f, sort_keys=False)
 story = root / "ios/App/App/Base.lproj/Main.storyboard"
