@@ -17,4 +17,10 @@ android/capacitor-cordova-android-plugins/
 *.jks
 *.keystore
 release/
+*.p12
+*.p8
+*.mobileprovision
+ios/ExportOptions.plist
+ios/App/App/Release.xcconfig
+ios-artifacts/
 android/.idea/

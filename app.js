@@ -2247,16 +2247,17 @@
     }
     if (!playerIdentity.name) {
       showHelpAfterUsername = firstVisit;
-      setTimeout(() => { els.usernameInput.value = ""; els.usernameDialog.showModal(); els.usernameInput.focus(); }, 260);
+      setTimeout(async () => { await window.SixthSenseNativeOnboarding; els.usernameInput.value = ""; els.usernameDialog.showModal(); els.usernameInput.focus(); }, 260);
     } else if (firstVisit) {
-      setTimeout(() => document.querySelector("#help-modal").showModal(), 450);
+      setTimeout(async () => { await window.SixthSenseNativeOnboarding; document.querySelector("#help-modal").showModal(); }, 450);
     }
   }
 
   init();
-  void window.SixthSenseIdentity.refresh().catch(error => {
+  void window.SixthSenseIdentity.refresh().catch(async error => {
     els.settingsUsernameMessage.textContent = error.message;
     if (error.status === 409) {
+      await window.SixthSenseNativeOnboarding;
       els.usernameInput.value = playerIdentity.name;
       playerIdentity = { name: "" }; saveJson(STORAGE.identity, playerIdentity);
       applySettings(); renderProfile();

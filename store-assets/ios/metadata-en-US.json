@@ -1,0 +1,19 @@
+{
+  "name": "Sixth Sense",
+  "subtitle": "Word puzzles with a twist",
+  "primaryCategory": "Games",
+  "gameSubcategories": [
+    "Word",
+    "Puzzle"
+  ],
+  "primaryLanguage": "en-US",
+  "keywords": "word,puzzle,clues,guess,bollywood,multiplayer,race,brain,daily,adventure",
+  "promotionalText": "Trust your instincts. Decode daily words, climb an Adventure trail, and challenge friends in private races and Bollywood duels.",
+  "description": "Six letters. Six chances. One flash of insight.\n\nSixth Sense is a word-guessing game with colorful animal avatars, clear feedback and clues when you need a nudge. Use letter patterns to find the answer, then celebrate your discovery.\n\nA NEW DAILY CHALLENGE\nVisit the observatory for the daily six-letter puzzle. Build your streak and see your progress.\n\nYOUR OWN ADVENTURE\nClimb an illustrated trail through thousands of words. Play solo offline and use Sense, Peek and Clear to help solve a tricky puzzle. Each puzzle offers six standard guesses and one optional Last Chance.\n\nPLAY TOGETHER\nCreate a private room and share its code. Race with up to eight players, face a friend in VS, or solve together in Co-op. Multiplayer requires an internet connection.\n\nBOLLYWOOD RACE AND VS\nGuess complete movie titles and familiar fictional character names in special 5â€“7-letter rounds. Short clues point you toward the answer without turning the game into a quiz.\n\nMAKE IT YOURS\nChoose an animal avatar, unlock cosmetic styles and enjoy dark mode, independent music and sound controls, reduced motion and feedback symbols alongside colors.\n\nThe game is free to play with ads and optional in-app purchases. Remove Ads disables banners and automatic ads; optional rewarded ads remain. Coin and lifeline balances are stored on this installation and are not restored through App Store purchases. Reinstalling or clearing app data can lose them. Permanent ad removal restores with the same App Store account. Username recovery does not transfer solo progress or supplies.\n\nSupport: aryanchandwani@gmail.com",
+  "supportURL": "https://sixth-sense-game.vercel.app/delete-account.html",
+  "privacyURL": "https://sixth-sense-game.vercel.app/privacy.html",
+  "marketingURL": "https://www.alphacodeai.com/",
+  "version": "1.0.3",
+  "releaseNotes": "First iPhone release of Sixth Sense: Daily puzzles, Adventure, private multiplayer and Bollywood movie-and-character challenges.",
+  "status": "Draft. Do not submit until IOS_RELEASE.md device, payment, privacy and account-deletion acceptance is complete."
+}

@@ -2,6 +2,8 @@
   "use strict";
   const cap = window.Capacitor;
   if (!cap?.isNativePlatform?.()) return;
+  let finishOnboarding;
+  window.SixthSenseNativeOnboarding = new Promise(resolve => { finishOnboarding = resolve; });
   const native = cap.registerPlugin("SenseiMonetization");
   const app = cap.registerPlugin("App");
   const reward = document.querySelector("#reward-ad-button");
@@ -63,6 +65,12 @@
   }
 
   function render() {
+    if (Number.isFinite(state.safeTop) && state.safeTop >= 0) {
+      const inset = `${state.safeTop}px`;
+      if (document.documentElement.style.getPropertyValue("--native-safe-top") !== inset) {
+        document.documentElement.style.setProperty("--native-safe-top", inset);
+      }
+    }
     purchase.textContent = state.owned ? "Automatic ads removed ✓" : state.price ? `Remove Ads · ${state.price}` : "Remove Ads · unavailable";
     purchase.disabled = state.owned || !state.eligible || !state.price || state.purchaseBusy || Boolean(state.pendingPurchases?.length);
     privacyOptions.hidden = !state.privacyOptionsRequired;
@@ -224,13 +232,16 @@
   });
   ageDialog.addEventListener("cancel", event => event.preventDefault());
   ageDialog.querySelectorAll("[data-age-band]").forEach(button => button.addEventListener("click", async () => {
-    ageDialog.close(); state = await native.initialize({ ageBand: button.dataset.ageBand }); render(); recover(); recoverPurchases();
+    ageDialog.close();
+    try { state = await native.initialize({ ageBand: button.dataset.ageBand }); render(); recover(); recoverPurchases(); }
+    catch (_) { storeMessage.textContent = "Store services unavailable. You can keep playing."; }
+    finally { finishOnboarding(); }
   }));
   native.addListener("stateChanged", next => { state = next; render(); if (!busy) { recover(); recoverPurchases(); } });
   native.getState().then(async next => {
     state = next;
     if (!state.ageBand) ageDialog.showModal();
-    else state = await native.initialize({ ageBand: state.ageBand });
+    else { finishOnboarding(); state = await native.initialize({ ageBand: state.ageBand }); }
     render(); await recover(); await recoverPurchases();
-  }).catch(() => { storeMessage.textContent = "Store services unavailable. You can keep playing."; });
+  }).catch(() => { finishOnboarding(); storeMessage.textContent = "Store services unavailable. You can keep playing."; });
 })();
