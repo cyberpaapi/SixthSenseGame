@@ -10,6 +10,7 @@ final class AppleStore {
     private var updates: Task<Void, Never>?
     private var processing: Set<UInt64> = []
     private var transactions: [String: StoreKit.Transaction] = [:]
+    private var authorizedClaims: Set<String> = []
     private var products: [String: Product] = [:]
     private var ownedIds: Set<String> = []
     private(set) var busy = false
@@ -28,7 +29,7 @@ final class AppleStore {
             (id, ["price": ready ? products[id]?.displayPrice ?? "" : "", "owned": ownedIds.contains(id)] as [String: Any])
         })
     }
-    var receipts: [[String: Any]] { state.purchases.values.compactMap { $0["receipt"] as? [String: Any] } }
+    var receipts: [[String: Any]] { state.purchases.filter { authorizedClaims.contains($0.key) }.values.compactMap { $0["receipt"] as? [String: Any] } }
 
     func start() async {
         if updates == nil {
@@ -59,17 +60,24 @@ final class AppleStore {
         defer { busy = false; changed() }
         await checkReady()
         do {
-            products = Dictionary(uniqueKeysWithValues: try await Product.products(for: Self.ids).map { ($0.id, $0) })
+            products = Dictionary(uniqueKeysWithValues: try await Product.products(for: Self.ids)
+                .filter { $0.type == (Self.permanent.contains($0.id) ? .nonConsumable : .consumable) }.map { ($0.id, $0) })
             // StoreKit verifies Apple's current entitlements, including revocations.
             // No JS or user-default ownership flag can grant ad removal.
             var current: Set<String> = []
+            var entitlementResults: [VerificationResult<StoreKit.Transaction>] = []
             for await result in StoreKit.Transaction.currentEntitlements {
                 if case .verified(let transaction) = result, transaction.revocationDate == nil,
                    Self.permanent.contains(transaction.productID) { current.insert(transaction.productID) }
-                try await accept(result)
+                entitlementResults.append(result)
             }
             ownedIds = current
-            for await result in StoreKit.Transaction.unfinished { try await accept(result) }
+            for result in entitlementResults {
+                do { try await accept(result) } catch { message = "Restore purchases when connected to recover supplies." }
+            }
+            for await result in StoreKit.Transaction.unfinished {
+                do { try await accept(result) } catch { message = "Restore purchases when connected to recover supplies." }
+            }
         } catch { message = "Some purchases need a connection. Use Restore purchases to retry." }
     }
     func restore() async throws {
@@ -98,6 +106,7 @@ final class AppleStore {
         if transaction.revocationDate != nil {
             ownedIds.remove(transaction.productID)
             let revoked = state.purchases.filter { $0.value["transactionId"] as? String == String(transaction.id) }.map(\.key)
+            revoked.forEach { authorizedClaims.remove($0) }
             try state.update { values in
                 var pending = values["purchases"] as? [String: [String: Any]] ?? [:]
                 revoked.forEach { pending.removeValue(forKey: $0) }; values["purchases"] = pending
@@ -119,6 +128,7 @@ final class AppleStore {
                 values["purchases"] = pending
             }
             transactions[claim] = transaction
+            authorizedClaims.insert(claim)
         } else { await transaction.finish() }
         changed()
     }
@@ -132,7 +142,7 @@ final class AppleStore {
             var all = values["purchases"] as? [String: [String: Any]] ?? [:]
             all.removeValue(forKey: claim); values["purchases"] = all
         }
-        transactions.removeValue(forKey: claim); changed()
+        transactions.removeValue(forKey: claim); authorizedClaims.remove(claim); changed()
     }
     private func verify(jws: String, action: String) async throws -> [String: Any] {
         guard let endpoint else { throw storeError("Store verification is not configured.") }

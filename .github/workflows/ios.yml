@@ -18,6 +18,8 @@ on:
         default: testing
 permissions:
   contents: read
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
 concurrency:
   group: ios-${{ github.ref }}
   cancel-in-progress: false

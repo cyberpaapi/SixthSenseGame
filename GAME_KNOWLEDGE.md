@@ -1220,3 +1220,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - The first GitHub macOS run reached Swift compilation and identified Capacitor's non-open home-indicator property. Use the supported iOS SystemBars configuration instead. Removed redundant explicit plugin registration so native observers/ads initialize only once.
 - Added a simulator UI-test target generated in CI for real onboarding, Adventure, puzzle/clue, landscape and restart captures. These are pending execution, not completed store screenshots. Xcode's default runner was 16.4 in the first run; final store SDK requirements remain a release gate.
 - Local core and Apple tests passed in the previous checkpoint; shared browser regressions are running after starting the previously stopped local server. No signed release or Apple upload.
+
+### 2026-10-12 — Verify shared flows and correct Swift bridge types
+
+- Shared mobile, six-product shop, Last Chance solo/online and native-banner browser suites passed against the local server; server purchase/Last Chance fixtures also passed.
+- Second cloud compile identified two Swift API mismatches; converted native dictionaries recursively to Capacitor JSValue and selected Google's parentalGuidance content rating. Explicitly disabled ad personalization. Pinned Xcode 26.3 on the standard macOS runner to meet Apple's current SDK floor.
+- Apple supplies now wait for a fresh server verification after restart, independently of permanent-entitlement restoration. Invalid catalog product types are hidden. Exported the selected fox into native splash sizes.
+- macOS rerun and screenshot capture remain pending; no signing/account setup has been claimed.

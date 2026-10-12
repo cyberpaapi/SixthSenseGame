@@ -53,7 +53,7 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
     deinit { observers.forEach { NotificationCenter.default.removeObserver($0) } }
     @MainActor private func status() -> JSObject {
         let offers = store?.offers ?? [:]
-        return ["ageBand": saved?.age ?? "", "eligible": eligible, "owned": store?.owned ?? false,
+        let data: [String: Any] = ["ageBand": saved?.age ?? "", "eligible": eligible, "owned": store?.owned ?? false,
                 "price": (offers["remove_banner_ads"] as? [String: Any])?["price"] ?? "", "products": offers,
                 "billingReady": store?.ready ?? false, "purchaseBusy": store?.busy ?? false,
                 "pendingPurchases": store?.receipts ?? [], "pendingReward": saved?.reward ?? [:],
@@ -61,6 +61,12 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
                 "rewardLoading": loadingReward, "interstitialReady": interstitial != nil,
                 "privacyOptionsRequired": ConsentInformation.shared.privacyOptionsRequirementStatus == .required,
                 "message": message.isEmpty ? store?.message ?? "" : message]
+        return data.mapValues(Self.jsValue)
+    }
+    private static func jsValue(_ value: Any) -> JSValue {
+        if let object = value as? [String: Any] { return object.mapValues(jsValue) }
+        if let array = value as? [Any] { return array.map(jsValue) }
+        return value as? JSValue ?? NSNull()
     }
     @MainActor private func changed() { updateBanner(); notifyListeners("stateChanged", data: status()) }
     private func run(_ call: CAPPluginCall, _ action: @escaping @MainActor () async throws -> Void) {
@@ -84,7 +90,8 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
     @MainActor private func updateConsent() async {
         let minor = saved?.age != "18+"
         MobileAds.shared.requestConfiguration.tagForUnderAgeOfConsent = NSNumber(value: minor)
-        MobileAds.shared.requestConfiguration.maxAdContentRating = .pg
+        MobileAds.shared.requestConfiguration.maxAdContentRating = .parentalGuidance
+        MobileAds.shared.requestConfiguration.publisherPrivacyPersonalizationState = .disabled
         // No ATT prompt or cross-app identifier access. Request contextual ads only.
         let parameters = RequestParameters(); parameters.isTaggedForUnderAgeOfConsent = minor
         do {
