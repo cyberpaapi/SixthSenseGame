@@ -1257,3 +1257,8 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Fitted headers use WebKit's top safe-area inset when Android's explicit native inset is absent. The iPhone WebView respects horizontal safe areas in landscape so notch placement cannot cover the keyboard or controls. Backgrounds still fill the native view.
 - Reset the native initialization guard after completion and retry consent setup on a later reward preparation if startup connectivity prevented ads. Ad eligibility and consent requirements remain enforced.
 - Shared browser and reserved-banner layout suites passed after these changes. Native Swift compilation/UI acceptance for this exact revision remains pending in the PR workflow. Draft PR #1 contains the implementation; no production branch merge or Apple upload has occurred.
+
+### 2026-10-12 — Diagnose simulator touch timing
+
+- The first sequenced-onboarding simulator run reached the age dialog, but its immediate accessibility tap did not advance. Saved the real screen/hierarchy for diagnosis. UI tests now wait for WebKit entry motion and perform one center tap on a hittable control, with no repeated-tap fallback. Native touch acceptance is still pending; browser onboarding regressions remain passed.
+
