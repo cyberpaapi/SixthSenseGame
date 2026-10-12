@@ -4,7 +4,7 @@
 
 Last updated: 2026-10-12
 
-Last verified: 2026-10-12 (Play production-access application acknowledged; approval pending. iOS app compiled with Xcode 26.3 in GitHub run 38221491911. Core rules, identity/content, Apple delivery and invalid-signature tests, shared browser/mobile/shop/Last Chance/banner tests, asset sync and whitespace passed; npm audit zero. Simulator UI acceptance, physical iPhone, sandbox purchases and signed upload pending. Existing Android release/monetization limitations remain.)
+Last verified: 2026-10-12 (Play production-access application acknowledged; approval pending. iOS app and native persistence/cadence tests passed with Xcode 26.3 in GitHub run 38222909823; simulator UI stage remains pending. Core rules, identity/content, Apple delivery and invalid-signature tests, shared browser/mobile/shop/Last Chance/banner tests, asset sync and whitespace passed; npm audit zero. Simulator UI acceptance, physical iPhone, sandbox purchases and signed upload pending. Existing Android release/monetization limitations remain.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -1245,3 +1245,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Clear stale native pending purchase entries when Apple's verified transaction has already been delivered, or has been revoked, so a restart cannot permanently block future checkout. Unexpected receipt-less responses remain retriable errors.
 - Bounded simulator UI execution to 15 minutes with a three-minute individual test limit, disabled parallel simulator cloning and added explicit boot diagnostics after the first UI run stalled.
 - Apple server tests, shared phone/desktop/browser regressions and Android purchase verification tests passed; npm audit remains zero. Production-without-approval and unknown iOS channels correctly fail configuration, and testing configuration succeeds. Updated current status to reflect the successful native cloud compile; simulator UI and device acceptance remain pending.
+
+### 2026-10-12 — Sequence native onboarding and configure release environment
+
+- Fresh native installs now complete age onboarding before showing the username/help dialog, including slow bridge replies; unavailable native services still allow solo play. Previously the delayed username modal could cover the age selector. The same ordering applies to Android and iOS; browser onboarding is unchanged.
+- Added browser regressions for fresh/delayed/existing age and service/storage errors; all passed, along with core/identity/content checks. Native persistence/cadence and Xcode compilation passed in run 38222909823. UI test teardown now preserves the final screen and accessibility hierarchy for diagnosis.
+- Created the GitHub ios-release environment with a main-only branch policy and IOS_RELEASE_APPROVED=false. No signing secrets or Apple upload were configured. Apple membership and real device/sandbox acceptance remain owner/account-dependent.

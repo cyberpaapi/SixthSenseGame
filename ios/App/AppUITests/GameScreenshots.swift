@@ -1,6 +1,13 @@
 import XCTest
 
 final class GameScreenshots: XCTestCase {
+    override func tearDown() {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = "final-ui-state"; attachment.lifetime = .keepAlways; add(attachment)
+        let hierarchy = XCTAttachment(string: XCUIApplication(bundleIdentifier: "com.sensei.sixthsense").debugDescription)
+        hierarchy.name = "accessibility-hierarchy"; hierarchy.lifetime = .keepAlways; add(hierarchy)
+        super.tearDown()
+    }
     func testNativeGameAndCapture() {
         continueAfterFailure = false
         let app = XCUIApplication(bundleIdentifier: "com.sensei.sixthsense")

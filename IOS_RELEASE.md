@@ -33,7 +33,7 @@ Apple's available price points may differ from exact INR targets. The app always
 
 ## Cloud setup after enrollment
 
-Create GitHub environment `ios-release`, restrict it to main, and require owner review if the repository plan supports this. Configure through GitHub's secret UI, never chat or tracked files.
+GitHub environment `ios-release` is created and restricted to the `main` branch, with `IOS_RELEASE_APPROVED=false`. Configure the missing signing inputs through GitHub's secret UI, never chat or tracked files. Add owner review if desired before the first production upload.
 
 Environment variables:
 - `APPLE_TEAM_ID`
