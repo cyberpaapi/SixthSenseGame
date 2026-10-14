@@ -319,6 +319,8 @@ public class SenseiMonetizationPlugin extends Plugin {
         return offers == null || offers.isEmpty() ? product.getOneTimePurchaseOfferDetails() : offers.get(0);
     }
     private void queryPrice() {
+        // Free launch: preserve restoration of prior ownership, but offer no new sales.
+        if (!BuildConfig.PURCHASES_ENABLED) { prices.clear(); price = ""; changed(); return; }
         billing.queryProductDetailsAsync(productQuery(PRODUCTS), (result, details) -> main.post(() -> {
             prices.clear();
             if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) for (ProductDetails product : details.getProductDetailsList()) {
@@ -332,6 +334,7 @@ public class SenseiMonetizationPlugin extends Plugin {
     @PluginMethod public void purchaseProduct(PluginCall call) { beginPurchase(call, call.getString("productId", "")); }
     private void beginPurchase(PluginCall call, String id) {
         getActivity().runOnUiThread(() -> {
+            if (!BuildConfig.PURCHASES_ENABLED) { call.reject("Purchases are not available in this version yet."); return; }
             if (!PRODUCTS.contains(id) || !eligible() || billing == null || !billing.isReady() || purchaseBusy || !verifyingTokens.isEmpty() || delivering || pendingPurchases().length() > 0 || (permanent(id) && (productOwned(id) || (id.equals("remove_banner_ads") && owned())))) { call.reject("Purchase is not available. Finish restoring pending purchases first."); return; }
             purchaseBusy = true; changed();
             network.execute(() -> {

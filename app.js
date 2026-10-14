@@ -3,8 +3,9 @@
 
   const Core = window.SixthSenseCore;
   const Progression = window.SixthSenseProgression;
+  const Bollywood = window.SixthSenseBollywoodSolo;
   const ANSWER_CLUES = new Map(Core.ANSWERS.map(item => [item.word, item.clue]));
-  const ANSWER_WORDS = new Set(Core.ANSWERS.map(item => item.word));
+  const ANSWER_WORDS = new Set([...Core.ANSWERS, ...Bollywood.answers].map(item => item.word));
   const STORAGE = {
     daily: "sixth-sense.daily.v1",
     practice: "sixth-sense.practice.v1",
@@ -12,6 +13,7 @@
     insight: "sixth-sense.insight.v1",
     streak: "sixth-sense.streak-mode.v1",
     adventure: "sixth-sense.adventure.v1",
+    bollywood: "sixth-sense.bollywood-solo.v1",
     stats: "sixth-sense.stats.v1",
     settings: "sixth-sense.settings.v1",
     identity: "sixth-sense.online.identity.v1",
@@ -39,7 +41,8 @@
     sprint: { label: "Time Tackle", ready: "Time Tackle started — ten minutes." },
     insight: { label: "Insight Puzzle", ready: "Insight ready — clue and reveal unlocked." },
     streak: { label: "Streak Puzzle", ready: "Streak puzzle ready." },
-    adventure: { label: "Adventure Puzzle", ready: "Adventure level ready." }
+    adventure: { label: "Adventure Puzzle", ready: "Adventure level ready." },
+    bollywood: { label: "Bollywood Solo", ready: "Guess the movie or character. Sense unlocks a hint." }
   });
   const defaultSettings = { hard: false, contrast: false, dark: false, music: true, effects: true, avatar: "fox", accent: "coral", decoration: "none", unlockedAvatars: [], unlockedDecorations: [] };
   const defaultInventory = { sense: 0, peek: 0, clear: 0, skip: 0 };
@@ -322,6 +325,7 @@
       puzzleNumber: Core.dayNumber(),
       answer: answer.word,
       clue: answer.clue,
+      answerKind: answer.kind || "Word",
       clueUsed: false,
       peekUsed: false,
       peekUses: 0,
@@ -374,6 +378,16 @@
 
   function loadModeGame(gameMode, forceNew) {
     const saved = loadJson(STORAGE[gameMode], {});
+    if (gameMode === "bollywood") {
+      const answer = Bollywood.answers.find(entry => entry.word === saved.answer);
+      if (!forceNew && answer && saved.mode === gameMode && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
+        return { ...restoreGame(emptyGame(answer, gameMode), saved), answerKind: answer.kind };
+      }
+      const seen = loadJson("sixth-sense.bollywood-seen.v1", []);
+      const next = Bollywood.next(Array.isArray(seen) ? seen : [], saved.answer);
+      saveJson("sixth-sense.bollywood-seen.v1", next.seen);
+      return emptyGame(next.answer, gameMode);
+    }
     const adventureLevelMatches = gameMode !== "adventure" || Number(saved.adventureLevel) === stats.adventure.level;
     if (!forceNew && adventureLevelMatches && saved.mode === gameMode && ANSWER_CLUES.has(saved.answer) && Array.isArray(saved.guesses) && ["playing", "last-chance"].includes(saved.status)) {
       return restoreGame(emptyGame({ word: saved.answer, clue: ANSWER_CLUES.get(saved.answer) }, gameMode), saved);
@@ -425,14 +439,15 @@
 
   function fitSoloBoard() {
     const fitted = currentScreen() === "game" && !window.Capacitor?.isNativePlatform?.()
-      && matchMedia("(orientation: landscape) and (max-height:600px)").matches;
+      && (matchMedia("(orientation: landscape) and (max-height:600px)").matches || (mode === "bollywood" && matchMedia("(max-width:600px)").matches));
     document.body.classList.toggle("is-fitted-solo", fitted);
     if (!fitted) return;
     const wrap = els.board.parentElement, bounds = wrap.getBoundingClientRect();
     if (!bounds.height || !bounds.width) return;
     const rows = els.board.children.length || Core.MAX_GUESSES;
     const padding = parseFloat(getComputedStyle(wrap).paddingRight) + parseFloat(getComputedStyle(wrap).paddingLeft);
-    const size = Math.floor(Math.min(52, (bounds.width - padding - 25) / 6, (bounds.height - 2 - (rows - 1) * 4) / rows));
+    const columns = game.answer.length;
+    const size = Math.floor(Math.min(52, (bounds.width - padding - (columns - 1) * 4 - 5) / columns, (bounds.height - 2 - (rows - 1) * 4) / rows));
     els.board.style.setProperty("--native-tile-size", `${Math.max(12, size)}px`);
   }
   new ResizeObserver(fitSoloBoard).observe(els.board.parentElement);
@@ -527,6 +542,7 @@
     if (inputLocked) return;
     mode = MODE_CONFIG[nextMode] ? nextMode : "daily";
     game = mode === "daily" ? loadDailyGame() : loadModeGame(mode, forceNew);
+    if (mode === "bollywood") saveGame();
     els.modeButtons.forEach(button => {
       const active = button.dataset.mode === mode;
       button.classList.toggle("is-active", active);
@@ -658,7 +674,9 @@
   function renderBoard() {
     els.board.innerHTML = "";
     const rowCount = (game.maxGuesses || Core.MAX_GUESSES) + (game.extraAttemptPurchased ? 1 : 0);
-    els.board.setAttribute("aria-label", `${rowCount} rows of six-letter guesses`);
+    els.board.setAttribute("aria-label", `${rowCount} rows of ${game.answer.length}-letter guesses`);
+    els.board.style.setProperty("--word-length", game.answer.length);
+    els.board.dataset.wordLength = game.answer.length;
     els.board.classList.toggle("has-extra-row", Boolean(game.extraAttemptPurchased));
     els.board.style.setProperty("--board-rows", rowCount);
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
@@ -668,7 +686,7 @@
       row.dataset.row = rowIndex;
       const prior = game.guesses[rowIndex];
       const letters = prior ? prior.guess : (rowIndex === game.guesses.length ? game.current : "");
-      for (let col = 0; col < Core.WORD_LENGTH; col += 1) {
+      for (let col = 0; col < game.answer.length; col += 1) {
         const tile = document.createElement("div");
         const letter = letters[col] || "";
         const status = prior ? prior.score[col] : null;
@@ -770,7 +788,7 @@
   }
 
   function remainingPeekPositions() {
-    return Core.remainingPeekPositions(game.guesses, game.peekedPositions);
+    return Core.remainingPeekPositions(game.guesses, game.peekedPositions, game.answer.length);
   }
 
   function remainingClearLetters() {
@@ -812,7 +830,7 @@
       stockBadge.hidden = !showStock;
       stockBadge.querySelector("b").textContent = available;
       price.hidden = !showPrice;
-      price.querySelector("b").textContent = Core.LIFELINE_COSTS[kind];
+      price.querySelector("b").textContent = Core.lifelineCosts(mode)[kind];
       if (game.clueUsed && kind === "sense") {
         button.setAttribute("aria-label", "Sense: show the clue again, unlocked for this puzzle");
         button.title = "Sense — show clue again";
@@ -824,8 +842,8 @@
         button.setAttribute("aria-label", `${names[kind]}: use one, ${stored} available`);
         button.title = `${names[kind]} — ${stored} available`;
       } else {
-        button.setAttribute("aria-label", `${names[kind]}: buy and use for ${Core.LIFELINE_COSTS[kind]} coins`);
-        button.title = `${names[kind]} — buy and use for ${Core.LIFELINE_COSTS[kind]} coins`;
+        button.setAttribute("aria-label", `${names[kind]}: buy and use for ${Core.lifelineCosts(mode)[kind]} coins`);
+        button.title = `${names[kind]} — buy and use for ${Core.lifelineCosts(mode)[kind]} coins`;
       }
     });
     els.clueCopy.textContent = "Tap a lifeline to use it; if needed, its price is charged in the same tap.";
@@ -886,12 +904,13 @@
       }
     } else if (mode === "insight") detail = "Clue + reveal";
     else if (mode === "streak") detail = `${stats.streakRun} win run`;
+    else if (mode === "bollywood") detail = `${game.answerKind} · ${game.answer.length} letters`;
     els.modeDetail.hidden = !detail;
     els.modeDetail.textContent = detail;
   }
 
   function spendCoins(kind, label) {
-    const cost = Core.LIFELINE_COSTS[kind];
+    const cost = Core.lifelineCosts(mode)[kind];
     return spendAmount(cost, label, kind);
   }
 
@@ -991,7 +1010,7 @@
       game.current = game.current.slice(0, -1);
       playEffect("delete");
     }
-    else if (/^[A-Z]$/.test(key) && game.current.length < Core.WORD_LENGTH) {
+    else if (/^[A-Z]$/.test(key) && game.current.length < game.answer.length) {
       game.current += key.toLowerCase();
       playEffect("letter", { semitone: (key.charCodeAt(0) - 65) % 7 });
     } else return;
@@ -1002,13 +1021,13 @@
       lastTile.classList.add("is-pop");
       lastTile.addEventListener("animationend", () => lastTile.classList.remove("is-pop"), { once: true });
     }
-    if (key !== "BACK" && game.current.length === Core.WORD_LENGTH) submitGuess();
+    if (key !== "BACK" && game.current.length === game.answer.length) submitGuess();
   }
 
   function submitGuess() {
     const guess = game.current;
-    if (guess.length !== Core.WORD_LENGTH) return invalid(`Enter ${Core.WORD_LENGTH} letters.`);
-    if (!Core.isValidWord(guess)) return invalid("That word isn’t in the accepted dictionary.");
+    if (guess.length !== game.answer.length) return invalid(`Enter ${game.answer.length} letters.`);
+    if (mode === "bollywood" ? !/^[a-z]{5,7}$/.test(guess) : !Core.isValidWord(guess)) return invalid("That word isn’t in the accepted dictionary.");
     if (settings.hard) {
       const issue = Core.validateHardMode(guess, game.guesses);
       if (issue) return invalid(issue);
@@ -1364,6 +1383,7 @@
     els.resultTitle.textContent = game.skipped ? "No reward this time" : won ? performance.title : "Signal missed";
     els.resultSummary.textContent = game.skipped ? "Take in the answer, then continue when you are ready." : won ? performance.summary : "The answer is yours now. Carry the pattern into the next word.";
     els.resultWord.setAttribute("aria-label", `${won ? "Solved word" : "Answer"}: ${game.answer.toUpperCase()}`);
+    els.resultWord.style.setProperty("--word-length", game.answer.length);
     els.resultWord.innerHTML = [...game.answer.toUpperCase()].map((letter, index) => `<span style="--letter-delay:${.08 + index * .055}s">${letter}</span>`).join("");
     els.resultAttemptIcon.textContent = won ? String(attempts) : "×";
     els.resultAttempts.textContent = won ? `Solved in ${attempts}` : `${attempts} ${attempts === 1 ? "try" : "tries"} used`;
@@ -1371,7 +1391,7 @@
     els.resultPoints.textContent = won ? `+${points} ${points === 1 ? "point" : "points"}` : "No points";
     els.resultStreakReward.hidden = !(won && streakReward > 0);
     els.resultPrimary.textContent = "OK";
-    els.resultNext.hidden = !(won && ["practice", "sprint", "insight", "streak"].includes(mode));
+    els.resultNext.hidden = !(mode === "bollywood" || (won && ["practice", "sprint", "insight", "streak"].includes(mode)));
     els.resultNext.textContent = mode === "sprint" ? "Next word · 10 min" : "Next word";
     els.resultProgress.hidden = !won || game.adventureReplay;
     const rank = game.mastery || Progression.mastery(stats.totalPoints);
@@ -1402,7 +1422,7 @@
   async function applyLastChanceReceipt(receipt) {
     if (receipt.kind === "last-chance-online") return window.SixthSenseOnlineLastChance.applyReceipt(receipt);
     if (receipt.kind !== "last-chance" || !/^[a-zA-Z0-9-]{20,80}$/.test(receipt.claimId || "")) throw Error("Invalid Last Chance receipt.");
-    for (const name of ["daily", "practice", "sprint", "insight", "streak", "adventure"]) {
+    for (const name of ["daily", "practice", "sprint", "insight", "streak", "adventure", "bollywood"]) {
       const saved = JSON.parse(localStorage.getItem(STORAGE[name]) || "null");
       if (saved?.lastChanceClaimId !== receipt.claimId) continue;
       if (saved.extraAttemptPurchased || saved.status !== "last-chance") return;
@@ -2083,7 +2103,7 @@
     els.resultExit.addEventListener("click", exitResult);
     els.resultPrimary.addEventListener("click", continueFromResult);
     els.resultNext.addEventListener("click", () => {
-      if (!["practice", "sprint", "insight", "streak"].includes(mode) || game.status !== "won") return;
+      if (mode !== "bollywood" && (!["practice", "sprint", "insight", "streak"].includes(mode) || game.status !== "won")) return;
       els.resultDialog.close();
       setMode(mode, true);
       showScreen("game");

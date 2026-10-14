@@ -1,9 +1,11 @@
 # Copy to release.properties (ignored by git); AdMob identifiers are public IDs, not secrets.
-admobAppId=REPLACE_WITH_ADMOB_APP_ID
-bannerAdId=REPLACE_WITH_BANNER_UNIT_ID
-rewardedAdId=REPLACE_WITH_REWARDED_UNIT_ID
-interstitialAdId=REPLACE_WITH_INTERSTITIAL_UNIT_ID
+admobAppId=ca-app-pub-2917215510689928~6202702379
+bannerAdId=ca-app-pub-2917215510689928/9942249790
+rewardedAdId=ca-app-pub-2917215510689928/3865769915
+interstitialAdId=ca-app-pub-2917215510689928/3575067827
 verifyPurchaseUrl=https://sixth-sense-game.vercel.app/api/play-purchase
+# Free launch. Enable only in a later build after real Play purchase acceptance.
+purchasesEnabled=false
 # Internal builds keep release signing/optimization but use Google sample ads.
 # Rebuild with production after completing the checklist before public release.
 releaseChannel=internal

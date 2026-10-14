@@ -9,7 +9,7 @@
   <link rel="icon" id="app-favicon" href="assets/app-icon-fox-192.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/app-icon-fox-192.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260921.3">
+  <link rel="stylesheet" href="styles.css?v=20261014.1">
 </head>
 <body>
   <a class="skip-link" href="#game-board">Skip to puzzle</a>
@@ -106,7 +106,8 @@
       <div class="mode-shelf-heading">
         <div><p class="eyebrow">Movies &amp; characters</p><h2 id="mode-shelf-title">Bollywood spotlight</h2></div>
       </div>
-      <div class="bollywood-mode-grid" aria-label="Bollywood multiplayer modes">
+      <div class="bollywood-mode-grid" aria-label="Bollywood modes">
+        <button class="bollywood-mode-card bollywood-solo-card" type="button" data-start-mode="bollywood"><img src="assets/bollywood-vs-v1.webp" width="1024" height="1024" alt="" aria-hidden="true"><span><strong>Bollywood Solo</strong><small>1 player · 125 movies and characters</small><em>Play at your pace · 5–7 letters · Six tries</em></span></button>
         <button class="bollywood-mode-card" type="button" data-open-online="bollywood"><img src="assets/bollywood-race-v1.webp" width="1024" height="1024" alt="" aria-hidden="true"><span><strong>Bollywood Race</strong><small>2–8 players · 3, 5 or 10 words</small><em>Guess the movie or character</em></span></button>
         <button class="bollywood-mode-card" type="button" data-open-online="bollywood-vs"><img src="assets/bollywood-vs-v1.webp" width="1024" height="1024" alt="" aria-hidden="true"><span><strong>Bollywood VS</strong><small>1v1 · 3, 5, 9 or Endless rounds</small><em>First solve wins the point</em></span></button>
       </div>
@@ -566,10 +567,11 @@
   <div class="celebration" id="celebration" aria-hidden="true"></div>
   <script src="answer-bank.js?v=20260921.2"></script>
   <script src="word-bank.js?v=20260917.1"></script>
-  <script src="game-core.js?v=20260919.3"></script>
-  <script src="progression.js?v=20260917.1"></script>
+  <script src="bollywood-solo.js?v=20261014.1"></script>
+  <script src="game-core.js?v=20261014.1"></script>
+  <script src="progression.js?v=20261014.1"></script>
   <script src="identity.js?v=20260918.16"></script>
-  <script src="app.js?v=20260921.3"></script>
+  <script src="app.js?v=20261014.1"></script>
   <script src="multiplayer.js?v=20260921.3"></script>
   <script src="store-catalog.js?v=20260921.3"></script>
   <script src="mobile.js?v=20260921.3"></script>

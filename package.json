@@ -8,6 +8,7 @@
     "test": "node test-core.js && node test-multiplayer.js && node test-progression.js && node test-identities.js && node test-answer-safety.js",
     "test:browser": "node test-browser.js",
     "test:bollywood": "node test-bollywood.js && node test-bollywood-vs.js && node test-bollywood-browser.js",
+    "test:bollywood-solo": "node test-bollywood-solo.js",
     "test:engagement": "node test-engagement-browser.js",
     "test:contrast": "node test-tile-contrast.js",
     "test:production-multiplayer": "node test-production-multiplayer.js",

@@ -152,7 +152,7 @@
   }
 
   function validateHardMode(guess, history) {
-    const fixed = Array(WORD_LENGTH).fill(null);
+    const fixed = Array(guess.length).fill(null);
     const requiredCounts = Object.create(null);
     history.forEach(entry => {
       const counts = Object.create(null);

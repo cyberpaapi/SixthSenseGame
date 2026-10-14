@@ -9,25 +9,27 @@ September 16 account setup: the owner reports Play Console verification complete
 | `admobAppId` | `ca-app-pub-2917215510689928~6202702379` |
 | `bannerAdId` | `ca-app-pub-2917215510689928/9942249790` |
 | `rewardedAdId` | `ca-app-pub-2917215510689928/3865769915` |
-| `interstitialAdId` | Not supplied; create in the existing AdMob app before production |
+| `interstitialAdId` | `ca-app-pub-2917215510689928/3575067827` |
 
-The app, banner and rewarded IDs are supplied; the new interstitial unit is still required. The rewarded unit is reused for clearly labelled rewards: 3× solve coins on the victory card, or one extra try on Last Chance. Each is granted only after the earned-reward callback. Local `releaseChannel=internal` builds use Google sample ads while retaining release optimization and upload signing. `releaseChecklistApproved=false` blocks production builds, not signed internal-test builds. Gradle cannot control which Play track receives a file: upload this internal build only to testing and rebuild for production after acceptance.
+All four public IDs are configured. The interstitial was created October 14 in the existing AdMob app. AdMob still requires store linking and app review; real serving is unverified. The rewarded unit is reused for clearly labelled rewards: 3× solve coins on the victory card, or one extra try on Last Chance. Each is granted only after the earned-reward callback. `releaseChannel=internal` builds use Google sample ads while retaining release optimization and upload signing. `releaseChecklistApproved=false` blocks production builds, not signed internal-test builds. Gradle cannot control which Play track receives a file: upload this internal build only to testing and rebuild for production after acceptance.
 
 Music update (`20260916.1`): **Tea and Tangrams** now loops the original 0:00–1:28 section, replacing the earlier 102-second edit. It keeps position through mute/app pauses and ducks for result sounds. Browser playback/loop/lifecycle checks pass for the 88-second asset; Android local-media playback was previously checked on September 10. Source and processing details are in `AUDIO_BRIEF.md`. The original download is preserved.
 
 The Android source is in `android/`, built with Capacitor 8, Java 21 and target/compile SDK 36. Package ID: `com.sensei.sixthsense` (check availability before the first Play upload; the uploaded package ID cannot later be changed). Solo gameplay, artwork, sound effects and fonts are bundled. Multiplayer uses the existing Vercel/Neon authority over HTTPS. No Cloudflare integration is required. A custom domain/Cloudflare DNS is optional; do not migrate the working room service just to package Android.
 
-## Current source — version 1.0.3 (versionCode 4)
+## Current source — version 1.0.4 (versionCode 5)
 
-September 21 monetization update: approved six-product regional shop, generated pack illustrations, permanent banner/interstitial removal, full-match interstitials and every-third-new-Adventure advancement ads. `MONETIZATION.md` is the current catalog/setup and delivery reference. Source/backend implementation and mocked/browser/native cadence tests are complete; actual Play purchases and new interstitial SDK presentation still need acceptance. The submitted Alpha release remains code 3, so it does not contain this update. A new upload-key-signed code-4 bundle has not been generated.
+October 14: production access is granted. The production draft is saved as **1.0.4 - Bollywood Solo**, with launch notes but no uploaded bundle. Current country targeting is 178 regions including India; this was observed, not changed. The updated default en-US description is saved but not sent for review; exact full copy is in `store-assets/play-description-en-US.txt`.
 
-Play Console explicitly requires a **merchant payments profile** before product creation. The owner must complete its financial-account setup. No six-product catalog/prices have been created externally yet. Service-account verification credentials and a real interstitial ID remain missing. The existing AdMob account belongs to a different Google login than the current browser session; no duplicate account was created. Keep the production checklist false and sample ads in testing.
+Bollywood Solo adds offline play from the approved 125 movies/characters, variable 5–7-letter boards, ordinary rewards/trio/mastery, Sense 75, Peek 50, Clear 40, Skip 60, and six tries plus optional Last Chance. It saves unfinished play and offers Next word after results.
 
-Verified for this source: store server and browser fixtures (all grants, duplicate prevention, atomic write failure/recovery, wallet-cap preservation, regional prices, phone layout, Adventure/full-match hooks), existing rewarded mobile/banner/Last Chance suites, native cadence JUnit, debug compilation and lint. These are not live-payment tests. The happy-fox logo is selected and applied locally; its new icon/feature graphic and three ad-free screenshots were submitted to Play on September 22 with code 3. The code-4 native update remains unsigned.
+**Owner launch decision: free game first; activate purchases later.** Release builds default to `purchasesEnabled=false`, which hides product offers and blocks new native checkout while retaining restoration for existing ownership. Debug retains purchase QA. Merchant profile, six-product setup, service credentials and real license transactions are deferred until a later update; they do not block a free launch. Keep purchase promotion out of the published description.
 
-Current test artifact: `release/SixthSense-v1.0.3-debug.apk`, SHA-256 `2ab973f073cccfbc26d6c6dfe716f92f0365cf3e15c0e906ae40337098f479f5`. Packaged client entries match the generated mobile bundle and all six shop illustrations are included. This APK is debug-signed and is not the Play-uploadable AAB.
+Real AdMob app/banner/reward/interstitial IDs are configured in ignored `release.properties` with `releaseChannel=production`; `releaseChecklistApproved=false` remains until native release acceptance. AdMob reports Requires review and cannot yet find the public listing by package. Link after publication, verify the developer-site app-ads.txt and consent configuration, and complete AdMob review. Creating an ID is not proof of live serving.
 
-Selected-fox test artifact: `release/SixthSense-v1.0.3-fox-debug.apk`, SHA-256 `29b7db58deb1caaa89057bacf2673413395d2f84d0cc36de63c764cc7e049950`. This rebuild adds the approved fox launcher/splash/web icons and passes assembly/lint. The earlier debug APK is preserved. Upload files: `store-assets/app-icon-512.png` (512×512 RGB, 345,465 bytes) and `store-assets/feature-graphic-1024x500.png` (1024×500 RGB, 504,422 bytes). No new signed binary is claimed. These store graphics were uploaded and submitted on September 22; the existing signed code-3 bundle is unchanged.
+Verified: core/identity/content, full browser, mobile/onboarding, Bollywood Solo/catalog/server and Last Chance suites; Android sync, debug assembly/lint/JUnit. A genuine 390×844 seven-letter Solo capture was visually inspected. Test artifact: `release/SixthSense-v1.0.4-bollywood-solo-debug.apk`, SHA-256 `7937bc2416019248b62bbfb9ee1bb5c139bc489363b03ce0f2b586b36b92f6cb`. This sample-ad, debug-signed APK is not uploadable to Play. No physical device is connected at this checkpoint.
+
+Production signing still requires the existing upload key; do not create a replacement. Studio previously used privately saved credentials. There is no CLI keystore configuration. Complete native release acceptance, approve the launch checklist, then use Build > Generate Signed App Bundle or APK > Android App Bundle > existing upload key > release. Upload the resulting code-5 AAB to the saved production draft, review the pre-launch report and submit the listing and release together. No signed production artifact or submission is claimed here.
 
 ## Submitted closed Alpha — version 1.0.2 (versionCode 3)
 
@@ -123,8 +125,8 @@ The September 10 below-lifelines update (`20260910.2`) also passes reserved-spac
 3. **Developer website:** publish `privacy.html` on the existing Vercel site and link it in Play. Add the exact AdMob-provided `app-ads.txt` line at the root of the developer website used in the listing and request AdMob verification. Do not publish the example publisher ID. Cloudflare is optional for a custom domain.
 4. **Paid products:** complete the missing merchant payments profile, then create the six exact products and standard Buy options in `MONETIZATION.md`. Use approved India customer prices and reviewed regional equivalents; keep multi-quantity disabled. The app displays Play prices. Remove Ads covers banners and automatic ads; Complete Pack also grants supplies once. License-test before sales.
 5. **Server verification:** enable Android Publisher API in your Google Cloud project, create a least-privilege service account and grant it the required Play app permissions to read purchases, acknowledge permanent orders and consume repeatable products. Configure Vercel server environment values below. Deploy `/api/play-store` and retain legacy `/api/play-purchase`; test all products on a Play testing track before allowing live purchases. Never put a service-account JSON file/private key into the APK, `www`, public assets or git.
-6. **Signing:** create an upload key through Android Studio, enroll in Play App Signing, store the upload key and passwords securely and back them up. The signing wizard supplies the key directly; for CLI builds, copy `android/keystore.properties.example` to ignored `keystore.properties` and fill it locally. Never send passwords in chat.
-7. The local ignored `android/release.properties` contains all three supplied AdMob IDs and `releaseChannel=internal`. Add the new real `interstitialAdId` and verify the HTTPS purchase URL. After acceptance, set `releaseChannel=production` and `releaseChecklistApproved=true`, then build a new bundle with a higher versionCode for Play. For a fresh checkout, copy the example and restore the public IDs above. This is a developer build safeguard, not Google approval.
+6. **Signing:** reuse the existing upload key through Android Studio, enroll in Play App Signing, store the upload key and passwords securely and back them up. The signing wizard supplies the key directly; for CLI builds, copy `android/keystore.properties.example` to ignored `keystore.properties` and fill it locally. Never send passwords in chat.
+7. The local ignored `android/release.properties` contains all four real AdMob IDs and `releaseChannel=production`. `purchasesEnabled` defaults to false for the authorized free launch. After native acceptance, set `releaseChecklistApproved=true`, then sign a new code-5 bundle. The build safeguard is not Google approval. Preserve the original upload key and never expose passwords in chat.
 
 Vercel-only environment:
 
@@ -140,7 +142,9 @@ Checkout requires the verification endpoint to return `{ "available": true }` be
 
 ## Release acceptance checklist
 
-- [ ] Real Android device/emulator: cold start, offline solo game, all seven home modes, rotation, system Back, app backgrounding, process restart, notch/gesture navigation, dark mode, TalkBack, reduced motion, low storage and poor connectivity.
+For the authorized free launch, paid-product/license-test and service-account items below are deferred while `purchasesEnabled=false`; they remain mandatory before enabling sales in a later signed update. App-ads.txt/store-link verification follows public listing availability. Other unverified native checks remain open; do not mark them passed based only on browser mocks.
+
+- [ ] Real Android device/emulator: cold start, offline solo game, all eight home modes, rotation, system Back, app backgrounding, process restart, notch/gesture navigation, dark mode, TalkBack, reduced motion, low storage and poor connectivity.
 - [ ] Native banners load only in intended home and below-lifelines placements, never over navigation/keyboard; paid owners retain removal after restart and restore.
 - [ ] Native test rewarded ads: earn once, close early, failed load/show, no fill, repeated tap, app death after earned callback, receipt recovery, full wallet, Daily reopen, and unchanged bonus/point accounting.
 - [ ] Native test interstitials: each full multiplayer match and each third new Adventure advancement; no replay/Daily/round ads, no-fill/error continuation, restart deduplication, foreground/consent guards, owned-ad suppression and audio recovery.
@@ -152,13 +156,11 @@ Checkout requires the verification endpoint to return `{ "available": true }` be
 - [ ] Signed AAB, target API 36, increasing versionCode, Play pre-launch report, SDK/Data safety disclosures, 16 KB page-size compatibility check and policy review pass.
 - [ ] If the Play account is a qualifying new personal account, complete the required closed test (currently at least 12 opted-in testers for 14 continuous days) and apply for production access. Google controls review/approval; building the app does not bypass this.
 
-## Store copy draft
+## Saved store copy
 
-Name: **Sixth Sense**
+Short description: **Daily word puzzles, Bollywood clues and multiplayer word races with friends.**
 
-Short description: **Find the six-letter word. Follow the clues. Trust your Sixth Sense.**
-
-Full description: Solve original six-letter word puzzles in six tries, with one optional Last Chance. Read the feedback, use clues when you need them and grow your word-solving skills. Explore Daily and Adventure, or invite friends into private Race, VS and Co-op rooms, including Bollywood movie and character challenges. Choose a playful animal avatar and earn coins through play. Solo puzzles work offline; multiplayer and ads require a connection. Optional reward ads can triple your puzzle-solve coins. A one-time purchase removes banners and automatic ads while keeping optional rewarded ads available. Optional coin and lifeline packs are also available; supplies stay on the buying installation. Designed for players ages 13 and up.
+Full copy: `store-assets/play-description-en-US.txt`. Saved October 14 as a listing draft for code 5, not submitted. It describes Bollywood Solo and omits unavailable purchase offers.
 
 ## Official references checked September 10, 2026
 

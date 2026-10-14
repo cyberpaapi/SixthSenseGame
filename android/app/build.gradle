@@ -17,8 +17,8 @@ android {
         applicationId "com.sensei.sixthsense"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -39,6 +39,7 @@ android {
     }
     buildTypes {
         debug {
+            buildConfigField 'boolean', 'PURCHASES_ENABLED', 'true'
             manifestPlaceholders = [admobAppId: 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'String', 'BANNER_AD_ID', '"ca-app-pub-3940256099942544/6300978111"'
             buildConfigField 'String', 'REWARDED_AD_ID', '"ca-app-pub-3940256099942544/5224354917"'
@@ -47,6 +48,7 @@ android {
             buildConfigField 'String', 'REMOVE_ADS_PRODUCT', '"remove_banner_ads"'
         }
         release {
+            buildConfigField 'boolean', 'PURCHASES_ENABLED', setting('purchasesEnabled', 'false') == 'true' ? 'true' : 'false'
             signingConfig signingConfigs.release
             manifestPlaceholders = [admobAppId: internalRelease ? 'ca-app-pub-3940256099942544~3347511713' : setting('admobAppId', '')]
             buildConfigField 'String', 'BANNER_AD_ID', '"' + (internalRelease ? 'ca-app-pub-3940256099942544/6300978111' : setting('bannerAdId', '')) + '"'

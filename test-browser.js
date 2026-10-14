@@ -35,7 +35,8 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.equal(await page.evaluate(() => window.SixthSenseCore.isValidWord("coates")), false);
     assert.equal(await page.locator("#home-screen").isVisible(), true);
     assert.equal(await page.locator("#game-screen").isHidden(), true);
-    assert.equal(await page.locator("[data-start-mode]").count(), 1);
+    assert.equal(await page.locator("[data-start-mode]").count(), 2);
+    assert.equal(await page.locator('[data-start-mode="bollywood"]').count(), 1);
     assert.equal(await page.locator("[data-open-online]").count(), 5);
     assert.equal(await page.locator("[data-open-adventure-map]").count(), 1);
     assert.equal(await page.locator("#adventure-feature").isVisible(), true);
@@ -58,7 +59,7 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
       const headerButton = document.querySelector(".header-actions .icon-button").getBoundingClientRect();
       const headerArt = document.querySelector(".header-actions .icon-button img").getBoundingClientRect();
       const daily = document.querySelector(".daily-quest").getBoundingClientRect();
-      const modeArt = document.querySelector(".bollywood-mode-card img").getBoundingClientRect();
+      const modeArt = document.querySelector(".bollywood-mode-card:not(.bollywood-solo-card) img").getBoundingClientRect();
       const modeShelf = document.querySelector(".mode-shelf").getBoundingClientRect();
       return { headerButton: headerButton.width, headerArt: headerArt.width, dailyHeight: daily.height, modeArtHeight: modeArt.height, modeShelfHeight: modeShelf.height };
     });
@@ -66,11 +67,11 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert(homeControlSizing.headerArt <= 36, "header artwork should remain visually compact");
     assert(homeControlSizing.dailyHeight <= 70, "Daily action should use the compact button treatment");
     assert(homeControlSizing.modeArtHeight >= 130 && homeControlSizing.modeArtHeight <= 190, "Bollywood generated artwork should be readable within its phone card");
-    assert(homeControlSizing.modeShelfHeight <= 340, "the phone mode launcher should remain compact");
+    assert(homeControlSizing.modeShelfHeight <= 460, "the three-card Bollywood shelf should remain compact");
     assert.equal(await page.locator("#mode-shelf-title").textContent(), "Bollywood spotlight");
     assert.equal(await page.locator("#streak-track").getAttribute("aria-valuenow"), "0");
     assert.match(await page.locator("#home-title").textContent(), /Six chances/);
-    assert.equal(await page.locator(".bollywood-mode-card img").count(), 2);
+    assert.equal(await page.locator(".bollywood-mode-card img").count(), 3);
     assert.match(await page.locator(".lobby-hero-art").getAttribute("src"), /lobby-observatory-v2\.webp$/);
     assert.match(await page.locator(".brand-wordmark img").getAttribute("src"), /logo-sixth-sense-clay-v1\.png$/);
     const brandLogoSizing = await page.locator(".brand-wordmark img").evaluate(image => {

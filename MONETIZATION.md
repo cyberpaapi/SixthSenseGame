@@ -2,6 +2,12 @@
 
 Approved September 21, 2026. Implemented in source version 1.0.3 / code 4; external setup and Play license testing are still required. This is Android-only. The browser game does not load AdMob or offer fake web checkout.
 
+## October 14 free-launch decision
+
+The owner chose to launch free and activate purchases later. Android 1.0.4/code 5 defaults release `purchasesEnabled=false`: product offers are hidden and new checkout is rejected natively, with existing restoration preserved. Debug is enabled for QA. A later signed build must enable the flag only after the setup and real purchase acceptance below. Play still requires a merchant account; the current server readiness response is unavailable. Neither paid products nor live purchases are claimed.
+
+The real Android interstitial is `ca-app-pub-2917215510689928/3575067827`, created in the existing AdMob app. Store linking/app review remain pending. Real IDs alone do not guarantee ad fill.
+
 ## Approved catalog
 
 | Play product ID | Product | India customer price | Contents | Repeatable |
