@@ -4,7 +4,7 @@
 
 Last updated: 2026-10-14
 
-Last verified: 2026-10-14 (Play production access granted; production draft has no uploaded bundle. Saved updated listing copy and 1.0.4 draft notes. Bollywood Solo catalog/cycle, 5–7-letter gameplay, hints, restart, Last Chance and phone/landscape tests passed; core, browser, mobile/onboarding, Bollywood server and Last Chance suites passed. Android debug assembly/lint/JUnit passed. Real interstitial created; AdMob requires store linking/review. Free launch authorized with purchases disabled in release builds. Production checklist/signing/device acceptance remain incomplete; no public release or live ad serving claimed. Earlier iOS simulator evidence remains as recorded below.)
+Last verified: 2026-10-14 (Studio SDK recognition repaired; Gradle sync and toolbar Run succeeded, installing and opening 1.0.4/code 5 in the API 36 emulator. Play production access granted; production draft has no uploaded bundle. Saved updated listing copy and 1.0.4 draft notes. Bollywood Solo catalog/cycle, 5–7-letter gameplay, hints, restart, Last Chance and phone/landscape tests passed; core, browser, mobile/onboarding, Bollywood server and Last Chance suites passed. Android debug assembly/lint/JUnit passed. Real interstitial created; AdMob requires store linking/review. Free launch authorized with purchases disabled in release builds. Production checklist/signing/physical-device acceptance remain incomplete; no public release or live ad serving claimed. Earlier iOS simulator evidence remains as recorded below.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -385,6 +385,8 @@ When changing stored shapes, add a safe migration or backward-compatible default
 
 Android Studio setup on this PC: open `C:\Users\Aryan\Downloads\SixthSense\android` as the project, not the user home or `.android` settings folder. In the native file picker, enter the path, press Enter to navigate, then Select Folder. Studio 2026.1.4 initially chose incompatible JVM 25; **Use JVM 21** selects installed Zulu 21. The app modules and signed-bundle wizard are now available. `ANDROID_RELEASE.md` includes these steps and the `npm.cmd` workaround for PowerShell script-policy restrictions.
 
+October 14 SDK repair: Studio reported “Please select Android SDK” and could not find compile target android-36 even though command-line assembly passed. Installing Android SDK Platform 36 revision 2 (shown as API 36.0) and Sources revision 1 through Studio's SDK Manager, then syncing, restored SDK registration and the app Run configuration. The SDK remains at `C:\Users\Aryan\AppData\Local\Android\Sdk`; target/compile API 36 and Java 21 are unchanged. The Google APIs x86_64 API 36 revision 7 image boots with WHPX in `SixthSense_QA_API36`. Toolbar Run successfully upgraded the existing emulator app to 1.0.4/code 5 and displayed the home screen. This is debug launch evidence, not full release acceptance; no app crash appeared in the inspected crash buffer (an unrelated emulator Bluetooth crash preceded launch).
+
 Serve the project root rather than opening `index.html` directly:
 
 ```powershell
@@ -589,6 +591,12 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Browsers block audible playback before interaction, so the soundtrack intentionally starts on the first tap or key press rather than during page load. Automated QA verifies scheduling and settings state, but perceived loudness still depends on the device and its media volume.
 
 ## Change log and rationale
+
+### 2026-10-14 — Repair Android Studio SDK recognition and emulator launch
+
+- Completed the API 36 emulator image installation and repaired Studio's missing compile-target registration through SDK Manager and Gradle sync. No game logic, target SDK, signing key or release approval setting changed.
+- Studio toolbar Run built, installed and opened the current game; adb confirmed version 1.0.4/code 5, minSdk 24 and targetSdk 36. Command-line debug assembly also passed. Existing emulator app data was retained. Documentation whitespace validation passed.
+- Signed production bundle, full native acceptance and physical-device checks remain pending. This repair does not publish the game or activate live ads.
 
 ### 2026-10-14 — Bollywood Solo and free Android launch preparation
 
