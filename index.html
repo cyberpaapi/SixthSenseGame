@@ -43,7 +43,7 @@
       <img src="assets/icon-flame.webp" width="320" height="320" alt="" aria-hidden="true">
       <div class="streak-copy">
         <strong id="streak-progress-label"><span id="streak-progress-count">0</span> day streak</strong>
-        <span id="streak-progress-message">Seven days lights the full signal</span>
+        <span id="streak-progress-message">Keep going · Bonus every seven days</span>
       </div>
       <div class="streak-track" id="streak-track" role="progressbar" aria-label="Progress toward a seven-day streak" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0">
         <span class="streak-fill" id="streak-progress-fill"></span>
@@ -388,6 +388,11 @@
         <label class="setting-row"><span><strong>Music</strong><small>Original dreamy claybeat soundtrack</small></span><input type="checkbox" id="music-mode"><i aria-hidden="true"></i></label>
         <label class="setting-row"><span><strong>Sound effects</strong><small>Letters, clues, coins, and crowd reactions</small></span><input type="checkbox" id="effects-mode"><i aria-hidden="true"></i></label>
       </div>
+      <section id="streak-reminder-settings" hidden aria-label="Daily streak notifications">
+        <label class="setting-row"><span><strong>Save my streak</strong><small>Fox reminders before the Daily resets</small></span><input type="checkbox" id="streak-reminders" aria-describedby="streak-reminder-status"><i aria-hidden="true"></i></label>
+        <p id="streak-reminder-status" role="status">Optional reminders 12, 6 and 3 hours before your streak ends.</p>
+        <p>Your streak has no seven-day limit. Win the Daily every day; earn a coin bonus every seven wins.</p>
+      </section>
       <section id="mobile-store" class="mobile-store" hidden aria-label="Ads and purchases">
         <h3>Your game shop</h3>
         <div class="store-product store-remove-ads">
@@ -571,9 +576,11 @@
   <script src="game-core.js?v=20261014.1"></script>
   <script src="progression.js?v=20261014.1"></script>
   <script src="identity.js?v=20260918.16"></script>
-  <script src="app.js?v=20261014.1"></script>
+  <script src="daily-streak.js?v=20261014.2"></script>
+  <script src="app.js?v=20261014.2"></script>
   <script src="multiplayer.js?v=20260921.3"></script>
   <script src="store-catalog.js?v=20260921.3"></script>
   <script src="mobile.js?v=20260921.3"></script>
+  <script src="streak-reminders.js?v=20261014.2"></script>
 </body>
 </html>

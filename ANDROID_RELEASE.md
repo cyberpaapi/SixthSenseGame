@@ -17,7 +17,13 @@ Music update (`20260916.1`): **Tea and Tangrams** now loops the original 0:00–
 
 The Android source is in `android/`, built with Capacitor 8, Java 21 and target/compile SDK 36. Package ID: `com.sensei.sixthsense` (check availability before the first Play upload; the uploaded package ID cannot later be changed). Solo gameplay, artwork, sound effects and fonts are bundled. Multiplayer uses the existing Vercel/Neon authority over HTTPS. No Cloudflare integration is required. A custom domain/Cloudflare DNS is optional; do not migrate the working room service just to package Android.
 
-## Current source — version 1.0.4 (versionCode 5)
+## Current source — version 1.0.5 (versionCode 6)
+
+Adds optional Android Daily streak reminders at 12, 6 and 3 hours before UTC expiry, with three generated fox moods, notification permission on opt-in, reboot recovery, deduplication and cancellation after success/loss/expiry. Streaks remain uncapped; seven-day bonuses repeat. Settings warns of overnight delivery and Android timing restrictions. See `STREAK_REMINDERS.md` for behavior and tests.
+
+Code 6 is a new debug-tested update, not signed or uploaded. The local release checklist flag is reset to false for this revision. The immutable code-5 production submission below remains in review at the last observed check. A new upload-key-signed AAB and Play submission are required to ship reminders. Do not replace the earlier release file or claim code 5 contains this feature.
+
+## Submitted production — version 1.0.4 (versionCode 5)
 
 October 14: production access is granted. The production draft is saved as **1.0.4 - Bollywood Solo**, with launch notes; the signed code-5 production bundle was accepted and submitted October 14. Console shows Changes in review for the full rollout and existing country expansion. Automated quick checks are still running; managed publishing is off. Google approval/public availability are pending. Current country targeting is 178 regions including India; this was observed, not changed. The updated default en-US description is saved but not sent for review; exact full copy is in `store-assets/play-description-en-US.txt`.
 
@@ -25,7 +31,7 @@ Bollywood Solo adds offline play from the approved 125 movies/characters, variab
 
 **Owner launch decision: free game first; activate purchases later.** Release builds default to `purchasesEnabled=false`, which hides product offers and blocks new native checkout while retaining restoration for existing ownership. Debug retains purchase QA. Merchant profile, six-product setup, service credentials and real license transactions are deferred until a later update; they do not block a free launch. Keep purchase promotion out of the published description.
 
-Real AdMob app/banner/reward/interstitial IDs are configured in ignored `release.properties` with `releaseChannel=production`; `releaseChecklistApproved=true` now records the owner’s explicit October 14 launch authorization; unchecked manual cases below remain unverified. AdMob reports Requires review and cannot yet find the public listing by package. Link after publication, verify the developer-site app-ads.txt and consent configuration, and complete AdMob review. Creating an ID is not proof of live serving.
+Real AdMob app/banner/reward/interstitial IDs are configured in ignored `release.properties` with `releaseChannel=production`; `releaseChecklistApproved=true` recorded the owner’s explicit October 14 code-5 launch authorization at signing (reset to false for new code-6 work); unchecked manual cases below remain unverified. AdMob reports Requires review and cannot yet find the public listing by package. Link after publication, verify the developer-site app-ads.txt and consent configuration, and complete AdMob review. Creating an ID is not proof of live serving.
 
 Verified: core/identity/content, full browser, mobile/onboarding, Bollywood Solo/catalog/server and Last Chance suites; Android sync, debug assembly/lint/JUnit. A genuine 390×844 seven-letter Solo capture was visually inspected. Test artifact: `release/SixthSense-v1.0.4-bollywood-solo-debug.apk`, SHA-256 `7937bc2416019248b62bbfb9ee1bb5c139bc489363b03ce0f2b586b36b92f6cb`. This sample-ad, debug-signed APK is not uploadable to Play. No physical device is connected at this checkpoint.
 

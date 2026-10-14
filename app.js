@@ -304,6 +304,7 @@
 
   function saveJson(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* Private browsing can deny storage. */ }
+    if (key === STORAGE.stats) document.dispatchEvent(new CustomEvent("sixth-sense-streak-change"));
   }
 
   function createAdventureSeed() {
@@ -1003,6 +1004,11 @@
   }
 
   function handleKey(key) {
+    if (mode === "daily" && game.date !== Core.dateKey() && !inputLocked) {
+      setMode("daily");
+      announce("A new Daily is ready. Yesterday’s puzzle has ended.");
+      return;
+    }
     if (els.gameScreen.hidden || inputLocked || game.status !== "playing" || document.querySelector("dialog[open]")) return;
     if (key === "ENTER") return submitGuess();
     if (key === "BACK") {
@@ -1102,11 +1108,8 @@
       if (won) {
         stats.wins += 1;
         stats.distribution[Math.min(stats.distribution.length, game.guesses.length) - 1] += 1;
-        const yesterday = new Date();
-        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-        stats.currentStreak = stats.lastWinDate === Core.dateKey(yesterday) ? stats.currentStreak + 1 : 1;
-        stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
-        stats.lastWinDate = Core.dateKey();
+        // A reveal animation can finish just after midnight; credit its actual puzzle day.
+        window.SixthSenseStreak.win(stats, Date.parse(game.date + "T12:00:00Z"));
         if (stats.currentStreak % 7 === 0 && stats.lastDailyRewardStreak < stats.currentStreak) {
           streakReward = addCoinBalance(DAILY_STREAK_REWARD);
           stats.lastDailyRewardStreak = stats.currentStreak;
@@ -1114,6 +1117,7 @@
         }
       } else {
         stats.currentStreak = 0;
+        stats.lastDailyRewardStreak = 0;
       }
       game.recorded = true;
     }
@@ -1299,12 +1303,13 @@
   }
 
   function renderStats() {
+    if (window.SixthSenseStreak.expire(stats)) saveJson(STORAGE.stats, stats);
     renderProgression();
     const winrate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
     const streakStep = stats.currentStreak ? ((stats.currentStreak - 1) % 7) + 1 : 0;
     const daysRemaining = 7 - streakStep;
     els.streakProgressCount.textContent = stats.currentStreak;
-    els.streakProgressMessage.textContent = daysRemaining === 0 ? `Reward unlocked · +${DAILY_STREAK_REWARD} coins` : `${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} to +${DAILY_STREAK_REWARD} coins`;
+    els.streakProgressMessage.textContent = daysRemaining === 0 ? `+${DAILY_STREAK_REWARD} coins · Keep your streak going!` : `${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} to next +${DAILY_STREAK_REWARD} coins`;
     els.streakProgressFill.style.width = `${(streakStep / 7) * 100}%`;
     els.streakTrack.setAttribute("aria-valuenow", String(streakStep));
     els.streakTrack.setAttribute("aria-valuetext", `${stats.currentStreak} day streak; ${daysRemaining} days to the next seven-day signal`);
@@ -1978,6 +1983,10 @@
 
   function updateCountdown() {
     const now = new Date();
+    if (window.SixthSenseStreak.expire(stats, now.getTime())) {
+      saveJson(STORAGE.stats, stats);
+      renderStats();
+    }
     const tomorrow = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
     let seconds = Math.max(0, Math.floor((tomorrow - now.getTime()) / 1000));
     const hours = Math.floor(seconds / 3600);
@@ -2190,6 +2199,16 @@
   }
 
   function init() {
+    window.SixthSenseDailyStreak = {
+      state: () => window.SixthSenseStreak.snapshot(stats),
+      open: () => {
+        if (currentScreen() === "online" || inputLocked || (currentScreen() === "game" && mode !== "daily" && ["playing", "last-chance"].includes(game?.status))) {
+          announce("Save your streak: open Daily from Home when you’re ready.");
+          return;
+        }
+        enterSoloMode("daily");
+      }
+    };
     window.SixthSenseAudio = {
       play: playEffect,
       unlock: unlockAudio,

@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 public class MainActivity extends BridgeActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         registerPlugin(SenseiMonetizationPlugin.class);
+        registerPlugin(StreakRemindersPlugin.class);
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         android.webkit.WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
