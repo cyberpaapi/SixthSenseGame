@@ -85,7 +85,7 @@ public final class SenseiMonetizationPlugin: CAPPlugin, CAPBridgedPlugin, FullSc
     @objc func getState(_ call: CAPPluginCall) { run(call) {} }
     @objc func initialize(_ call: CAPPluginCall) {
         run(call) {
-            guard let saved = self.saved, let age = call.getString("ageBand"), ["under13", "13-15", "16-17", "18+"].contains(age) else { return }
+            guard let saved = self.saved, let age = call.getString("ageBand"), ["under13", "13+", "13-15", "16-17", "18+"].contains(age) else { return }
             // Age is selected once per installation; the web client cannot toggle ad eligibility.
             if saved.age.isEmpty { try saved.update { $0["ageBand"] = age } }
             guard self.eligible, !self.initializing else { return }

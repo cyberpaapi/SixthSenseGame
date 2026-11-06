@@ -17,7 +17,8 @@ for (const word of ["female", "gender", "sexism", "gamete", "sexton", "sextet"])
 assert(Core.WORDS.has("ravish"), "the answer cleanup must not narrow accepted guesses");
 const sourceHtml = require("node:fs").readFileSync(require("node:path").join(__dirname, "index.html"), "utf8");
 const agePrompt = sourceHtml.split('id="age-band-modal"')[1].split("</dialog>")[0];
-assert.doesNotMatch(agePrompt, /ads|adverts|advertising|disabled|exempt/i, "the age question must not advertise ad exemptions");
+assert.doesNotMatch(agePrompt.split('<section id="age-under13-notice"')[0], /ads|adverts|advertising|disabled|exempt/i, "the initial age question must not advertise ad exemptions");
+assert.match(agePrompt, /id="age-under13-notice"[^>]*\bhidden/, "under-13 explanation must start hidden");
 
 assert.deepEqual(Core.lifelineCosts("bollywood"), { sense: 75, peek: 50, clear: 40, skip: 60 });
 assert.deepEqual(Core.lifelineCosts(), { sense: 30, peek: 50, clear: 40, skip: 60 });

@@ -107,7 +107,7 @@ public class SenseiMonetizationPlugin extends Plugin {
     @PluginMethod public void initialize(PluginCall call) {
         getActivity().runOnUiThread(() -> {
             String requested = call.getString("ageBand", ageBand);
-            if (!Arrays.asList("under13", "13-15", "16-17", "18+").contains(requested)) { call.resolve(status()); return; }
+            if (!Arrays.asList("under13", "13+", "13-15", "16-17", "18+").contains(requested)) { call.resolve(status()); return; }
             ageBand = requested;
             prefs.edit().putString("ageBand", ageBand).apply();
             if (!initialized) {

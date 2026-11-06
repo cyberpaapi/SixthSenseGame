@@ -231,11 +231,27 @@
     else window.SixthSenseAppLifecycle.back();
   });
   ageDialog.addEventListener("cancel", event => event.preventDefault());
+  let choosingAge = false;
+  const ageContinue = document.querySelector("#age-under13-continue");
+  ageContinue.addEventListener("click", () => { ageDialog.close(); finishOnboarding(); });
   ageDialog.querySelectorAll("[data-age-band]").forEach(button => button.addEventListener("click", async () => {
-    ageDialog.close();
+    if (choosingAge) return;
+    choosingAge = true;
+    const under13 = button.dataset.ageBand === "under13";
+    ageDialog.querySelectorAll("[data-age-band]").forEach(choice => { choice.disabled = true; });
+    if (under13) {
+      document.querySelector("#age-band-question").hidden = true;
+      document.querySelector("#age-band-title").textContent = "Thanks for letting us know";
+      document.querySelector("#age-under13-notice").hidden = false;
+      ageContinue.disabled = true;
+      document.querySelector("#age-under13-title").focus();
+    }
     try { state = await native.initialize({ ageBand: button.dataset.ageBand }); render(); recover(); recoverPurchases(); }
     catch (_) { storeMessage.textContent = "Store services unavailable. You can keep playing."; }
-    finally { finishOnboarding(); }
+    finally {
+      if (under13) ageContinue.disabled = false;
+      else { ageDialog.close(); finishOnboarding(); }
+    }
   }));
   native.addListener("stateChanged", next => { state = next; render(); if (!busy) { recover(); recoverPurchases(); } });
   native.getState().then(async next => {

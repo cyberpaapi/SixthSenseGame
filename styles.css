@@ -1583,6 +1583,13 @@ body:is(.is-native-app,.is-fitted-online,.is-fitted-solo)[data-screen="online"] 
 .mobile-store p, .mobile-store a { font-size:12px; }
 .mobile-store button:disabled, .reward-ad-offer button:disabled { opacity:.6; cursor:default; }
 .age-band-options { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+.age-band-options .age-choice-no { background:#e5e7eb; border-color:#697386; color:#202938; }
+.age-band-options .age-choice-yes { background:#dcfce7; border-color:#15803d; color:#14532d; }
+.age-band-options button { min-height:60px; }
+.age-band-options button:focus-visible { outline:3px solid #6331b4; outline-offset:3px; }
+#age-under13-notice[hidden], #age-band-question[hidden] { display:none; }
+#age-under13-notice h3 { color:#25123d; margin:12px 0; font:900 22px "Nunito",sans-serif; }
+#age-under13-notice .popup-ok { margin:12px auto; }
 .privacy-modal { width:min(800px,calc(100% - 20px)); }
 .privacy-modal iframe { width:100%; height:65dvh; border:0; background:#fff8ff; border-radius:14px; }
 @media (max-height:700px) {

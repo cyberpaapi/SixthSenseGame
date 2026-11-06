@@ -12,9 +12,11 @@ final class GameScreenshots: XCTestCase {
         continueAfterFailure = false
         let app = XCUIApplication(bundleIdentifier: "com.sensei.sixthsense")
         app.launch()
-        let age = app.buttons["Under 13"]
+        let age = app.buttons["No, I’m under 13"]
         XCTAssertTrue(age.waitForExistence(timeout: 30), "Native bridge must present age onboarding")
         tap(age) // Actual eligibility path keeps screenshots free of ad creative.
+        let continuePlaying = app.buttons["Continue playing"]
+        XCTAssertTrue(continuePlaying.waitForExistence(timeout: 10)); tap(continuePlaying)
         let guest = app.buttons["Play solo as a guest"]
         XCTAssertTrue(guest.waitForExistence(timeout: 15)); tap(guest)
         let close = app.buttons["Close how to play"]
@@ -40,7 +42,7 @@ final class GameScreenshots: XCTestCase {
         capture("05-landscape")
         XCUIDevice.shared.orientation = .portrait
         app.terminate(); app.launch()
-        XCTAssertFalse(app.buttons["Under 13"].waitForExistence(timeout: 3), "Native age choice persists across restart")
+        XCTAssertFalse(app.buttons["No, I’m under 13"].waitForExistence(timeout: 3), "Native age choice persists across restart")
     }
     private func tap(_ element: XCUIElement) {
         // WebKit accessibility exposes controls before CSS entry motion completes.
