@@ -2,9 +2,9 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-09-21
+Last updated: 2026-11-06
 
-Last verified: 2026-09-21 (Selected happy-fox branding: exact attached source preserved, opaque Play 512×512 and 1024×500 exports checked, transparent adaptive/legacy-round icon previews inspected, web favicon/install-icon references checked, Android sync/debug assembly/lint and whitespace passed. Earlier monetization suites and deployments remain verified below. Current source/code 4 needs a signed upload and live purchase/ad acceptance; Play Alpha still has code 3. Merchant profile and paid catalog setup remain pending. Fox logo selection is complete; updated store asset upload and closed-test submission remain pending.)
+Last verified: 2026-11-06 (Privacy-only public-site update: allow-listed web build and bundled privacy/deletion links checked. Published Android 1.0.4/code 5 and newer app source are maintained on codex/android-launch; this main-branch change does not merge their game/runtime changes. Vercel/Pages propagation will be checked after push.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -384,6 +384,8 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+November 6: refreshed the public privacy policy with AlphaCodeAI publisher identity, current Android/iOS/purchase availability, conditional local-reminder disclosures and an explicit existing account/data-deletion link. Web build includes both HTML documents; no gameplay, API, database or app bundle changes.
 
 September 21 selected-fox update: opaque Play icon is 512×512 RGB / 345,465 bytes; feature graphic is 1024×500 RGB / 504,422 bytes. All Android density foregrounds use actual alpha and fit the central safe region; selected square and round previews were inspected. `android:sync`, debug assembly, lint, icon-reference/export checks and whitespace passed. Rebuilt test APK is `release/SixthSense-v1.0.3-fox-debug.apk`, SHA-256 `29b7db58deb1caaa89057bacf2673413395d2f84d0cc36de63c764cc7e049950`. Earlier non-fox debug and signed code-3 artifacts are preserved; no new signed release or Play asset upload is claimed.
 
@@ -1165,3 +1167,8 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Added a 3×3 set of nine generated logo choices with persistent selection; logo option 1 is the current default.
 - Removed verbose “Read the signs” and genre-disclaimer marketing copy from the visible home experience because the user wanted a cleaner, more visual presentation.
 - Kept original terminology, imagery, copy, and layout so the game participates in the letter-deduction genre without infringing Wordle branding.
+
+### 2026-11-06 — Public privacy policy refresh
+
+- Updated the public privacy page to AlphaCodeAI (formerly Sensei), added direct deletion-request navigation, and aligned disclosures with current release availability. Preserved data handling/contact information and explained optional iOS/purchase/reminder behavior without claiming unlaunched features are live.
+- This isolated main-branch release changes only privacy.html and this knowledge record. The existing production website and backend remain otherwise unchanged. Allow-listed web packaging passed; Vercel/Pages public checks follow deployment.
