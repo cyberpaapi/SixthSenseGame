@@ -2,13 +2,13 @@
 
 > Canonical context for humans and AI contributors. Read this file before making changes.
 
-Last updated: 2026-10-14
+Last updated: 2026-11-06
 
-Last verified: 2026-10-14 (Android source 1.0.5/code 6 adds opt-in local streak reminders. Node streak policy and browser native-bridge integration passed; Android debug assembly, lint and unit tests passed; API 36 emulator instrumentation verified all three notification moods, deduplication, win/loss cancellation and opt-out. Core/identity/content and mobile/onboarding suites passed. Full browser phone/desktop/dark-theme/overflow regression passed. No code-6 signed bundle or Play upload. Previously signed 1.0.4/code 5 remains submitted for production review, with managed publishing off; public availability and live ads remain unverified. Earlier iOS evidence remains below; iOS reminders are not implemented.)
+Last verified: 2026-11-06 (Play Console confirms Android 1.0.4/code 5 at 100% production rollout, published October 14; the India public listing displayed Install in a signed-in browser. Six new light-theme marketing captures rendered from the exact shipped code-5 client with isolated demonstration state: no page errors; all final JPEGs verified RGB 1080×1920 below 0.5 MB and visually reviewed. Screenshot/AI-label update plus previously saved descriptions submitted; Console shows Changes in review, quick checks running, managed publishing off. New screenshots are not yet verified public. Source 1.0.5/code 6 remains unsigned/unsubmitted; prior October 14 game/native test evidence below is unchanged, not rerun for this asset-only update. Live ad serving, universal device/country availability and search ranking remain unverified.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
-Current source branch: `codex/android-launch`, based on the unmerged `codex/ios-app` work; deployed browser baseline remains `main`. Android launch changes are not yet deployed.
+Current source branch: `codex/android-launch`, based on the unmerged `codex/ios-app` work; deployed browser baseline remains `main`. Android 1.0.4/code 5 is publicly released; source-only code-6 streak reminders are not yet deployed.
 
 Current delivery: static browser game published primarily at `https://sixth-sense-game.vercel.app/` and secondarily at `https://cyberpaapi.github.io/SixthSenseGame/`; local development URL `http://127.0.0.1:4173/`
 
@@ -410,7 +410,15 @@ The current Codex workspace also runs the project from the folder with an availa
 
 ## Verification
 
-October 14: the launch-preparation checks and remaining blockers are recorded in the latest change-log entry below. No production AAB has been signed or uploaded.
+### November 6 store screenshot verification
+
+- Exact released code-5 AAB assets were rendered in isolated Chromium native-layout fixtures, using real game scoring and synthetic local demonstration room snapshots; no production data or runtime code changed. Onboarding capture shows the current age-group dialog separately.
+- Six raw gameplay panels and final 1080×1920 RGB JPEG compositions passed visual review, image size/mode checks, capture error checks and script syntax checks. The renderer uses bundled fonts, preserved real UI panels and generated header artwork. Provenance, prompts, manifest and reproduction steps: `store-assets/play-2026-11-06/README.md`.
+- Console Review confirmed ordered images: guessing, multiplayer race, lifelines, Bollywood movies, characters, Bollywood race; all six composites declared AI-assisted. Old clue/victory/Adventure screenshots removed from the phone gallery; icon and feature graphic unchanged. No tablet/desktop/XR screenshots existed.
+- Sent phone screenshots and the already-saved short/full descriptions for review. Console shows Changes in review with quick checks running and managed publishing off. Local proof: `release/play-screenshots-submitted-2026-11-06.jpg`. This is submission, not approval or public propagation of the new gallery.
+
+
+October 14 historical preparation checks preceded signing; the later October 14 change-log entry records the signed code-5 upload. November 6 verification above confirms its public production rollout.
 
 September 24 publication/access verification: live Console notification, app status and closed-release task confirmed publication, while dashboard showed zero opt-ins. Google Group settings directly exposed member-only visibility with public self-join. After switching visibility to Anyone on the web, the UI retained that selection, disabled Save and reported Successfully updated group settings, with a propagation caveat. Public web-reader access was unavailable, so no independent nonmember verification is claimed. Documentation whitespace passed; no code or binary changes.
 
@@ -580,11 +588,11 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 
 ## Known limitations
 
-- Bollywood's 125-word replacement has owner-reviewed hints, per-entry reference credits and selected source URLs, not an exhaustive independent factual audit. Character-name familiarity and Latin spellings vary; only the listed canonical spelling solves the word. Preserve complete movie titles or fictional character names/nicknames and 5–7 letters. Existing stored routes retain lookup through the old server-only archive until room expiry; that archive never supplies new answers. The replacement multiplayer pool was deployed September 21; the new Solo mode remains on the launch branch.
+- Bollywood's 125-word replacement has owner-reviewed hints, per-entry reference credits and selected source URLs, not an exhaustive independent factual audit. Character-name familiarity and Latin spellings vary; only the listed canonical spelling solves the word. Preserve complete movie titles or fictional character names/nicknames and 5–7 letters. Existing stored routes retain lookup through the old server-only archive until room expiry; that archive never supplies new answers. The replacement multiplayer pool was deployed September 21; the Solo mode is included in publicly released Android 1.0.4/code 5; the browser main branch remains separate.
 
 - The user rejected the CSS party accessories and requested rendered transparent sheets. Four generated sources in `artwork-drafts/party-sheets/` cover all 18 avatars in extended/rolled blower poses, but contain baked checkerboards. Genuine alpha cleanup, cell packing/alignment, and runtime replacement remain pending; a local cleanup permission question is awaiting the user's reply. Exact prompts and source status are recorded in that folder's README.
 
-- Android 1.0.4/code 5 has Bollywood Solo, automatic ads and the six-product implementation, and its signed bundle is submitted for production review. Source 1.0.5/code 6 adds local streak reminders and still needs signing/submission. Free launch uses purchases disabled; merchant/catalog/service setup and license tests are deferred. Real ad IDs are configured but live serving and full physical-device acceptance remain unverified.
+- Android 1.0.4/code 5 has Bollywood Solo, automatic ads and the six-product implementation, and its signed bundle is publicly released at 100% rollout (verified November 6). Source 1.0.5/code 6 adds local streak reminders and still needs signing/submission. Free launch uses purchases disabled; merchant/catalog/service setup and license tests are deferred. Real ad IDs are configured but live serving and full physical-device acceptance remain unverified.
 
 - Clue validation catches structural leaks/patterns and the explicit regression list, not every semantic mistake. Rare-word/sense quality still benefits from human editing; the content audit does not claim a complete manual review.
 - Trio, mastery, and personal bests currently apply to solo play; multiplayer retains its existing independent coin/round rewards. Local progress is not cheat-resistant and should not be used for real-money entitlements. There is no telemetry or evidence yet that these changes improve retention; they provide clearer short goals and competence feedback, not a promised addiction outcome.
@@ -1323,3 +1331,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Clarified that the seven-step rail is a recurring coin bonus and the streak keeps growing. Fixed stale missed-day counts and reset the paid milestone marker when a run breaks so later runs can earn bonuses. Keyboard input refreshes an expired Daily; a reveal crossing midnight credits its puzzle date.
 - Updated bundled privacy disclosure, offline client allow-list, Android source to 1.0.5/code 6 and tests. Reset the ignored local production checklist flag for this new unsubmitted build; the previously submitted code-5 bundle is untouched.
 - Node tests cover more than 400 consecutive wins, duplicates, UTC expiry and restarted-run bonuses. Browser fixtures cover opt-in/denial/off, web hiding, Daily launch and day-eight native sync. Android JUnit and API 36 instrumentation passed for three real posted notification objects, artwork, deduplication, win/loss cancellation and opt-out. Core/identity/content and mobile/onboarding passed. Full browser phone/desktop/dark-theme/overflow regression and final native lint/JUnit follow-up also passed; existing Gradle/deprecation/lint warnings remain. No long-duration Doze/OEM/physical-phone acceptance, signed code-6 bundle or store submission is claimed.
+
+### 2026-11-06 — Light-theme store screenshots and public-release verification
+
+- Replaced the phone gallery with six promotional composites showing active guesses and the released game's light theme. New supporting fox/cinema/friends illustrations and captions highlight original word guessing, multiplayer and Bollywood; no Adventure map, hidden-answer modal or ad creative. The owner requested multiplayer second and Bollywood last; final order follows that direction.
+- Added capture/composition scripts, archived raw captures, generated-art provenance, RGB JPEG exports, manifest and a browser review gallery. Captures use the exact signed code-5 WebView client with isolated test data, not a physical device or fabricated AI gameplay. Captured and showed the separate age-group onboarding screen without changing its wording or behavior.
+- Verified production 1.0.4 at 100% rollout and public India listing Install availability; an account's internal-tester label does not imply production is private. Search ranking and every country/device were not tested.
+- Uploaded six images, preserved prior text and icon/feature assets, labeled the new composites as AI-assisted, and submitted the screenshots plus previously saved descriptions. Google review/quick checks are pending; no new AAB or app-source deployment occurred.

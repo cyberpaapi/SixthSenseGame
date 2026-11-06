@@ -1,0 +1,62 @@
+[
+  {
+    "file": "upload/01-guess-word.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 440873,
+    "sha256": "a8c94c62503e9491ea0821fa44044192c268eee6ca0c6848082c1248b8ea6d56"
+  },
+  {
+    "file": "upload/04-race-friends.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 456257,
+    "sha256": "268984ff12fdf496550039c68c2eb6d460505fda6e2ebb395f338327c57b4061"
+  },
+  {
+    "file": "upload/06-lifelines.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 427407,
+    "sha256": "bffc145a0db628bad8abbd14c346b03052129767ea8322c59798c587fadc1714"
+  },
+  {
+    "file": "upload/02-bollywood-movies.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 441991,
+    "sha256": "5bd9ee1aefc10095e6f34aa225ebd485a7a7468186e3a85bcb8c524796aba18b"
+  },
+  {
+    "file": "upload/03-bollywood-characters.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 441849,
+    "sha256": "5e5c02492e74a055decfba0ff7293f027da41bf55504d1b063f1625c7e8dfc26"
+  },
+  {
+    "file": "upload/05-bollywood-race.jpg",
+    "size": [
+      1080,
+      1920
+    ],
+    "mode": "RGB",
+    "bytes": 456788,
+    "sha256": "307ae6c85c45bb36e3a9ef6d1c0c85a865b2d96452383f18080ad73eb5f9fd16"
+  }
+]

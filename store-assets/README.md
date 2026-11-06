@@ -1,5 +1,7 @@
 # Sixth Sense Play Store assets
 
+Current November 6 phone gallery: [`play-2026-11-06/README.md`](play-2026-11-06/README.md) documents six light-theme 1080×1920 promotional screenshots featuring actual released code-5 gameplay, captions and generated supporting fox artwork. Order: word guessing, multiplayer race, lifelines, Bollywood movies, characters, Bollywood race. The earlier clue/victory/Adventure-map selection below is superseded for the phone listing. The age screen is captured separately for owner review. The selected fox icon and feature graphic remain unchanged. Console submission state is recorded in `GAME_KNOWLEDGE.md`.
+
 Current September 21 selection: the owner approved the happy furry orange fox above SIXTH / SENSE blocks. The current 512×512 opaque `app-icon-512.png` exports the exact attached selection, and `feature-graphic-1024x500.png` is a matching generated purple graphic. Production sources, prompts and deterministic Android/web export details are in `fox-selected/README.md`. Both exports contain no ads. On September 22 they were uploaded, added to the default English listing and submitted with closed Alpha code 3. Generated icon/feature artwork is labeled in the Console AI declaration; Google approval remains pending.
 
 ## Earlier aperture preparation (superseded)
