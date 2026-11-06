@@ -4,7 +4,7 @@
 
 Last updated: 2026-11-06
 
-Last verified: 2026-11-06 (Privacy-only public-site update: allow-listed web build and bundled privacy/deletion links checked. Published Android 1.0.4/code 5 and newer app source are maintained on codex/android-launch; this main-branch change does not merge their game/runtime changes. Vercel/Pages propagation will be checked after push.)
+Last verified: 2026-11-06 (Privacy-only public-site update: allow-listed web build and bundled privacy/deletion links checked. Published Android 1.0.4/code 5 and newer app source are maintained on codex/android-launch; this main-branch change does not merge their game/runtime changes. Production Vercel deployment dpl_EVKdyzL9AyyVo5UEKcuRfEttDzgT for 666cfdd is READY; public Vercel and GitHub Pages privacy URLs returned HTTP 200 with AlphaCodeAI/new disclosures, and public deletion URL returned 200.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -1171,4 +1171,4 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 ### 2026-11-06 — Public privacy policy refresh
 
 - Updated the public privacy page to AlphaCodeAI (formerly Sensei), added direct deletion-request navigation, and aligned disclosures with current release availability. Preserved data handling/contact information and explained optional iOS/purchase/reminder behavior without claiming unlaunched features are live.
-- This isolated main-branch release changes only privacy.html and this knowledge record. The existing production website and backend remain otherwise unchanged. Allow-listed web packaging passed; Vercel/Pages public checks follow deployment.
+- This isolated main-branch release changes only privacy.html and this knowledge record. The existing production website and backend remain otherwise unchanged. Allow-listed web packaging passed. Production Vercel deployment dpl_EVKdyzL9AyyVo5UEKcuRfEttDzgT reached READY for 666cfdd; both public privacy URLs returned HTTP 200 with updated AlphaCodeAI copy, and the deletion page returned 200. No runtime log/traffic audit was performed for this static-copy change.
