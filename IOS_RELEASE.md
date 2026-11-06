@@ -1,6 +1,8 @@
 # Sixth Sense iOS release
 
-Updated October 12, 2026. Implementation is committed on `codex/ios-app` in draft PR #1. Xcode 26.3 compilation, native persistence/cadence checks and iPhone 16 Pro Max / iOS 26.2 UI checks passed in GitHub run 38225990851. Actual screenshots are saved in `store-assets/ios/screenshots/`, with touch/landscape evidence in `store-assets/ios/qa/`. The owner has an iPhone but has not enrolled in the Apple Developer Program. Signing, physical-device/sandbox acceptance and authenticated in-app account deletion remain pending; no IPA, TestFlight upload or App Store approval is claimed.
+Updated November 6, 2026. The existing iOS implementation from draft PR #1 is preserved on `codex/ios-release-preparation`, based on the current `codex/android-launch` source (b9adc8d), including its latest age onboarding and privacy changes. The original October Xcode/simulator evidence below remains historical; a fresh cloud verification is required for this branch. The owner confirms that the **new Apple account is not enrolled**. Tell the owner before membership purchase, signing or publishing; do not reuse an older account's signing identity. Access to a physical test iPhone must be confirmed. No IPA, TestFlight upload or App Store submission has occurred.
+
+Authenticated in-app multiplayer account deletion is now implemented in source and tested against a local PostgreSQL engine. It requires deployment of `/api/delete-identity` and live acceptance before the app can advertise this capability as available. The first public iOS release is still blocked on enrollment, credentials, device/sandbox/ad/privacy acceptance and listing setup.
 
 ## Implemented source
 
@@ -76,7 +78,7 @@ python scripts/configure-ios.py
 - Exercise UMP regional states, minor/ad eligibility, sample banner space, reward cancel/fail/earn/restart, no duplicate grant, ad away-alert suppression, interstitial cadence and paid ad removal.
 - Sandbox purchase each product; cancel, pending approval, restore, revoke/refund, offline/reconnect, storage failure, full wallet, interrupted delivery and reinstall. Check one-time Complete Pack supplies and cross-device permanent restore.
 - Confirm current SDK privacy manifests, actual data collection and App Store privacy answers. No ATT prompt means no authorized cross-app tracking; keep contextual requests and review AdMob settings accordingly. Add required SKAdNetwork buyer IDs if enabling additional demand.
-- Review content rating from actual word clues/Bollywood references, rights to supplied music and generated art, and privacy/support URLs. Implement authenticated account deletion initiated in-app before submission. The current support-email-only username deletion route is insufficient under Apple's account-deletion guidance: https://developer.apple.com/support/offering-account-deletion-in-your-app/ . This is a remaining implementation gate, not merely an owner declaration.
+- Review content rating from actual word clues/Bollywood references, rights to supplied music and generated art, and privacy/support URLs. Deploy and verify authenticated deletion using Settings → Delete multiplayer account, including confirmation, recovery after network failure and deletion of only the owning profile. The source endpoint and UI replace the support-only route, but are not deployed yet. Apple account-deletion guidance: https://developer.apple.com/support/offering-account-deletion-in-your-app/ . This is a remaining implementation gate, not merely an owner declaration.
 - Supply actual iPhone store screenshots with no ad creative; Android captures must not be represented as iOS captures.
 - Configure public app-ads.txt/store association, then real iOS IDs and production release approval. Complete public App Review separately.
 
@@ -92,3 +94,12 @@ No server-side ad reward verification, cloud wallet, cross-platform purchases, A
 - https://github.com/apple/app-store-server-library-node
 - https://developer.apple.com/programs/enroll/
 - https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications
+
+
+## Account deletion implementation and deployment acceptance
+
+`account-delete.js` uses the device-held recovery credential with explicit typed confirmation, never a caller-supplied username/profile ID. `/api/delete-identity` rate limits requests and performs an atomic PostgreSQL transaction. It releases the username, deletes the recovery hash, linked room seats, cascading presence events and cached snapshots that can contain the old name. Affected matches finish; unrelated profiles and rooms stay intact. A lost success response can be safely retried. No live player deletion was performed during development.
+
+Local solo progress and paid supply ledgers remain on the device, as the confirmation explains. Store purchase records remain separate for support/legal obligations. Other origins/devices lose server access after deletion, but cannot have their local storage remotely wiped. Deployment and an isolated staging-profile end-to-end test are required before App Review. Do not enable the final release gate solely because unit/browser tests pass.
+
+Run `npm run test:account-delete`, `npm run test:account-delete-browser` (with a local server and CHROME_BIN), and `npm run test:ios-package` after `npm run ios:sync`. The cloud workflow runs database deletion tests plus public-only packaging checks before compiling.

@@ -43,6 +43,23 @@ final class GameScreenshots: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         app.terminate(); app.launch()
         XCTAssertFalse(app.buttons["No, I’m under 13"].waitForExistence(timeout: 3), "Native age choice persists across restart")
+        // Guest play intentionally does not reserve a persistent username.
+        // On relaunch, finish that same guest entry before opening Settings.
+        let resumedGuest = app.buttons["Play solo as a guest"]
+        if resumedGuest.waitForExistence(timeout: 8) { tap(resumedGuest) }
+        if close.waitForExistence(timeout: 3) { tap(close) }
+        let settings = app.buttons["Settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 10)); tap(settings)
+        let deleteAccount = app.buttons["Delete multiplayer account"]
+        for _ in 0..<8 {
+            if deleteAccount.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(deleteAccount.isHittable); tap(deleteAccount)
+        let keepAccount = app.buttons["Keep my account"]
+        XCTAssertTrue(keepAccount.waitForExistence(timeout: 10))
+        capture("07-delete-account-confirmation")
+        tap(keepAccount) // Never delete a real account in screenshot automation.
     }
     private func tap(_ element: XCUIElement) {
         // WebKit accessibility exposes controls before CSS entry motion completes.
