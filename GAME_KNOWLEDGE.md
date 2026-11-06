@@ -4,7 +4,7 @@
 
 Last updated: 2026-11-06
 
-Last verified: 2026-11-06 (iOS release preparation: core/identity/content, Apple verification, atomic account-deletion Postgres tests and synchronized iOS packaging pass locally. Browser deletion confirmation/cancel/retry and 320px layout pass locally; fresh cloud native verification is pending; prior October Xcode evidence is historical. New Apple account is not enrolled. No signing, Apple upload, live deletion or production deployment.)
+Last verified: 2026-11-06 (iOS runtime 080ecd6 compiles with Xcode 26.3 in GitHub run 42198869004; cloud core/Apple/Postgres deletion/native persistence/packaging checks pass. Native UI exercised onboarding/gameplay/clue/touch/rotation/restart, then the added Settings assertion failed because guest onboarding reappears after restart. Corrected test sequence and rerun pending. Full browser, mobile/onboarding, deletion UI and Postgres tests pass locally; Adventure geometry assertion now waits for screen-entry transforms. New Apple account not enrolled; no signed upload or production deployment.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -1377,3 +1377,10 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Added authenticated in-app multiplayer account deletion, explicit confirmation, atomic server cleanup, retry safety and offline/server failure feedback. Retained solo progress and paid receipts, and documented deployment/account/device gates honestly.
 - Added real PostgreSQL regression tests for ownership, data cleanup/cascades, unaffected profiles/rooms, rollback, released usernames and retries. Added browser confirmation/retry/local-data checks and a synchronized public-client packaging check to CI. Owner confirmed new Apple membership is not enrolled and must be notified before purchase/publication.
 - Local core/Apple/database/packaging checks pass; browser confirmation/cancel/retry and preserved-wallet checks pass at 320px; cloud native results follow. No production deployment, real-user deletion, signed export, TestFlight upload or App Review submission.
+
+
+### 2026-11-06 — Native compile verification and guest-restart test correction
+
+- GitHub run 42198869004 compiled the exact 080ecd6 iPhone runtime with Xcode 26.3 and passed core/Apple/database-deletion/native-state/packaging checks. The UI suite reached all original gameplay captures, then its new Settings step failed after restart because guest play correctly prompts for a username again. Updated automation to enter guest play again and wait for Settings; no account was deleted and no runtime logic changed.
+- Full local browser QA passed after fixing an existing timing-sensitive measurement: wait until the Adventure entry transform settles before asserting the unchanged 44px house control. Mobile/onboarding and account-deletion browser checks also pass. Fresh native rerun follows; prior failed run is retained honestly.
+- Vercel preview 080ecd6 is READY; authenticated preview checking requires the approved temporary access link. Production remains unchanged. The owner confirmed use of the new, unenrolled Apple account; signing and upload are still blocked on enrollment and acceptance.

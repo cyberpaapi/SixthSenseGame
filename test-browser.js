@@ -377,6 +377,12 @@ const evidenceDir = process.env.SIXTH_SENSE_EVIDENCE || path.resolve(__dirname, 
     assert.match(await adventurePage.locator("#adventure-map-art").getAttribute("src"), /adventure-zone-sky-ladder-v1\.webp$/);
     assert.equal(await adventurePage.locator("#adventure-play").textContent(), "Play");
     assert.doesNotMatch(await adventurePage.locator(".adventure-map-head, .adventure-map-foot").allTextContents().then(parts => parts.join(" ")), /\bEasy\b|Level\s+\d/i, "the map chrome should leave progression to the ladder itself");
+    // Screen entry can be scheduled on the next paint after getAnimations().
+    // Measure the actual 44px target only after its ancestor transform settles.
+    await adventurePage.waitForFunction(() => {
+      const button = document.querySelector("#adventure-back");
+      return Math.abs(button.getBoundingClientRect().width - button.offsetWidth) < .1;
+    });
     const homeIconAlignment = await adventurePage.locator("#adventure-back").evaluate(button => {
       const buttonBox = button.getBoundingClientRect();
       const image = button.querySelector("img");
