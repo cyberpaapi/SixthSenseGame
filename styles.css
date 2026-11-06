@@ -1584,7 +1584,7 @@ body:is(.is-native-app,.is-fitted-online,.is-fitted-solo)[data-screen="online"] 
 .mobile-store button:disabled, .reward-ad-offer button:disabled { opacity:.6; cursor:default; }
 .age-band-options { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
 .age-band-options .age-choice-no { background:#e5e7eb; border-color:#697386; color:#202938; }
-.age-band-options .age-choice-yes { background:#dcfce7; border-color:#15803d; color:#14532d; }
+.age-band-options .age-choice-yes { background:linear-gradient(145deg,#22b66f,#087a45); border:0; color:#fff; box-shadow:7px 9px 17px rgba(8,109,62,.28),inset 2px 2px 3px rgba(255,255,255,.3); font-weight:900; }
 .age-band-options button { min-height:60px; }
 .age-band-options button:focus-visible { outline:3px solid #6331b4; outline-offset:3px; }
 #age-under13-notice[hidden], #age-band-question[hidden] { display:none; }
