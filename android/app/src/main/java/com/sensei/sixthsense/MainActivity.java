@@ -3,7 +3,9 @@ package com.sensei.sixthsense;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -11,10 +13,18 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 public class MainActivity extends BridgeActivity {
+    private boolean launchReady;
+
     @Override public void onCreate(Bundle savedInstanceState) {
+        // Install before BridgeActivity changes the launch theme. Keep the fox
+        // visible until bundled content can paint, with a bounded failure fallback.
+        SplashScreen splash = SplashScreen.installSplashScreen(this);
+        long launchDeadline = SystemClock.uptimeMillis() + 4000;
+        splash.setKeepOnScreenCondition(() -> !launchReady && SystemClock.uptimeMillis() < launchDeadline);
         registerPlugin(SenseiMonetizationPlugin.class);
         registerPlugin(StreakRemindersPlugin.class);
         super.onCreate(savedInstanceState);
+        if (getBridge() == null) { launchReady = true; return; }
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         android.webkit.WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         View container = (View) getBridge().getWebView().getParent();
@@ -29,8 +39,15 @@ public class MainActivity extends BridgeActivity {
             return WindowInsetsCompat.CONSUMED;
         });
         getBridge().addWebViewListener(new WebViewListener() {
+            @Override public void onPageCommitVisible(android.webkit.WebView webView, String url) {
+                launchReady = true;
+            }
             @Override public void onPageLoaded(android.webkit.WebView webView) {
+                launchReady = true;
                 ViewCompat.requestApplyInsets(container);
+            }
+            @Override public void onReceivedError(android.webkit.WebView webView) {
+                launchReady = true;
             }
         });
         ViewCompat.requestApplyInsets(container);

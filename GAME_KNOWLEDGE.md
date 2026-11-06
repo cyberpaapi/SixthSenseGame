@@ -4,7 +4,7 @@
 
 Last updated: 2026-11-06
 
-Last verified: 2026-11-06 (Play Console confirms Android 1.0.4/code 5 at 100% production rollout, published October 14; the India public listing displayed Install in a signed-in browser. Six new light-theme marketing captures rendered from the exact shipped code-5 client with isolated demonstration state: no page errors; all final JPEGs verified RGB 1080×1920 below 0.5 MB and visually reviewed. Screenshot/AI-label update plus previously saved descriptions submitted; Console shows Changes in review, quick checks running, managed publishing off. New screenshots are not yet verified public. Source 1.0.5/code 6 remains unsigned/unsubmitted; prior October 14 game/native test evidence below is unchanged, not rerun for this asset-only update. Live ad serving, universal device/country availability and search ranking remain unverified.)
+Last verified: 2026-11-06 (Privacy policy refreshed and publicly verified HTTP 200 on Vercel and GitHub Pages; Vercel production deployment for 666cfdd is READY. Android splash compatibility startup and pre-age privacy access implemented on source 1.0.5/code 6. Android sync, debug/test assembly, unit tests, lint, API 36 launch/recreation instrumentation and mobile/onboarding browser suites passed; iOS assets synced. No new signed code-6 bundle or Play upload. Earlier today: production 1.0.4/code 5 verified at 100% rollout; six screenshots/AI labels and saved descriptions submitted for review, quick checks pending at last Console observation. Live ad serving and universal device/country availability remain unverified.)
 
 Repository: `https://github.com/cyberpaapi/SixthSenseGame`
 
@@ -93,7 +93,7 @@ October 12 draft implementation is available on `codex/ios-app`: a Capacitor 8.5
 
 ### Android ads and purchases
 
-The Android project uses Capacitor 8.5.1, Java 21, target/compile API 36 and package `com.sensei.sixthsense`. Source is version **1.0.4 / code 5**; Play's submitted Alpha release contains older signed 1.0.2/code 3. Developer account is AlphaCodeAI, existing app publisher copy is Sensei, support is `aryanchandwani@gmail.com`, intended audience 13+. `ANDROID_RELEASE.md` and `MONETIZATION.md` distinguish implementation from pending external activation.
+The Android project uses Capacitor 8.5.1, Java 21, target/compile API 36 and package `com.sensei.sixthsense`. Source is version **1.0.5 / code 6**; public Play production is signed 1.0.4/code 5. Developer account and refreshed privacy publisher are AlphaCodeAI; existing in-app support labels still say Sensei, support is `aryanchandwani@gmail.com`, intended audience 13+. `ANDROID_RELEASE.md` and `MONETIZATION.md` distinguish implementation from pending external activation.
 
 `SenseiMonetizationPlugin.java` uses Google Mobile Ads 25.4.0, UMP 4.0.0 and Play Billing 8.3.0. Banners retain reserved native space on home and below the solo/online lifelines with an 8 dp separator; they hide during maps/dialogs/full-screen ads. Boards resize within the remaining WebView and keys/lifelines retain 44 px targets. Configuration changes recreate adaptive banners and ignore obsolete load callbacks.
 
@@ -114,6 +114,11 @@ October 14 launch decision: publish the free game first and activate purchases l
 The existing AdMob app now has all real IDs: app `ca-app-pub-2917215510689928~6202702379`, banner `/9942249790`, rewarded `/3865769915`, and new interstitial `/3575067827` (same publisher prefix). Local release channel is production; the owner explicitly authorized signing and production submission on October 14, and the local release approval flag is true. Studio signed with the existing saved upload key; no CLI signing secrets were created. This launch approval does not mean every optional/manual QA case below was performed. AdMob reports Requires review and cannot yet find the public package listing. Link the published Play listing, verify the developer-site app-ads.txt and complete consent/app review before claiming live serving. Root `app-ads.txt` is prepared with the real public publisher ID, but deployment/verification is not yet claimed. Debug/internal keep sample ads. No sample-ad test bundle should be promoted to production.
 
 The local age-band screen collects no DOB: under-13 selections skip ad/billing initialization; under-18 selections use under-age-of-consent settings and PG ad content. UMP runs before ads, with privacy options when required. `privacy.html` is available offline from Settings. Native Back retains leave confirmation. Immersive fullscreen hides status/navigation bars, supports transient swipe reveal and returns after ads/resume; the game background extends behind the camera while CSS header padding protects controls. Side/bottom cutout and IME insets remain. The age question is neutral and no longer advertises ad exemptions; UMP does not determine age for the app. Solo assets/audio/fonts are bundled; multiplayer retains the existing HTTPS Vercel/Neon authority. Cloudflare is optional, not a dependency.
+
+The privacy policy is public at `https://sixth-sense-game.vercel.app/privacy.html` and the GitHub Pages equivalent, with AlphaCodeAI identity, support contact, explicit account/data-deletion navigation and conditional disclosures for not-yet-enabled purchases, iOS and local reminders. Code-6 source also exposes the offline policy from the age dialog before a choice is made. Reading/closing it preserves age onboarding; Settings access remains. `delete-account.html` is now bundled for native builds so the policy's deletion instructions also open offline. Deletion requests still require email/support verification, not an automatic backend deletion endpoint.
+
+Android uses the existing approved fox adaptive icon on purple through `Theme.SplashScreen`. `MainActivity` now installs AndroidX SplashScreen before BridgeActivity startup and retains it until the WebView first visible commit/load, with a four-second maximum/error fallback and no forced minimum delay. This completes older-Android compatibility and reduces the blank startup transition; the public code-5 app already has the system launch-theme fox, while this refinement needs the next signed code-6 update. iOS already has the fox LaunchScreen storyboard/assets; they were inspected and retained, not newly built or submitted to Apple.
+
 
 Starting wallet: 500 coins. The wallet hard-caps at 99,999 across saved-state loading, solo rewards, Daily streak rewards, multiplayer credits, and refunds; a reward that crosses the ceiling grants only the remaining room. Economy version 10 resets existing pre-version-10 saved wallets without paid-purchase receipts to exactly 500 once on their next load, without changing progress, inventory, cosmetics, or statistics. Solving rewards fewer coins as more attempts are used:
 
@@ -409,6 +414,13 @@ Open `http://127.0.0.1:4173/`.
 The current Codex workspace also runs the project from the folder with an available static server. Do not stop an existing user-visible server unless needed and authorized.
 
 ## Verification
+
+### November 6 privacy and splash verification
+
+- Public Vercel and GitHub Pages privacy pages returned HTTP 200 with the updated AlphaCodeAI identity and disclosure scope; deletion page returned 200. Vercel production deployment `dpl_EVKdyzL9AyyVo5UEKcuRfEttDzgT` for main commit `666cfdd` is READY. Only policy/docs were published from an isolated main worktree; no game/API deployment from the Android launch branch.
+- Native packaging includes both privacy/deletion HTML files; Android and iOS sync completed. Android debug/test APK assembly, JUnit and lint passed. API 36 `LaunchInstrumentedTest` launched and recreated the real activity and reached the bundled native-layout client. Existing Gradle/SDK/lint warnings remain. No API 24 emulator or physical-device splash acceptance is claimed.
+- Core, multiplayer, progression, identity and answer-safety checks passed. Mobile bridge and onboarding browser suites passed. Added a fresh-install regression opening policy, following deletion instructions, closing back to the age question and then continuing to solo play; no age was selected by opening the policy.
+- No local release signing configuration exists, no new signed bundle was generated, and code-6 startup/privacy changes are not yet on Play. Existing iOS launch art was inspected and shared assets synced; no new Xcode build was run for these HTML-only iOS changes.
 
 ### November 6 store screenshot verification
 
@@ -1338,3 +1350,9 @@ GitHub Pages is active as a secondary route through `.github/workflows/pages.yml
 - Added capture/composition scripts, archived raw captures, generated-art provenance, RGB JPEG exports, manifest and a browser review gallery. Captures use the exact signed code-5 WebView client with isolated test data, not a physical device or fabricated AI gameplay. Captured and showed the separate age-group onboarding screen without changing its wording or behavior.
 - Verified production 1.0.4 at 100% rollout and public India listing Install availability; an account's internal-tester label does not imply production is private. Search ranking and every country/device were not tested.
 - Uploaded six images, preserved prior text and icon/feature assets, labeled the new composites as AI-assisted, and submitted the screenshots plus previously saved descriptions. Google review/quick checks are pending; no new AAB or app-source deployment occurred.
+
+### 2026-11-06 — Public privacy policy and native splash completion
+
+- Confirmed both features already existed, then fixed the gaps: old Sensei identity/availability copy in the public policy and missing AndroidX splash installation before native startup. Preserved the selected happy fox artwork and bounded startup waiting to four seconds without imposing a minimum delay.
+- Added privacy access before age selection and bundled the linked deletion instructions for offline reading. The policy now identifies AlphaCodeAI, explains public Android versus future feature availability, and keeps contact, collection, sharing, retention and deletion disclosures. No consent, age eligibility or ad protection was weakened.
+- Published policy-only main changes and verified Vercel/Pages responses; main verification commit is e974c31. Native/browser checks above passed; source remains code 6 and requires the next signed Play update. No claim that source-only changes have reached installed copies.

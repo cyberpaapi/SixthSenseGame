@@ -1,5 +1,9 @@
 # Sixth Sense Android release
 
+## November 6 privacy and startup checkpoint
+
+The public privacy policy now identifies AlphaCodeAI at https://sixth-sense-game.vercel.app/privacy.html (HTTP 200 verified, also on GitHub Pages). Source 1.0.5/code 6 adds a privacy link before age selection, bundles deletion instructions offline, and installs AndroidX SplashScreen before BridgeActivity startup using the existing approved fox. The splash waits for visible/loaded content with a four-second failure fallback and no minimum delay. Android debug/test assembly, unit tests, lint, API 36 activity launch/recreation and mobile/onboarding browser checks passed. These source changes are not signed/uploaded; public production remains 1.0.4/code 5. No local keystore.properties is available; a future signed build must use the existing upload key through Studio. Existing production ads/purchases acceptance limitations below remain.
+
 Play Console developer: **AlphaCodeAI**; existing in-app publisher copy: **Sensei**. Support: **aryanchandwani@gmail.com**. Audience: **13+**.
 
 September 16 account setup: the owner reports Play Console verification complete (`silversabre9@gmail.com`) and an AdMob account created (`aryanchandwani@gmail.com`). The following public identifiers are saved in the local, git-ignored `android/release.properties`; debug continues using Google sample IDs. Production ad serving has not been tested or approved by this configuration change.

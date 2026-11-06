@@ -29,6 +29,15 @@ const { chromium } = require("./test-browser-runtime");
         // Let the old username timer fire; it must not cover the age choices.
         await page.waitForTimeout(550);
         assert.deepEqual(await page.locator("dialog[open]").evaluateAll(nodes => nodes.map(node => node.id)), ["age-band-modal"]);
+        if (scenario === "fresh") {
+          await page.locator('#age-band-modal [data-open-privacy]').click();
+          const policy = page.frameLocator('[data-privacy-document]');
+          await policy.getByText('AlphaCodeAI', { exact: true }).waitFor();
+          await policy.getByRole('link', { name: 'Request deletion of your account or data' }).click();
+          await policy.getByRole('heading', { name: 'Request deletion of your Sixth Sense account or data' }).waitFor();
+          await page.getByRole('button', { name: 'Close privacy policy', exact: true }).click();
+          assert.deepEqual(await page.locator('dialog[open]').evaluateAll(nodes => nodes.map(node => node.id)), ['age-band-modal'], 'reading privacy must not choose an age or bypass onboarding');
+        }
         await page.getByRole("button", { name: "Under 13", exact: true }).click();
       }
       await page.getByRole("button", { name: "Play solo as a guest", exact: true }).click();
