@@ -419,6 +419,7 @@
           <div><input id="settings-username" maxlength="18" minlength="2" autocomplete="nickname"><button class="secondary-button" id="save-settings-username" type="button">Save name</button></div>
           <small id="settings-username-message" aria-live="polite">Your username is unique across Sixth Sense. Connect to save it.</small>
           <div><button class="secondary-button" type="button" id="identity-backup">Save recovery code</button><button class="secondary-button" type="button" data-identity-restore>Restore username</button></div>
+          <button class="secondary-button" type="button" id="account-delete-open">Delete multiplayer account</button>
         </div>
         <div class="avatar-choice-grid" role="group" aria-label="Choose a fun animal avatar">
           <button class="avatar-choice" type="button" data-avatar-option="fox" aria-label="Choose fox avatar" aria-pressed="true"><span class="avatar-art avatar-fox"></span></button>
@@ -575,6 +576,17 @@
       <button type="button" class="text-button" data-open-privacy style="min-height:44px">Privacy policy</button>
     </div>
   </dialog>
+  <dialog class="modal" id="account-delete-modal" aria-labelledby="account-delete-title">
+    <form id="account-delete-form" class="modal-sheet">
+      <h2 id="account-delete-title">Delete your multiplayer account?</h2>
+      <p>This permanently deletes your reserved username, recovery code and server-held multiplayer history. Your username becomes available again, and your current matches end. Other players keep their accounts.</p>
+      <p>Solo progress and coins on this device stay saved. Purchase records needed for support or legal obligations may be retained. Deletion does not cancel or refund store purchases.</p>
+      <label class="username-field">Type DELETE to confirm<input id="account-delete-confirmation" autocomplete="off" autocapitalize="characters" spellcheck="false" required></label>
+      <p id="account-delete-message" role="status"></p>
+      <button type="button" class="secondary-button" data-delete-cancel>Keep my account</button>
+      <button type="submit" class="destructive-button" disabled>Delete my account permanently</button>
+    </form>
+  </dialog>
   <div class="celebration" id="celebration" aria-hidden="true"></div>
   <script src="answer-bank.js?v=20260921.2"></script>
   <script src="word-bank.js?v=20260917.1"></script>
@@ -588,5 +600,6 @@
   <script src="store-catalog.js?v=20260921.3"></script>
   <script src="mobile.js?v=20261106.1"></script>
   <script src="streak-reminders.js?v=20261014.2"></script>
+  <script src="account-delete.js?v=20261106.1"></script>
 </body>
 </html>

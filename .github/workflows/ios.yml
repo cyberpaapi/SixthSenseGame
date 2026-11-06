@@ -2,9 +2,9 @@ name: iOS build and TestFlight
 on:
   push:
     branches: [main, 'codex/ios-*']
-    paths: ['ios/**', 'native/sensei-ios/**', '*.js', '*.html', '*.css', 'assets/**', 'package*.json', 'scripts/**', '.github/workflows/ios.yml']
+    paths: ['ios/**', 'native/sensei-ios/**', 'api/**', 'lib/**', '*.js', '*.html', '*.css', 'assets/**', 'package*.json', 'scripts/**', '.github/workflows/ios.yml']
   pull_request:
-    paths: ['ios/**', 'native/sensei-ios/**', '*.js', '*.html', '*.css', 'package*.json', '.github/workflows/ios.yml']
+    paths: ['ios/**', 'native/sensei-ios/**', 'api/**', 'lib/**', '*.js', '*.html', '*.css', 'assets/**', 'package*.json', 'scripts/**', '.github/workflows/ios.yml']
   workflow_dispatch:
     inputs:
       upload_testflight:
@@ -34,13 +34,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test && npm run test:apple-store
+      - run: npm test && npm run test:apple-store && npm run test:account-delete
       - name: Test native receipt persistence and ad cadence
         run: |
           xcrun swiftc native/sensei-ios/ios/Sources/NativeState.swift scripts/test-ios-state.swift -o "$RUNNER_TEMP/native-state-tests"
           "$RUNNER_TEMP/native-state-tests"
       - run: npm run ios:sync
       - run: python3 scripts/configure-ios.py
+      - name: Verify synchronized assets exclude private files
+        run: npm run test:ios-package
       - name: Compile native iPhone app without signing
         run: |
           set -o pipefail

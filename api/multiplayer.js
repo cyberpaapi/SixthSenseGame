@@ -775,4 +775,5 @@ async function handler(request, response) {
 }
 
 module.exports = handler;
+module.exports.ensureSchema = ensureSchema;
 module.exports._test = { authorizeIdentity, bindIdentity, snapshot, createRoom, isBollywood, canJoinRoom, joinRoom, updatePresence, roomGuessLimit, submitGuess, submitLastChance, submitLifeline, cleanPlayer, roomCode, token, tokenHash, isSharedRoundMode, normalizeGameLength, resolveVsRound, chooseAnswers, chooseFreshAnswer, ACCENTS, AVATARS };

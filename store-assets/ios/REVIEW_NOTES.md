@@ -52,7 +52,6 @@ The actual Under 13 eligibility path keeps ads out of the captures; release mone
 ## Submission gates still requiring acceptance
 
 Apple enrollment and app record; signing and TestFlight processing; iPhone and
-sandbox purchase/ad/privacy matrix; actual screenshot inspection; in-app account
-deletion initiated in-app (the current support-email-only route still needs
-authenticated deletion implementation); final public privacy policy and app-ads.txt;
+sandbox purchase/ad/privacy matrix; actual screenshot inspection; deployment and live acceptance of Settings → Delete multiplayer account
+(the authenticated source flow is implemented and locally tested); final public privacy policy and app-ads.txt;
 production ad IDs. Public review and approval are separate from successful upload.

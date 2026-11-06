@@ -859,6 +859,8 @@ html:has(#settings-modal[open])::-webkit-scrollbar { display:none; width:0; heig
 .primary-button:active { transform: scale(.96); }
 .primary-button:disabled { opacity: .42; cursor: not-allowed; transform: none; }
 .modal-got-it { width: 100%; }
+#account-delete-form button { width:100%; min-height:48px; margin-top:10px; transform:none; }
+#account-delete-message { min-height:2.5em; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .stat-grid div { min-height: 87px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; background: var(--tile); box-shadow: var(--shadow-in); text-align: center; }

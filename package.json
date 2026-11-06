@@ -22,7 +22,10 @@
     "ios:sync": "npm run build:mobile && cap sync ios",
     "ios:configure": "python scripts/configure-ios.py",
     "test:apple-store": "node test-apple-store.js",
-    "test:streak": "node test-daily-streak.js && node test-streak-reminders-browser.js"
+    "test:streak": "node test-daily-streak.js && node test-streak-reminders-browser.js",
+    "test:account-delete": "node test-account-delete.js",
+    "test:account-delete-browser": "node test-account-delete-browser.js",
+    "test:ios-package": "node test-ios-package.js"
   },
   "dependencies": {
     "@apple/app-store-server-library": "3.1.0",
@@ -36,6 +39,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.1",
+    "@electric-sql/pglite": "0.5.15",
     "playwright": "^1.55.0"
   },
   "engines": {
